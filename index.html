@@ -1,0 +1,623 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
+import {
+  Menu,
+  X,
+  Home,
+  Mail,
+  Settings,
+  FileText,
+  Eye,
+  Zap,
+  BarChart3,
+  User,
+  Bell,
+  Search,
+  Plus,
+  Activity,
+  CheckCircle,
+  AlertTriangle,
+  Clock,
+  Database,
+  Cpu,
+  HardDrive,
+  Globe,
+  TrendingUp,
+  Calendar,
+  Filter,
+  Download,
+  Upload,
+  Play,
+  Pause,
+  RefreshCw,
+  Send,
+  Edit,
+  Trash2,
+  Copy,
+  Calculator,
+  CreditCard,
+  DollarSign,
+  Users,
+  Folder,
+  Image,
+  Bot,
+  Target,
+  Gauge
+} from 'lucide-react';
+
+const AutoMateProHub = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [notifications, setNotifications] = useState(5);
+  const [realTimeData, setRealTimeData] = useState({
+    activeTasks: 127,
+    successRate: 94.2,
+    apiCalls: 2847,
+    storage: 67.3
+  });
+
+  // Simulate real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRealTimeData(prev => ({
+        activeTasks: prev.activeTasks + Math.floor(Math.random() * 3) - 1,
+        successRate: Math.max(90, Math.min(99, prev.successRate + (Math.random() - 0.5) * 0.5)),
+        apiCalls: prev.apiCalls + Math.floor(Math.random() * 10),
+        storage: Math.max(0, Math.min(100, prev.storage + (Math.random() - 0.5) * 0.1))
+      }));
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const navigation = [
+    { id: 'dashboard', name: 'Dashboard', icon: Home, color: 'text-blue-500' },
+    { id: 'email', name: 'Email Automation', icon: Mail, color: 'text-green-500' },
+    { id: 'tools', name: 'Tools & Utilities', icon: Settings, color: 'text-purple-500' },
+    { id: 'files', name: 'File Management', icon: Folder, color: 'text-orange-500' },
+    { id: 'ocr', name: 'OCR & Vision AI', icon: Eye, color: 'text-teal-500' },
+    { id: 'automation', name: 'Automation', icon: Zap, color: 'text-yellow-500' },
+    { id: 'analytics', name: 'Analytics', icon: BarChart3, color: 'text-red-500' }
+  ];
+
+  const statusData = [
+    { name: 'Mon', tasks: 45, success: 42 },
+    { name: 'Tue', tasks: 52, success: 49 },
+    { name: 'Wed', tasks: 38, success: 36 },
+    { name: 'Thu', tasks: 67, success: 63 },
+    { name: 'Fri', tasks: 71, success: 68 },
+    { name: 'Sat', tasks: 29, success: 27 },
+    { name: 'Sun', tasks: 34, success: 32 }
+  ];
+
+  const pieData = [
+    { name: 'Email', value: 30, color: '#4285F4' },
+    { name: 'Files', value: 25, color: '#00BCD4' },
+    { name: 'OCR', value: 20, color: '#4CAF50' },
+    { name: 'Tools', value: 15, color: '#FF9800' },
+    { name: 'Other', value: 10, color: '#9C27B0' }
+  ];
+
+  const recentActivities = [
+    { id: 1, type: 'email', message: 'Email campaign sent to 1,247 recipients', time: '2 min ago', status: 'success' },
+    { id: 2, type: 'ocr', message: 'OCR processing completed for 15 documents', time: '5 min ago', status: 'success' },
+    { id: 3, type: 'file', message: 'Bulk file rename operation completed', time: '12 min ago', status: 'success' },
+    { id: 4, type: 'automation', message: 'Workflow "Daily Reports" executed', time: '18 min ago', status: 'warning' },
+    { id: 5, type: 'api', message: 'Vision API quota warning (85% used)', time: '25 min ago', status: 'warning' }
+  ];
+
+  const StatusCard = ({ title, value, icon: Icon, color, change, unit = '' }) => (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-600">{title}</p>
+          <p className={`text-2xl font-bold ${color} mt-2`}>
+            {typeof value === 'number' ? value.toLocaleString() : value}{unit}
+          </p>
+          {change && (
+            <p className={`text-sm mt-1 flex items-center ${change.positive ? 'text-green-600' : 'text-red-600'}`}>
+              <TrendingUp className="w-4 h-4 mr-1" />
+              {change.value}
+            </p>
+          )}
+        </div>
+        <div className={`p-3 rounded-full bg-opacity-10 ${color.replace('text', 'bg')}`}>
+          <Icon className={`w-6 h-6 ${color}`} />
+        </div>
+      </div>
+    </div>
+  );
+
+  const ActivityItem = ({ activity }) => {
+    const getStatusColor = (status) => {
+      switch (status) {
+        case 'success': return 'text-green-600 bg-green-100';
+        case 'warning': return 'text-yellow-600 bg-yellow-100';
+        case 'error': return 'text-red-600 bg-red-100';
+        default: return 'text-gray-600 bg-gray-100';
+      }
+    };
+
+    const getStatusIcon = (status) => {
+      switch (status) {
+        case 'success': return CheckCircle;
+        case 'warning': return AlertTriangle;
+        case 'error': return X;
+        default: return Clock;
+      }
+    };
+
+    const StatusIcon = getStatusIcon(activity.status);
+
+    return (
+      <div className="flex items-center space-x-4 p-4 hover:bg-gray-50 rounded-lg transition-colors">
+        <div className={`p-2 rounded-full ${getStatusColor(activity.status)}`}>
+          <StatusIcon className="w-4 h-4" />
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-medium text-gray-900">{activity.message}</p>
+          <p className="text-xs text-gray-500">{activity.time}</p>
+        </div>
+      </div>
+    );
+  };
+
+  const DashboardContent = () => (
+    <div className="space-y-6">
+      {/* Status Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatusCard
+          title="Active Tasks"
+          value={realTimeData.activeTasks}
+          icon={Activity}
+          color="text-blue-500"
+          change={{ positive: true, value: '+12 today' }}
+        />
+        <StatusCard
+          title="Success Rate"
+          value={realTimeData.successRate.toFixed(1)}
+          unit="%"
+          icon={CheckCircle}
+          color="text-green-500"
+          change={{ positive: true, value: '+2.1% vs last week' }}
+        />
+        <StatusCard
+          title="API Calls Today"
+          value={realTimeData.apiCalls}
+          icon={Globe}
+          color="text-purple-500"
+          change={{ positive: true, value: '+156 vs yesterday' }}
+        />
+        <StatusCard
+          title="Storage Used"
+          value={realTimeData.storage.toFixed(1)}
+          unit="%"
+          icon={HardDrive}
+          color="text-orange-500"
+          change={{ positive: false, value: '+1.2GB this week' }}
+        />
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Activity Chart */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">Task Performance</h3>
+            <div className="flex space-x-2">
+              <button className="px-3 py-1 text-xs bg-blue-100 text-blue-600 rounded-full">7D</button>
+              <button className="px-3 py-1 text-xs text-gray-600 rounded-full hover:bg-gray-100">30D</button>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={statusData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="tasks" fill="#4285F4" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="success" fill="#00BCD4" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Usage Distribution */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">Usage Distribution</h3>
+            <Filter className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600" />
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={pieData}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={120}
+                paddingAngle={5}
+                dataKey="value"
+              >
+                {pieData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            {pieData.map((item, index) => (
+              <div key={index} className="flex items-center space-x-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                <span className="text-sm text-gray-600">{item.name}</span>
+                <span className="text-sm font-medium text-gray-900">{item.value}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+            <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">View All</button>
+          </div>
+        </div>
+        <div className="divide-y divide-gray-200">
+          {recentActivities.map((activity) => (
+            <ActivityItem key={activity.id} activity={activity} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const EmailAutomationContent = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-900">Email Automation Suite</h2>
+        <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+          <Plus className="w-4 h-4" />
+          <span>New Campaign</span>
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StatusCard
+          title="Campaigns Sent"
+          value={47}
+          icon={Send}
+          color="text-blue-500"
+          change={{ positive: true, value: '+8 this month' }}
+        />
+        <StatusCard
+          title="Open Rate"
+          value={68.4}
+          unit="%"
+          icon={Mail}
+          color="text-green-500"
+          change={{ positive: true, value: '+3.2% vs avg' }}
+        />
+        <StatusCard
+          title="Templates"
+          value={23}
+          icon={FileText}
+          color="text-purple-500"
+        />
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">Recent Campaigns</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recipients</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Open Rate</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              <tr>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">Weekly Newsletter #47</div>
+                  <div className="text-sm text-gray-500">Sent 2 hours ago</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    Delivered
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1,247</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">72.3%</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <div className="flex space-x-2">
+                    <button className="text-blue-600 hover:text-blue-900"><Eye className="w-4 h-4" /></button>
+                    <button className="text-green-600 hover:text-green-900"><Edit className="w-4 h-4" /></button>
+                    <button className="text-red-600 hover:text-red-900"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const ToolsContent = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-900">Tools & Utilities</h2>
+        <div className="flex space-x-2">
+          <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+            <Calculator className="w-4 h-4" />
+            <span>New Calculation</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="p-3 rounded-full bg-blue-100">
+              <Calculator className="w-6 h-6 text-blue-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">BMI Calculator</h3>
+          </div>
+          <p className="text-gray-600 mb-4">Calculate Body Mass Index with PDF reports</p>
+          <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition-colors">
+            Open Tool
+          </button>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="p-3 rounded-full bg-green-100">
+              <Calendar className="w-6 h-6 text-green-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Age Calculator</h3>
+          </div>
+          <p className="text-gray-600 mb-4">Calculate age with birthday tracking</p>
+          <button className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg transition-colors">
+            Open Tool
+          </button>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="p-3 rounded-full bg-purple-100">
+              <CreditCard className="w-6 h-6 text-purple-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Invoice Generator</h3>
+          </div>
+          <p className="text-gray-600 mb-4">Professional invoice templates</p>
+          <button className="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 rounded-lg transition-colors">
+            Open Tool
+          </button>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="p-3 rounded-full bg-orange-100">
+              <DollarSign className="w-6 h-6 text-orange-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Currency Converter</h3>
+          </div>
+          <p className="text-gray-600 mb-4">Real-time currency conversion</p>
+          <button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg transition-colors">
+            Open Tool
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <DashboardContent />;
+      case 'email':
+        return <EmailAutomationContent />;
+      case 'tools':
+        return <ToolsContent />;
+      case 'files':
+        return (
+          <div className="text-center py-12">
+            <Folder className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">File Management System</h3>
+            <p className="text-gray-600">Advanced file operations and drive management coming soon</p>
+          </div>
+        );
+      case 'ocr':
+        return (
+          <div className="text-center py-12">
+            <Image className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">OCR & Vision AI</h3>
+            <p className="text-gray-600">AI-powered text extraction and image analysis</p>
+          </div>
+        );
+      case 'automation':
+        return (
+          <div className="text-center py-12">
+            <Bot className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Automation & Workflows</h3>
+            <p className="text-gray-600">Smart automation and workflow management</p>
+          </div>
+        );
+      case 'analytics':
+        return (
+          <div className="text-center py-12">
+            <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Advanced Analytics</h3>
+            <p className="text-gray-600">Detailed reports and performance insights</p>
+          </div>
+        );
+      default:
+        return <DashboardContent />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
+        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
+            <h1 className="text-xl font-bold text-gray-900">AutoMate Pro</h1>
+          </div>
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="lg:hidden p-1 text-gray-400 hover:text-gray-600"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <nav className="mt-6 px-3">
+          <div className="space-y-1">
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    activeTab === item.id
+                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 mr-3 ${activeTab === item.id ? item.color : 'text-gray-400'}`} />
+                  {item.name}
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+
+        {/* System Status in Sidebar */}
+        <div className="absolute bottom-4 left-3 right-3">
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
+              <span>System Status</span>
+              <div className="flex items-center space-x-1">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span>Online</span>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs">
+                <span>CPU</span>
+                <span>23%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-1">
+                <div className="bg-blue-500 h-1 rounded-full" style={{width: '23%'}}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className={`${sidebarOpen ? 'lg:pl-64' : ''} flex-1 min-h-screen`}>
+        {/* Top Header */}
+        <header className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="lg:hidden p-2 text-gray-400 hover:text-gray-600"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search automation tasks..."
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-80"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              {/* Real-time Status Indicators */}
+              <div className="hidden md:flex items-center space-x-4 text-sm">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-gray-600">API: Online</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Cpu className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-600">CPU: 23%</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Database className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-600">DB: 142ms</span>
+                </div>
+              </div>
+
+              <button className="relative p-2 text-gray-400 hover:text-gray-600">
+                <Bell className="w-5 h-5" />
+                {notifications > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {notifications}
+                  </span>
+                )}
+              </button>
+              
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <User className="w-4 h-4 text-white" />
+                </div>
+                <div className="hidden md:block">
+                  <p className="text-sm font-medium text-gray-900">John Doe</p>
+                  <p className="text-xs text-gray-500">Admin</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="p-6">
+          {renderContent()}
+        </main>
+      </div>
+
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+export default AutoMateProHub;
