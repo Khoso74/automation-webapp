@@ -1,623 +1,797 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell
-} from 'recharts';
-import {
-  Menu,
-  X,
-  Home,
-  Mail,
-  Settings,
-  FileText,
-  Eye,
-  Zap,
-  BarChart3,
-  User,
-  Bell,
-  Search,
-  Plus,
-  Activity,
-  CheckCircle,
-  AlertTriangle,
-  Clock,
-  Database,
-  Cpu,
-  HardDrive,
-  Globe,
-  TrendingUp,
-  Calendar,
-  Filter,
-  Download,
-  Upload,
-  Play,
-  Pause,
-  RefreshCw,
-  Send,
-  Edit,
-  Trash2,
-  Copy,
-  Calculator,
-  CreditCard,
-  DollarSign,
-  Users,
-  Folder,
-  Image,
-  Bot,
-  Target,
-  Gauge
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoMate Pro Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .slide-in { animation: slideIn 0.4s ease-out; }
+        @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .glass-effect { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app"></div>
 
-const AutoMateProHub = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [notifications, setNotifications] = useState(5);
-  const [realTimeData, setRealTimeData] = useState({
-    activeTasks: 127,
-    successRate: 94.2,
-    apiCalls: 2847,
-    storage: 67.3
-  });
+    <script>
+        // State Management
+        const state = {
+            user: null,
+            currentView: 'dashboard',
+            sidebarOpen: true,
+            notifications: [],
+            systemMetrics: {
+                cpu: 45,
+                memory: 62,
+                storage: 38,
+                activeUsers: 127,
+                apiCalls: 3542,
+                uptime: 99.9
+            },
+            emailCampaigns: [],
+            files: [],
+            workflows: [],
+            currencyRates: { USD: 1, EUR: 0.92, GBP: 0.79, JPY: 149.50, INR: 83.25 }
+        };
 
-  // Simulate real-time updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRealTimeData(prev => ({
-        activeTasks: prev.activeTasks + Math.floor(Math.random() * 3) - 1,
-        successRate: Math.max(90, Math.min(99, prev.successRate + (Math.random() - 0.5) * 0.5)),
-        apiCalls: prev.apiCalls + Math.floor(Math.random() * 10),
-        storage: Math.max(0, Math.min(100, prev.storage + (Math.random() - 0.5) * 0.1))
-      }));
-    }, 3000);
+        // Utility Functions
+        const generateId = () => Math.random().toString(36).substr(2, 9);
+        
+        const formatDate = (date) => {
+            return new Date(date).toLocaleDateString('en-US', {
+                year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+        };
 
-    return () => clearInterval(interval);
-  }, []);
+        const showNotification = (message, type = 'info') => {
+            const id = generateId();
+            const notification = { id, message, type, timestamp: new Date() };
+            state.notifications.push(notification);
+            render();
+            setTimeout(() => {
+                state.notifications = state.notifications.filter(n => n.id !== id);
+                render();
+            }, 5000);
+        };
 
-  const navigation = [
-    { id: 'dashboard', name: 'Dashboard', icon: Home, color: 'text-blue-500' },
-    { id: 'email', name: 'Email Automation', icon: Mail, color: 'text-green-500' },
-    { id: 'tools', name: 'Tools & Utilities', icon: Settings, color: 'text-purple-500' },
-    { id: 'files', name: 'File Management', icon: Folder, color: 'text-orange-500' },
-    { id: 'ocr', name: 'OCR & Vision AI', icon: Eye, color: 'text-teal-500' },
-    { id: 'automation', name: 'Automation', icon: Zap, color: 'text-yellow-500' },
-    { id: 'analytics', name: 'Analytics', icon: BarChart3, color: 'text-red-500' }
-  ];
-
-  const statusData = [
-    { name: 'Mon', tasks: 45, success: 42 },
-    { name: 'Tue', tasks: 52, success: 49 },
-    { name: 'Wed', tasks: 38, success: 36 },
-    { name: 'Thu', tasks: 67, success: 63 },
-    { name: 'Fri', tasks: 71, success: 68 },
-    { name: 'Sat', tasks: 29, success: 27 },
-    { name: 'Sun', tasks: 34, success: 32 }
-  ];
-
-  const pieData = [
-    { name: 'Email', value: 30, color: '#4285F4' },
-    { name: 'Files', value: 25, color: '#00BCD4' },
-    { name: 'OCR', value: 20, color: '#4CAF50' },
-    { name: 'Tools', value: 15, color: '#FF9800' },
-    { name: 'Other', value: 10, color: '#9C27B0' }
-  ];
-
-  const recentActivities = [
-    { id: 1, type: 'email', message: 'Email campaign sent to 1,247 recipients', time: '2 min ago', status: 'success' },
-    { id: 2, type: 'ocr', message: 'OCR processing completed for 15 documents', time: '5 min ago', status: 'success' },
-    { id: 3, type: 'file', message: 'Bulk file rename operation completed', time: '12 min ago', status: 'success' },
-    { id: 4, type: 'automation', message: 'Workflow "Daily Reports" executed', time: '18 min ago', status: 'warning' },
-    { id: 5, type: 'api', message: 'Vision API quota warning (85% used)', time: '25 min ago', status: 'warning' }
-  ];
-
-  const StatusCard = ({ title, value, icon: Icon, color, change, unit = '' }) => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className={`text-2xl font-bold ${color} mt-2`}>
-            {typeof value === 'number' ? value.toLocaleString() : value}{unit}
-          </p>
-          {change && (
-            <p className={`text-sm mt-1 flex items-center ${change.positive ? 'text-green-600' : 'text-red-600'}`}>
-              <TrendingUp className="w-4 h-4 mr-1" />
-              {change.value}
-            </p>
-          )}
-        </div>
-        <div className={`p-3 rounded-full bg-opacity-10 ${color.replace('text', 'bg')}`}>
-          <Icon className={`w-6 h-6 ${color}`} />
-        </div>
-      </div>
-    </div>
-  );
-
-  const ActivityItem = ({ activity }) => {
-    const getStatusColor = (status) => {
-      switch (status) {
-        case 'success': return 'text-green-600 bg-green-100';
-        case 'warning': return 'text-yellow-600 bg-yellow-100';
-        case 'error': return 'text-red-600 bg-red-100';
-        default: return 'text-gray-600 bg-gray-100';
-      }
-    };
-
-    const getStatusIcon = (status) => {
-      switch (status) {
-        case 'success': return CheckCircle;
-        case 'warning': return AlertTriangle;
-        case 'error': return X;
-        default: return Clock;
-      }
-    };
-
-    const StatusIcon = getStatusIcon(activity.status);
-
-    return (
-      <div className="flex items-center space-x-4 p-4 hover:bg-gray-50 rounded-lg transition-colors">
-        <div className={`p-2 rounded-full ${getStatusColor(activity.status)}`}>
-          <StatusIcon className="w-4 h-4" />
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-900">{activity.message}</p>
-          <p className="text-xs text-gray-500">{activity.time}</p>
-        </div>
-      </div>
-    );
-  };
-
-  const DashboardContent = () => (
-    <div className="space-y-6">
-      {/* Status Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatusCard
-          title="Active Tasks"
-          value={realTimeData.activeTasks}
-          icon={Activity}
-          color="text-blue-500"
-          change={{ positive: true, value: '+12 today' }}
-        />
-        <StatusCard
-          title="Success Rate"
-          value={realTimeData.successRate.toFixed(1)}
-          unit="%"
-          icon={CheckCircle}
-          color="text-green-500"
-          change={{ positive: true, value: '+2.1% vs last week' }}
-        />
-        <StatusCard
-          title="API Calls Today"
-          value={realTimeData.apiCalls}
-          icon={Globe}
-          color="text-purple-500"
-          change={{ positive: true, value: '+156 vs yesterday' }}
-        />
-        <StatusCard
-          title="Storage Used"
-          value={realTimeData.storage.toFixed(1)}
-          unit="%"
-          icon={HardDrive}
-          color="text-orange-500"
-          change={{ positive: false, value: '+1.2GB this week' }}
-        />
-      </div>
-
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Activity Chart */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">Task Performance</h3>
-            <div className="flex space-x-2">
-              <button className="px-3 py-1 text-xs bg-blue-100 text-blue-600 rounded-full">7D</button>
-              <button className="px-3 py-1 text-xs text-gray-600 rounded-full hover:bg-gray-100">30D</button>
-            </div>
-          </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={statusData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="tasks" fill="#4285F4" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="success" fill="#00BCD4" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Usage Distribution */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">Usage Distribution</h3>
-            <Filter className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600" />
-          </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={120}
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            {pieData.map((item, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-                <span className="text-sm text-gray-600">{item.name}</span>
-                <span className="text-sm font-medium text-gray-900">{item.value}%</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-            <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">View All</button>
-          </div>
-        </div>
-        <div className="divide-y divide-gray-200">
-          {recentActivities.map((activity) => (
-            <ActivityItem key={activity.id} activity={activity} />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const EmailAutomationContent = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Email Automation Suite</h2>
-        <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
-          <Plus className="w-4 h-4" />
-          <span>New Campaign</span>
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatusCard
-          title="Campaigns Sent"
-          value={47}
-          icon={Send}
-          color="text-blue-500"
-          change={{ positive: true, value: '+8 this month' }}
-        />
-        <StatusCard
-          title="Open Rate"
-          value={68.4}
-          unit="%"
-          icon={Mail}
-          color="text-green-500"
-          change={{ positive: true, value: '+3.2% vs avg' }}
-        />
-        <StatusCard
-          title="Templates"
-          value={23}
-          icon={FileText}
-          color="text-purple-500"
-        />
-      </div>
-
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Recent Campaigns</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recipients</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Open Rate</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">Weekly Newsletter #47</div>
-                  <div className="text-sm text-gray-500">Sent 2 hours ago</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                    Delivered
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1,247</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">72.3%</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex space-x-2">
-                    <button className="text-blue-600 hover:text-blue-900"><Eye className="w-4 h-4" /></button>
-                    <button className="text-green-600 hover:text-green-900"><Edit className="w-4 h-4" /></button>
-                    <button className="text-red-600 hover:text-red-900"><Trash2 className="w-4 h-4" /></button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-
-  const ToolsContent = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Tools & Utilities</h2>
-        <div className="flex space-x-2">
-          <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
-            <Calculator className="w-4 h-4" />
-            <span>New Calculation</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
-          <div className="flex items-center space-x-4 mb-4">
-            <div className="p-3 rounded-full bg-blue-100">
-              <Calculator className="w-6 h-6 text-blue-500" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900">BMI Calculator</h3>
-          </div>
-          <p className="text-gray-600 mb-4">Calculate Body Mass Index with PDF reports</p>
-          <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition-colors">
-            Open Tool
-          </button>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
-          <div className="flex items-center space-x-4 mb-4">
-            <div className="p-3 rounded-full bg-green-100">
-              <Calendar className="w-6 h-6 text-green-500" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900">Age Calculator</h3>
-          </div>
-          <p className="text-gray-600 mb-4">Calculate age with birthday tracking</p>
-          <button className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg transition-colors">
-            Open Tool
-          </button>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
-          <div className="flex items-center space-x-4 mb-4">
-            <div className="p-3 rounded-full bg-purple-100">
-              <CreditCard className="w-6 h-6 text-purple-500" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900">Invoice Generator</h3>
-          </div>
-          <p className="text-gray-600 mb-4">Professional invoice templates</p>
-          <button className="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 rounded-lg transition-colors">
-            Open Tool
-          </button>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
-          <div className="flex items-center space-x-4 mb-4">
-            <div className="p-3 rounded-full bg-orange-100">
-              <DollarSign className="w-6 h-6 text-orange-500" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900">Currency Converter</h3>
-          </div>
-          <p className="text-gray-600 mb-4">Real-time currency conversion</p>
-          <button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg transition-colors">
-            Open Tool
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return <DashboardContent />;
-      case 'email':
-        return <EmailAutomationContent />;
-      case 'tools':
-        return <ToolsContent />;
-      case 'files':
-        return (
-          <div className="text-center py-12">
-            <Folder className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">File Management System</h3>
-            <p className="text-gray-600">Advanced file operations and drive management coming soon</p>
-          </div>
-        );
-      case 'ocr':
-        return (
-          <div className="text-center py-12">
-            <Image className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">OCR & Vision AI</h3>
-            <p className="text-gray-600">AI-powered text extraction and image analysis</p>
-          </div>
-        );
-      case 'automation':
-        return (
-          <div className="text-center py-12">
-            <Bot className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Automation & Workflows</h3>
-            <p className="text-gray-600">Smart automation and workflow management</p>
-          </div>
-        );
-      case 'analytics':
-        return (
-          <div className="text-center py-12">
-            <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Advanced Analytics</h3>
-            <p className="text-gray-600">Detailed reports and performance insights</p>
-          </div>
-        );
-      default:
-        return <DashboardContent />;
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            <h1 className="text-xl font-bold text-gray-900">AutoMate Pro</h1>
-          </div>
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden p-1 text-gray-400 hover:text-gray-600"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <nav className="mt-6 px-3">
-          <div className="space-y-1">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    activeTab === item.id
-                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
-                >
-                  <Icon className={`w-5 h-5 mr-3 ${activeTab === item.id ? item.color : 'text-gray-400'}`} />
-                  {item.name}
-                </button>
-              );
-            })}
-          </div>
-        </nav>
-
-        {/* System Status in Sidebar */}
-        <div className="absolute bottom-4 left-3 right-3">
-          <div className="bg-gray-50 rounded-lg p-3">
-            <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
-              <span>System Status</span>
-              <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <span>Online</span>
-              </div>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between text-xs">
-                <span>CPU</span>
-                <span>23%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-1">
-                <div className="bg-blue-500 h-1 rounded-full" style={{width: '23%'}}></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className={`${sidebarOpen ? 'lg:pl-64' : ''} flex-1 min-h-screen`}>
-        {/* Top Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden p-2 text-gray-400 hover:text-gray-600"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-              
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search automation tasks..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-80"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              {/* Real-time Status Indicators */}
-              <div className="hidden md:flex items-center space-x-4 text-sm">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-gray-600">API: Online</span>
+        // Components
+        const Header = () => `
+            <header class="bg-white shadow-sm border-b border-gray-200">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center space-x-4">
+                        <button onclick="toggleSidebar()" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                        <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            AutoMate Pro Hub
+                        </h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <button onclick="toggleNotifications()" class="p-2 rounded-lg hover:bg-gray-100 transition-colors relative">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                </svg>
+                                ${state.notifications.length > 0 ? `<span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>` : ''}
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                                ${state.user ? state.user.name.charAt(0) : 'G'}
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">${state.user ? state.user.name : 'Guest User'}</p>
+                                <p class="text-xs text-gray-500">Administrator</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Cpu className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-600">CPU: 23%</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Database className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-600">DB: 142ms</span>
-                </div>
-              </div>
+            </header>
+        `;
 
-              <button className="relative p-2 text-gray-400 hover:text-gray-600">
-                <Bell className="w-5 h-5" />
-                {notifications > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    {notifications}
-                  </span>
-                )}
-              </button>
-              
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-white" />
+        const Sidebar = () => `
+            <aside class="bg-white border-r border-gray-200 w-64 min-h-screen ${state.sidebarOpen ? 'slide-in' : 'hidden'}">
+                <nav class="p-4 space-y-2">
+                    ${[
+                        { id: 'dashboard', icon: '📊', label: 'Dashboard' },
+                        { id: 'email', icon: '📧', label: 'Email Automation' },
+                        { id: 'utilities', icon: '🛠️', label: 'Utilities' },
+                        { id: 'files', icon: '📁', label: 'File Manager' },
+                        { id: 'ocr', icon: '👁️', label: 'OCR & Vision' },
+                        { id: 'workflows', icon: '⚡', label: 'Workflows' },
+                        { id: 'analytics', icon: '📈', label: 'Analytics' }
+                    ].map(item => `
+                        <button onclick="changeView('${item.id}')" 
+                            class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all hover:bg-blue-50 ${
+                                state.currentView === item.id ? 'bg-blue-100 text-blue-600' : 'text-gray-700'
+                            }">
+                            <span class="text-xl">${item.icon}</span>
+                            <span class="font-medium">${item.label}</span>
+                        </button>
+                    `).join('')}
+                </nav>
+            </aside>
+        `;
+
+        const Dashboard = () => `
+            <div class="fade-in space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    ${Object.entries({
+                        'CPU Usage': { value: state.systemMetrics.cpu, unit: '%', color: 'blue' },
+                        'Memory': { value: state.systemMetrics.memory, unit: '%', color: 'green' },
+                        'Storage': { value: state.systemMetrics.storage, unit: 'GB', color: 'purple' },
+                        'Active Users': { value: state.systemMetrics.activeUsers, unit: '', color: 'yellow' },
+                        'API Calls': { value: state.systemMetrics.apiCalls, unit: '', color: 'pink' },
+                        'Uptime': { value: state.systemMetrics.uptime, unit: '%', color: 'indigo' }
+                    }).map(([label, data]) => `
+                        <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-lg transition-shadow">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-sm font-medium text-gray-500">${label}</h3>
+                                <span class="w-2 h-2 bg-green-500 rounded-full pulse"></span>
+                            </div>
+                            <div class="flex items-baseline space-x-2">
+                                <span class="text-3xl font-bold text-gray-900">${data.value}</span>
+                                <span class="text-sm text-gray-500">${data.unit}</span>
+                            </div>
+                            <div class="mt-4 w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-${data.color}-400 to-${data.color}-600 h-2 rounded-full" 
+                                    style="width: ${Math.min(data.value, 100)}%"></div>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
-                <div className="hidden md:block">
-                  <p className="text-sm font-medium text-gray-900">John Doe</p>
-                  <p className="text-xs text-gray-500">Admin</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold">Performance Analytics</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="exportAnalytics('pdf')" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Export PDF</button>
+                            <button onclick="exportAnalytics('excel')" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Export Excel</button>
+                        </div>
+                    </div>
+                    <canvas id="analyticsChart"></canvas>
                 </div>
-              </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold mb-4">Traffic Sources</h3>
+                        <div class="space-y-3">
+                            ${[
+                                { source: 'Direct', visits: 45, color: 'blue' },
+                                { source: 'Social Media', visits: 30, color: 'green' },
+                                { source: 'Search', visits: 20, color: 'purple' },
+                                { source: 'Referral', visits: 5, color: 'yellow' }
+                            ].map(item => `
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-3 h-3 bg-${item.color}-500 rounded-full"></div>
+                                        <span class="text-sm text-gray-700">${item.source}</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-24 bg-gray-200 rounded-full h-2">
+                                            <div class="bg-${item.color}-500 h-2 rounded-full" style="width: ${item.visits}%"></div>
+                                        </div>
+                                        <span class="text-sm text-gray-500">${item.visits}%</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold mb-4">Top Pages</h3>
+                        <div class="space-y-3">
+                            ${[
+                                { page: '/dashboard', views: 2341 },
+                                { page: '/email-automation', views: 1823 },
+                                { page: '/workflows', views: 1456 },
+                                { page: '/analytics', views: 982 }
+                            ].map(item => `
+                                <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
+                                    <span class="text-sm text-gray-700">${item.page}</span>
+                                    <span class="text-sm font-medium text-gray-900">${item.views.toLocaleString()} views</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </header>
+        `;
 
-        {/* Page Content */}
-        <main className="p-6">
-          {renderContent()}
-        </main>
-      </div>
+        const NotificationPanel = () => `
+            <div class="absolute right-4 top-16 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50 fade-in">
+                <div class="p-4 border-b border-gray-200">
+                    <h3 class="font-semibold text-gray-900">Notifications</h3>
+                </div>
+                <div class="max-h-96 overflow-y-auto">
+                    ${state.notifications.length > 0 ? state.notifications.map(notification => `
+                        <div class="p-4 border-b border-gray-100 hover:bg-gray-50">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-2 h-2 mt-2 bg-${notification.type === 'success' ? 'green' : notification.type === 'error' ? 'red' : 'blue'}-500 rounded-full"></div>
+                                <div class="flex-1">
+                                    <p class="text-sm text-gray-700">${notification.message}</p>
+                                    <p class="text-xs text-gray-500 mt-1">${formatDate(notification.timestamp)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('') : `
+                        <div class="p-8 text-center text-gray-500">
+                            <p>No new notifications</p>
+                        </div>
+                    `}
+                </div>
+            </div>
+        `;
 
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div
-          className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-    </div>
-  );
-};
+        // Helper Functions
+        const getFileIcon = (type) => {
+            const icons = {
+                'pdf': '📄',
+                'doc': '📝',
+                'xls': '📊',
+                'img': '🖼️',
+                'video': '🎥',
+                'default': '📎'
+            };
+            return icons[type] || icons.default;
+        };
 
-export default AutoMateProHub;
+        const toggleSidebar = () => {
+            state.sidebarOpen = !state.sidebarOpen;
+            render();
+        };
+
+        const toggleNotifications = () => {
+            const panel = document.getElementById('notification-panel');
+            if (panel) {
+                panel.remove();
+            } else {
+                const div = document.createElement('div');
+                div.id = 'notification-panel';
+                div.innerHTML = NotificationPanel();
+                document.body.appendChild(div);
+                setTimeout(() => {
+                    document.addEventListener('click', function closePanel(e) {
+                        if (!e.target.closest('#notification-panel') && !e.target.closest('[onclick*="toggleNotifications"]')) {
+                            document.getElementById('notification-panel')?.remove();
+                            document.removeEventListener('click', closePanel);
+                        }
+                    });
+                }, 100);
+            }
+        };
+
+        const changeView = (view) => {
+            state.currentView = view;
+            render();
+            if (view === 'dashboard' || view === 'analytics') {
+                setTimeout(initCharts, 100);
+            }
+        };
+
+        // Utility Functions Implementation
+        const calculateBMI = () => {
+            const height = document.getElementById('bmi-height').value;
+            const weight = document.getElementById('bmi-weight').value;
+            if (height && weight) {
+                const bmi = (weight / ((height / 100) ** 2)).toFixed(1);
+                let category = '';
+                if (bmi < 18.5) category = 'Underweight';
+                else if (bmi < 25) category = 'Normal';
+                else if (bmi < 30) category = 'Overweight';
+                else category = 'Obese';
+                document.getElementById('bmi-result').innerHTML = `BMI: ${bmi} (${category})`;
+                showNotification('BMI calculated successfully', 'success');
+            }
+        };
+
+        const calculateAge = () => {
+            const birthDate = new Date(document.getElementById('age-date').value);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            document.getElementById('age-result').innerHTML = `Age: ${age} years`;
+            showNotification('Age calculated successfully', 'success');
+        };
+
+        const convertCurrency = () => {
+            const amount = parseFloat(document.getElementById('currency-amount').value);
+            const from = document.getElementById('currency-from').value;
+            const to = document.getElementById('currency-to').value;
+            if (amount) {
+                const result = (amount * state.currencyRates[to] / state.currencyRates[from]).toFixed(2);
+                document.getElementById('currency-result').innerHTML = `${amount} ${from} = ${result} ${to}`;
+                showNotification('Currency converted successfully', 'success');
+            }
+        };
+
+        const generateInvoice = () => {
+            const client = document.getElementById('invoice-client').value;
+            const amount = document.getElementById('invoice-amount').value;
+            const desc = document.getElementById('invoice-desc').value;
+            
+            if (client && amount && desc) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                doc.setFontSize(24);
+                doc.text('INVOICE', 105, 30, { align: 'center' });
+                
+                doc.setFontSize(12);
+                doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 50);
+                doc.text(`Invoice #: ${generateId().toUpperCase()}`, 20, 60);
+                
+                doc.text(`Bill To: ${client}`, 20, 80);
+                
+                doc.text('Description:', 20, 100);
+                doc.text(desc, 20, 110);
+                
+                doc.setFontSize(14);
+                doc.text(`Total Amount: ${amount}`, 20, 130);
+                
+                doc.save('invoice.pdf');
+                showNotification('Invoice generated successfully', 'success');
+            }
+        };
+
+        const createEmailCampaign = () => {
+            const name = prompt('Enter campaign name:');
+            if (name) {
+                state.emailCampaigns.push({
+                    id: generateId(),
+                    name,
+                    recipients: Math.floor(Math.random() * 1000),
+                    status: 'Draft',
+                    createdAt: new Date()
+                });
+                render();
+                showNotification('Email campaign created', 'success');
+            }
+        };
+
+        const createWorkflow = () => {
+            const name = prompt('Enter workflow name:');
+            if (name) {
+                state.workflows.push({
+                    id: generateId(),
+                    name,
+                    trigger: 'Manual',
+                    actions: 3,
+                    active: false,
+                    createdAt: new Date()
+                });
+                render();
+                showNotification('Workflow created', 'success');
+            }
+        };
+
+        const handleFileUpload = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                state.files.push({
+                    id: generateId(),
+                    name: file.name,
+                    size: (file.size / 1024).toFixed(2) + ' KB',
+                    type: file.type.split('/')[0],
+                    uploadDate: new Date()
+                });
+                render();
+                showNotification(`File "${file.name}" uploaded successfully`, 'success');
+            }
+        };
+
+        const exportAnalytics = (format) => {
+            if (format === 'pdf') {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.setFontSize(20);
+                doc.text('Analytics Report', 105, 20, { align: 'center' });
+                doc.setFontSize(12);
+                doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 40);
+                doc.text('Total Users: 1,234', 20, 60);
+                doc.text('Active Sessions: 342', 20, 70);
+                doc.text('Conversion Rate: 3.4%', 20, 80);
+                doc.save('analytics-report.pdf');
+            }
+            showNotification(`Analytics exported as ${format.toUpperCase()}`, 'success');
+        };
+
+        // Chart Initialization
+        const initCharts = () => {
+            // Activity Chart for Dashboard
+            const activityCtx = document.getElementById('activityChart');
+            if (activityCtx && !activityCtx.chart) {
+                activityCtx.chart = new Chart(activityCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Activity',
+                            data: [65, 78, 90, 81, 56, 55, 84],
+                            borderColor: '#4285F4',
+                            backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            // Analytics Chart
+            const analyticsCtx = document.getElementById('analyticsChart');
+            if (analyticsCtx && !analyticsCtx.chart) {
+                analyticsCtx.chart = new Chart(analyticsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Users',
+                            data: [1200, 1900, 3000, 2500, 2700, 3200],
+                            backgroundColor: '#4285F4'
+                        }, {
+                            label: 'Revenue',
+                            data: [800, 1200, 1800, 1500, 1900, 2100],
+                            backgroundColor: '#34A853'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+        };
+
+        // Main Render Function
+        const render = () => {
+            const views = {
+                dashboard: Dashboard,
+                email: EmailAutomation,
+                utilities: Utilities,
+                files: FileManager,
+                ocr: OCRVision,
+                workflows: Workflows,
+                analytics: Analytics
+            };
+
+            document.getElementById('app').innerHTML = `
+                <div class="flex h-screen bg-gray-50">
+                    ${Sidebar()}
+                    <div class="flex-1 flex flex-col">
+                        ${Header()}
+                        <main class="flex-1 overflow-y-auto p-6">
+                            ${views[state.currentView]()}
+                        </main>
+                    </div>
+                </div>
+            `;
+
+            if (state.currentView === 'dashboard' || state.currentView === 'analytics') {
+                setTimeout(initCharts, 100);
+            }
+        };
+
+        // Simulate real-time updates
+        setInterval(() => {
+            state.systemMetrics.cpu = Math.min(100, Math.max(20, state.systemMetrics.cpu + (Math.random() - 0.5) * 10));
+            state.systemMetrics.memory = Math.min(100, Math.max(30, state.systemMetrics.memory + (Math.random() - 0.5) * 8));
+            state.systemMetrics.apiCalls += Math.floor(Math.random() * 10);
+            if (state.currentView === 'dashboard') {
+                render();
+            }
+        }, 5000);
+
+        // Initial render
+        render();
+        showNotification('Welcome to AutoMate Pro Hub!', 'success');
+    </script>
+</body>
+</html>    <h3 class="text-lg font-semibold mb-4">Activity Overview</h3>
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold mb-4">Recent Activities</h3>
+                        <div class="space-y-3">
+                            ${[
+                                { action: 'Email Campaign Sent', user: 'System', time: '2 mins ago', status: 'success' },
+                                { action: 'File Upload Completed', user: 'John Doe', time: '15 mins ago', status: 'success' },
+                                { action: 'Workflow Executed', user: 'AutoBot', time: '1 hour ago', status: 'warning' },
+                                { action: 'OCR Processing', user: 'System', time: '2 hours ago', status: 'info' }
+                            ].map(activity => `
+                                <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-2 h-2 bg-${activity.status === 'success' ? 'green' : activity.status === 'warning' ? 'yellow' : 'blue'}-500 rounded-full"></div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900">${activity.action}</p>
+                                            <p class="text-xs text-gray-500">by ${activity.user}</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs text-gray-400">${activity.time}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const EmailAutomation = () => `
+            <div class="fade-in space-y-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-semibold">Email Campaigns</h2>
+                        <button onclick="createEmailCampaign()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            Create Campaign
+                        </button>
+                    </div>
+                    <div class="grid gap-4">
+                        ${state.emailCampaigns.length > 0 ? state.emailCampaigns.map(campaign => `
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-900">${campaign.name}</h3>
+                                        <p class="text-sm text-gray-500">Recipients: ${campaign.recipients} | Status: ${campaign.status}</p>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200">Send</button>
+                                        <button class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Edit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('') : `
+                            <div class="text-center py-12 text-gray-500">
+                                <p class="mb-4">No email campaigns yet</p>
+                                <button onclick="createEmailCampaign()" class="text-blue-600 hover:text-blue-700">Create your first campaign</button>
+                            </div>
+                        `}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold mb-4">Email Templates</h3>
+                        <div class="space-y-3">
+                            ${['Welcome Email', 'Newsletter', 'Promotional', 'Follow-up'].map(template => `
+                                <div class="p-3 border border-gray-200 rounded-lg hover:border-blue-300 cursor-pointer transition-colors">
+                                    <p class="font-medium text-gray-700">${template}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold mb-4">Auto-Reply Rules</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 border border-gray-200 rounded-lg">
+                                <p class="font-medium text-gray-700">Out of Office</p>
+                                <p class="text-sm text-gray-500">Active • Replies: 45</p>
+                            </div>
+                            <button class="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-gray-400">
+                                + Add Rule
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const Utilities = () => `
+            <div class="fade-in grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold mb-4">BMI Calculator</h3>
+                    <div class="space-y-4">
+                        <input type="number" placeholder="Height (cm)" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" id="bmi-height">
+                        <input type="number" placeholder="Weight (kg)" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" id="bmi-weight">
+                        <button onclick="calculateBMI()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            Calculate
+                        </button>
+                        <div id="bmi-result" class="text-center font-semibold text-gray-700"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold mb-4">Age Calculator</h3>
+                    <div class="space-y-4">
+                        <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" id="age-date">
+                        <button onclick="calculateAge()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            Calculate Age
+                        </button>
+                        <div id="age-result" class="text-center font-semibold text-gray-700"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold mb-4">Currency Converter</h3>
+                    <div class="space-y-4">
+                        <input type="number" placeholder="Amount" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" id="currency-amount">
+                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" id="currency-from">
+                            ${Object.keys(state.currencyRates).map(currency => `<option value="${currency}">${currency}</option>`).join('')}
+                        </select>
+                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" id="currency-to">
+                            ${Object.keys(state.currencyRates).map(currency => `<option value="${currency}">${currency}</option>`).join('')}
+                        </select>
+                        <button onclick="convertCurrency()" class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                            Convert
+                        </button>
+                        <div id="currency-result" class="text-center font-semibold text-gray-700"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold mb-4">Invoice Generator</h3>
+                    <div class="space-y-4">
+                        <input type="text" placeholder="Client Name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" id="invoice-client">
+                        <input type="number" placeholder="Amount" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" id="invoice-amount">
+                        <textarea placeholder="Description" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" id="invoice-desc"></textarea>
+                        <button onclick="generateInvoice()" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                            Generate PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const FileManager = () => `
+            <div class="fade-in space-y-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-semibold">File Manager</h2>
+                        <div class="flex space-x-2">
+                            <input type="file" id="file-upload" class="hidden" onchange="handleFileUpload(event)">
+                            <button onclick="document.getElementById('file-upload').click()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                Upload File
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        ${state.files.length > 0 ? state.files.map(file => `
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+                                <div class="text-3xl mb-2">${getFileIcon(file.type)}</div>
+                                <p class="font-medium text-gray-900 truncate">${file.name}</p>
+                                <p class="text-sm text-gray-500">${file.size}</p>
+                                <p class="text-xs text-gray-400">${formatDate(file.uploadDate)}</p>
+                            </div>
+                        `).join('') : `
+                            <div class="col-span-full text-center py-12 text-gray-500">
+                                <p class="mb-4">No files uploaded yet</p>
+                                <button onclick="document.getElementById('file-upload').click()" class="text-blue-600 hover:text-blue-700">Upload your first file</button>
+                            </div>
+                        `}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const OCRVision = () => `
+            <div class="fade-in space-y-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-xl font-semibold mb-6">OCR & Vision AI</h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <p class="text-gray-500 mb-4">Drop image here or click to upload</p>
+                            <input type="file" accept="image/*" class="hidden" id="ocr-upload">
+                            <button onclick="document.getElementById('ocr-upload').click()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                Select Image
+                            </button>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <h3 class="font-medium text-gray-700 mb-2">Features</h3>
+                                <ul class="space-y-2 text-sm text-gray-600">
+                                    <li>✓ Text extraction from images</li>
+                                    <li>✓ Multi-language support</li>
+                                    <li>✓ Object detection</li>
+                                    <li>✓ Batch processing</li>
+                                </ul>
+                            </div>
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <h3 class="font-medium text-blue-700 mb-2">Recent Extractions</h3>
+                                <p class="text-sm text-blue-600">No recent extractions</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const Workflows = () => `
+            <div class="fade-in space-y-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-semibold">Automation Workflows</h2>
+                        <button onclick="createWorkflow()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            Create Workflow
+                        </button>
+                    </div>
+                    <div class="grid gap-4">
+                        ${state.workflows.length > 0 ? state.workflows.map(workflow => `
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-gray-900">${workflow.name}</h3>
+                                        <p class="text-sm text-gray-500">Trigger: ${workflow.trigger} | Actions: ${workflow.actions}</p>
+                                    </div>
+                                    <div class="flex items-center space-x-4">
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" ${workflow.active ? 'checked' : ''} class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                        </label>
+                                        <button class="text-gray-500 hover:text-gray-700">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('') : `
+                            <div class="text-center py-12 text-gray-500">
+                                <p class="mb-4">No workflows created yet</p>
+                                <button onclick="createWorkflow()" class="text-blue-600 hover:text-blue-700">Create your first workflow</button>
+                            </div>
+                        `}
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold mb-4">Workflow Templates</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        ${[
+                            { name: 'Email to Slack', desc: 'Forward emails to Slack channel' },
+                            { name: 'Daily Report', desc: 'Generate and send daily reports' },
+                            { name: 'File Backup', desc: 'Auto backup files to cloud' }
+                        ].map(template => `
+                            <div class="p-4 border border-gray-200 rounded-lg hover:border-blue-300 cursor-pointer transition-colors">
+                                <h4 class="font-medium text-gray-900">${template.name}</h4>
+                                <p class="text-sm text-gray-500 mt-1">${template.desc}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const Analytics = () => `
+            <div class="fade-in space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    ${[
+                        { label: 'Total Users', value: '1,234', change: '+12%' },
+                        { label: 'Active Sessions', value: '342', change: '+5%' },
+                        { label: 'Conversion Rate', value: '3.4%', change: '+0.8%' },
+                        { label: 'Avg. Response Time', value: '1.2s', change: '-15%' }
+                    ].map(stat => `
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <p class="text-sm text-gray-500 mb-2">${stat.label}</p>
+                            <p class="text-2xl font-bold text-gray-900">${stat.value}</p>
+                            <p class="text-sm ${stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'} mt-2">${stat.change} from last week</p>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6">
