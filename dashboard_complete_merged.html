@@ -22,6 +22,9 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
         }
         
         .header {
@@ -35,6 +38,7 @@
             justify-content: space-between;
             align-items: center;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            grid-column: 1 / -1;
         }
         
         .header-content h1 {
@@ -171,30 +175,110 @@
             font-weight: 500;
         }
         
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        /* Left Sidebar for Actions */
+        .sidebar {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .sidebar-actions {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .vertical-actions {
+            display: flex;
+            flex-direction: column;
             gap: 15px;
-            margin-bottom: 30px;
         }
         
         .action-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 15px 20px;
-            font-size: 1em;
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafe 100%);
+            color: #2c3e50;
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            padding: 18px 20px;
+            font-size: 0.95em;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-decoration: none;
-            display: inline-block;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         }
-        
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .action-btn:hover::before {
+            left: 100%;
+        }
+
         .action-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: translateX(8px) scale(1.02);
+            border-color: rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+            color: #667eea;
+        }
+
+        .action-btn-icon {
+            font-size: 1.5em;
+            margin-right: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .action-btn:hover .action-btn-icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .action-btn-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .action-btn-title {
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .action-btn-desc {
+            font-size: 0.8em;
+            opacity: 0.7;
+            font-weight: 400;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            min-height: 100vh;
         }
 
         /* Premium Tools Enhanced Styles */
@@ -753,7 +837,7 @@
             letter-spacing: 0.5px;
         }
         
-        /* Modal Styles */
+        /* Enhanced Professional Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -761,30 +845,179 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
         }
         
         .modal-content {
-            background: white;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.7);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(25px);
+            border-radius: 25px;
+            padding: 0;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            min-width: 500px;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow: hidden;
+            animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        .modal-title {
+            font-size: 1.6em;
+            font-weight: 700;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .modal-title-icon {
+            font-size: 1.2em;
+            margin-right: 12px;
+        }
+
+        .modal-subtitle {
+            opacity: 0.9;
+            margin-top: 8px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+            font-weight: 400;
         }
         
         .close {
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             cursor: pointer;
-            color: #aaa;
+            transition: all 0.3s ease;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .close:hover {
-            color: #000;
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 35px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 10px;
+        }
+
+        /* Enhanced form elements for modals */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: flex-end;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .modal-btn:hover::before {
+            left: 100%;
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .modal-btn-secondary {
+            background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+            border: 2px solid rgba(108, 117, 125, 0.2);
+        }
+
+        .modal-btn-secondary:hover {
+            background: rgba(108, 117, 125, 0.2);
+            transform: translateY(-2px);
         }
         
         /* Activity and Deadline Styles */
@@ -880,6 +1113,12 @@
             to { transform: rotate(360deg); }
         }
 
+        @keyframes modalSlideIn {
+            to {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
         /* Loading Animation */
         .loading-spinner {
             display: inline-block;
@@ -917,6 +1156,20 @@
         
         /* Responsive Design */
         @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+
+            .sidebar {
+                order: 2;
+                position: static;
+            }
+
+            .main-content {
+                order: 1;
+            }
+
             .main-grid {
                 grid-template-columns: 1fr;
             }
@@ -933,10 +1186,6 @@
             .header-actions {
                 width: 100%;
                 justify-content: center;
-            }
-            
-            .container {
-                padding: 10px;
             }
 
             .premium-tools-grid {
@@ -962,6 +1211,23 @@
                 grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
                 gap: 10px;
             }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                min-width: 95%;
+                margin: 10px;
+            }
+
+            .action-btn {
+                padding: 15px;
+            }
+
+            .action-btn-text {
+                font-size: 0.9em;
+            }
         }
     </style>
 </head>
@@ -980,61 +1246,109 @@
             </div>
         </div>
         
-        <!-- Dashboard Tab -->
-        <div id="dashboard" class="tab-content active">
-            <!-- Statistics -->
-            <div class="stats-grid">
-                <div class="stat-card clients">
-                    <div class="stat-number" id="totalClients">0</div>
-                    <div class="stat-label">Total Clients</div>
-                </div>
-                <div class="stat-card pending">
-                    <div class="stat-number" id="pendingProposals">0</div>
-                    <div class="stat-label">Pending Proposals</div>
-                </div>
-                <div class="stat-card projects">
-                    <div class="stat-number" id="activeProjects">0</div>
-                    <div class="stat-label">Active Projects</div>
-                </div>
-                <div class="stat-card invoices">
-                    <div class="stat-number" id="overdueInvoices">0</div>
-                    <div class="stat-label">Overdue Invoices</div>
-                </div>
-                <div class="stat-card revenue">
-                    <div class="stat-number" id="monthlyRevenue">Rs. 0</div>
-                    <div class="stat-label">Monthly Revenue (PKR)</div>
-                </div>
-            </div>
-            
-            <!-- Quick Actions -->
-            <div class="quick-actions">
-                <button class="action-btn" onclick="openModal('clientModal')">➕ Add Client</button>
-                <button class="action-btn" onclick="openModal('proposalModal')">📄 Create Proposal</button>
-                <button class="action-btn" onclick="openModal('invoiceModal')">💰 Create Invoice</button>
-                <button class="action-btn" onclick="openModal('projectModal')">🎯 Add Project</button>
-                <button class="action-btn" onclick="sendFollowUps()">📧 Send Follow-ups</button>
-                <button class="action-btn" onclick="generateReports()">📊 Generate Reports</button>
-            </div>
-            
-            <!-- Main Content Grid -->
-            <div class="main-grid">
-                <!-- Recent Activity -->
-                <div class="panel">
-                    <h3>📈 Recent Activity</h3>
-                    <div id="recentActivity">
-                        <div class="no-data">Loading recent activity...</div>
-                    </div>
-                </div>
-                
-                <!-- Upcoming Deadlines -->
-                <div class="panel">
-                    <h3>⏰ Upcoming Deadlines</h3>
-                    <div id="upcomingDeadlines">
-                        <div class="no-data">Loading upcoming deadlines...</div>
-                    </div>
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-actions">
+                <h3 class="sidebar-title">🎯 Quick Actions</h3>
+                <div class="vertical-actions">
+                    <button class="action-btn" onclick="openModal('clientModal')">
+                        <span class="action-btn-icon">👥</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Add Client</span>
+                            <span class="action-btn-desc">Register new clients</span>
+                        </div>
+                    </button>
+                    
+                    <button class="action-btn" onclick="openModal('proposalModal')">
+                        <span class="action-btn-icon">📄</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Create Proposal</span>
+                            <span class="action-btn-desc">Professional proposals</span>
+                        </div>
+                    </button>
+                    
+                    <button class="action-btn" onclick="openModal('invoiceModal')">
+                        <span class="action-btn-icon">💰</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Create Invoice</span>
+                            <span class="action-btn-desc">Generate invoices</span>
+                        </div>
+                    </button>
+                    
+                    <button class="action-btn" onclick="openModal('projectModal')">
+                        <span class="action-btn-icon">🎯</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Add Project</span>
+                            <span class="action-btn-desc">Track new projects</span>
+                        </div>
+                    </button>
+                    
+                    <button class="action-btn" onclick="sendFollowUps()">
+                        <span class="action-btn-icon">📧</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Send Follow-ups</span>
+                            <span class="action-btn-desc">Automated emails</span>
+                        </div>
+                    </button>
+                    
+                    <button class="action-btn" onclick="generateReports()">
+                        <span class="action-btn-icon">📊</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Generate Reports</span>
+                            <span class="action-btn-desc">Business analytics</span>
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>
+        
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <!-- Statistics -->
+                <div class="stats-grid">
+                    <div class="stat-card clients">
+                        <div class="stat-number" id="totalClients">0</div>
+                        <div class="stat-label">Total Clients</div>
+                    </div>
+                    <div class="stat-card pending">
+                        <div class="stat-number" id="pendingProposals">0</div>
+                        <div class="stat-label">Pending Proposals</div>
+                    </div>
+                    <div class="stat-card projects">
+                        <div class="stat-number" id="activeProjects">0</div>
+                        <div class="stat-label">Active Projects</div>
+                    </div>
+                    <div class="stat-card invoices">
+                        <div class="stat-number" id="overdueInvoices">0</div>
+                        <div class="stat-label">Overdue Invoices</div>
+                    </div>
+                    <div class="stat-card revenue">
+                        <div class="stat-number" id="monthlyRevenue">Rs. 0</div>
+                        <div class="stat-label">Monthly Revenue (PKR)</div>
+                    </div>
+                </div>
+                
+                <!-- Main Content Grid -->
+                <div class="main-grid">
+                    <!-- Recent Activity -->
+                    <div class="panel">
+                        <h3>📈 Recent Activity</h3>
+                        <div id="recentActivity">
+                            <div class="no-data">Loading recent activity...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Upcoming Deadlines -->
+                    <div class="panel">
+                        <h3>⏰ Upcoming Deadlines</h3>
+                        <div id="upcomingDeadlines">
+                            <div class="no-data">Loading upcoming deadlines...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         
         <!-- Premium Tools Tab -->
         <div id="tools" class="tab-content">
@@ -1484,32 +1798,46 @@
     <!-- Client Modal -->
     <div id="clientModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal('clientModal')">&times;</span>
-            <h2>Add New Client</h2>
-            <form id="clientForm">
-                <div class="form-group">
-                    <label for="companyName">Company Name *</label>
-                    <input type="text" id="companyName" name="companyName" required>
-                </div>
-                <div class="form-group">
-                    <label for="contactName">Contact Name *</label>
-                    <input type="text" id="contactName" name="contactName" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email *</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone">Phone</label>
-                    <input type="tel" id="phone" name="phone" placeholder="+92-300-1234567">
-                </div>
-                <div class="form-group">
-                    <label for="address">Address</label>
-                    <textarea id="address" name="address"></textarea>
-                </div>
-                <button type="submit" class="action-btn">Create Client</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal('clientModal')">Cancel</button>
-            </form>
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <span class="modal-title-icon">👥</span>
+                    Add New Client
+                </h2>
+                <p class="modal-subtitle">Register a new client and build your business network</p>
+                <button class="close" onclick="closeModal('clientModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="clientForm" onsubmit="submitClientForm(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="companyName">Company Name *</label>
+                            <input type="text" id="companyName" name="companyName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactName">Contact Name *</label>
+                            <input type="text" id="contactName" name="contactName" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone</label>
+                            <input type="tel" id="phone" name="phone" placeholder="+92-300-1234567">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <textarea id="address" name="address" placeholder="Complete business address"></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="modal-btn modal-btn-secondary" onclick="closeModal('clientModal')">Cancel</button>
+                        <button type="submit" class="modal-btn modal-btn-primary">Create Client</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
     
