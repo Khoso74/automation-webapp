@@ -2773,14 +2773,20 @@
             
             google.script.run
                 .withSuccessHandler(function(result) {
+                    console.log('Client creation result:', result);
+                    
                     // Reset form
                     form.reset();
                     
                     // Close modal
                     closeModal('clientModal');
                     
-                    // Show success message
-                    showSuccessMessage('✅ Client created successfully!');
+                    // Show success message with details
+                    let successMsg = '✅ Client created successfully!';
+                    if (result.folderUrl) {
+                        successMsg += `<br><a href="${result.folderUrl}" target="_blank">📁 View Client Folder</a>`;
+                    }
+                    showSuccessMessage(successMsg);
                     
                     // Refresh dashboard data
                     loadDashboardData();
@@ -2790,6 +2796,8 @@
                     submitBtn.disabled = false;
                 })
                 .withFailureHandler(function(error) {
+                    console.error('Client creation error:', error);
+                    
                     // Show error message
                     showErrorMessage('❌ Failed to create client: ' + error);
                     

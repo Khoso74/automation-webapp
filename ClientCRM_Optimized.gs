@@ -4,6 +4,52 @@
  */
 
 /**
+ * Test function to verify client creation setup
+ */
+function testClientCreation() {
+  try {
+    console.log('=== TESTING CLIENT CREATION SETUP ===');
+    
+    // Test spreadsheet access
+    const spreadsheet = getSpreadsheet();
+    console.log('✅ Spreadsheet access OK:', spreadsheet.getName());
+    
+    // Test clients sheet
+    const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
+    console.log('✅ Clients sheet access OK:', clientsSheet.getName());
+    
+    // Test getting existing clients
+    const existingClients = getAllClients();
+    console.log('✅ Existing clients count:', existingClients.length);
+    
+    // Test root folder access
+    const rootFolder = getRootFolder();
+    console.log('✅ Root folder access OK:', rootFolder.getName());
+    console.log('Root folder ID:', rootFolder.getId());
+    
+    // Test creating test client data
+    const testClientData = {
+      companyName: 'Test Company',
+      contactName: 'Test Contact',
+      email: 'test@example.com',
+      phone: '+92-300-1234567',
+      address: 'Test Address'
+    };
+    
+    console.log('Test client data prepared:', testClientData);
+    console.log('=== SETUP TEST COMPLETED ===');
+    
+    return 'Setup test completed successfully';
+    
+  } catch (error) {
+    console.error('=== SETUP TEST FAILED ===');
+    console.error('Error:', error);
+    console.error('Stack:', error.stack);
+    throw error;
+  }
+}
+
+/**
  * OPTIMIZED: Get all clients with better performance
  */
 function getAllClients() {
@@ -48,28 +94,44 @@ function getClientById(clientId) {
  */
 function createClient(clientData) {
   try {
+    console.log('=== CLIENT CREATION DEBUG ===');
+    console.log('Received clientData:', JSON.stringify(clientData));
+    
     // Validate required fields
     if (!clientData.companyName || !clientData.contactName || !clientData.email) {
+      console.error('Missing required fields:', {
+        companyName: !!clientData.companyName,
+        contactName: !!clientData.contactName,
+        email: !!clientData.email
+      });
       return { success: false, error: 'Company name, contact name, and email are required' };
     }
     
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(clientData.email)) {
+      console.error('Invalid email format:', clientData.email);
       return { success: false, error: 'Invalid email format' };
     }
     
+    console.log('Validation passed, getting spreadsheet...');
     const spreadsheet = getSpreadsheet();
     const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
+    console.log('Got clients sheet:', clientsSheet.getName());
     
     // Check for duplicate email
+    console.log('Checking for duplicate emails...');
     const existingClients = getAllClients();
+    console.log('Found existing clients:', existingClients.length);
+    
     if (existingClients.some(client => client.Email === clientData.email)) {
+      console.error('Duplicate email found:', clientData.email);
       return { success: false, error: 'A client with this email already exists' };
     }
     
     // Generate unique client ID
     const clientId = generateId('CLI');
+    console.log('Generated client ID:', clientId);
     
     // Prepare client data
     const newClient = [
@@ -83,24 +145,35 @@ function createClient(clientData) {
       'Active'
     ];
     
+    console.log('Prepared client data for sheet:', newClient);
+    
     // Add to sheet
+    console.log('Adding row to sheet...');
     clientsSheet.appendRow(newClient);
+    console.log('✅ Client added to sheet successfully');
     
     // Create client folder in your Drive folder
+    console.log('Creating client folder...');
     const clientFolder = createClientFolderOptimized(clientId, clientData.companyName);
+    console.log('✅ Client folder created:', clientFolder.getName());
     
     // Log activity
     logActivity('Client', `New client created: ${clientData.companyName}`, clientId);
+    console.log('✅ Activity logged');
     
+    console.log('=== CLIENT CREATION SUCCESS ===');
     return {
       success: true,
       clientId: clientId,
       folderId: clientFolder.getId(),
+      folderUrl: clientFolder.getUrl(),
       message: 'Client created successfully'
     };
     
   } catch (error) {
+    console.error('=== CLIENT CREATION ERROR ===');
     console.error('Error creating client:', error);
+    console.error('Error stack:', error.stack);
     logActivity('Client', `Failed to create client: ${error.message}`, '', 'Error');
     return { success: false, error: error.message };
   }
@@ -111,27 +184,45 @@ function createClient(clientData) {
  */
 function createClientFolderOptimized(clientId, companyName) {
   try {
+    console.log('=== CLIENT FOLDER CREATION DEBUG ===');
+    console.log('Creating folder for:', clientId, companyName);
+    
     const rootFolder = getRootFolder();
+    console.log('Root folder ID:', rootFolder.getId());
+    console.log('Root folder name:', rootFolder.getName());
     
     // Get or create Clients folder
+    console.log('Getting/creating Clients folder...');
     const clientsFolder = createSubfolderIfNeeded(rootFolder, 'Clients');
+    console.log('Clients folder ID:', clientsFolder.getId());
+    console.log('Clients folder name:', clientsFolder.getName());
     
     // Create folder for this client with safe name
     const safeName = companyName.replace(/[^a-zA-Z0-9\s-_]/g, '').trim();
     const folderName = `${clientId} - ${safeName}`;
+    console.log('Creating client folder with name:', folderName);
+    
     const clientFolder = clientsFolder.createFolder(folderName);
+    console.log('✅ Client folder created:', clientFolder.getName());
+    console.log('Client folder ID:', clientFolder.getId());
+    console.log('Client folder URL:', clientFolder.getUrl());
     
     // Create subfolders for client
     const subfolders = ['Proposals', 'Contracts', 'Projects', 'Invoices', 'Communications'];
+    console.log('Creating subfolders:', subfolders);
+    
     subfolders.forEach(subfolder => {
-      clientFolder.createFolder(subfolder);
+      const createdSubfolder = clientFolder.createFolder(subfolder);
+      console.log(`Created subfolder: ${subfolder} (ID: ${createdSubfolder.getId()})`);
     });
     
-    console.log(`Created client folder: ${folderName}`);
+    console.log('=== CLIENT FOLDER CREATION SUCCESS ===');
     return clientFolder;
     
   } catch (error) {
+    console.error('=== CLIENT FOLDER CREATION ERROR ===');
     console.error('Error creating client folder:', error);
+    console.error('Error stack:', error.stack);
     // Return a fallback - at least the client record was created
     throw new Error('Client folder creation failed: ' + error.message);
   }
