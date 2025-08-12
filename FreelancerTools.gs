@@ -66,7 +66,10 @@ function startTimeTracking(projectId, taskDescription) {
     // Save time tracking record to Drive
     try {
       const rootFolder = getRootFolder();
+      console.log('📁 Root folder for time tracking:', rootFolder.getName(), 'ID:', rootFolder.getId());
+      
       const timeTrackingFolder = createSubfolder(rootFolder, 'TimeTracking');
+      console.log('📂 TimeTracking folder:', timeTrackingFolder.getName(), 'ID:', timeTrackingFolder.getId());
       
       const sessionRecord = {
         sessionId: sessionId,
@@ -263,9 +266,12 @@ function addExpense(expenseData) {
     const expenseId = generateId();
     const currentDate = new Date();
     
-    // Save expense record to Drive
+    // Save expense record to Drive with logging
     const rootFolder = getRootFolder();
+    console.log('📁 Root folder for expense:', rootFolder.getName(), 'ID:', rootFolder.getId());
+    
     const expensesFolder = createSubfolder(rootFolder, 'Expenses');
+    console.log('📂 Expenses folder:', expensesFolder.getName(), 'ID:', expensesFolder.getId());
     
     // Create detailed expense record
     const expenseRecord = {
@@ -280,9 +286,12 @@ function addExpense(expenseData) {
     };
     
     const fileName = `Expense_${expenseData.category.replace(/\s+/g, '_')}_${expenseData.date}_${expenseId}.json`;
+    console.log('💰 Creating expense file:', fileName);
+    
     const expenseFile = expensesFolder.createFile(
       Utilities.newBlob(JSON.stringify(expenseRecord, null, 2), 'application/json', fileName)
     );
+    console.log('✅ Expense file created:', expenseFile.getName(), 'ID:', expenseFile.getId());
     
     const newRow = [
       expenseId,
@@ -841,12 +850,20 @@ function generateContract(contractData) {
     const blob = Utilities.newBlob(contractHTML, 'text/html', 'contract.html');
     const pdfBlob = blob.getAs('application/pdf');
     
-    // Save to Drive
+    // Save to Drive with detailed logging
     const rootFolder = getRootFolder();
+    console.log('📁 Root folder obtained:', rootFolder.getName(), 'ID:', rootFolder.getId());
+    
     const contractsFolder = createSubfolder(rootFolder, 'Contracts');
+    console.log('📂 Contracts folder:', contractsFolder.getName(), 'ID:', contractsFolder.getId());
+    
     const timestamp = new Date().toISOString().split('T')[0];
     const fileName = `Contract_${contractData.clientCompany.replace(/\s+/g, '_')}_${timestamp}.pdf`;
+    console.log('📄 Creating PDF file:', fileName);
+    
     const file = contractsFolder.createFile(pdfBlob.setName(fileName));
+    console.log('✅ PDF file created:', file.getName(), 'ID:', file.getId());
+    console.log('🔗 PDF URL:', file.getUrl());
     
     // Create contract metadata file
     const metadataFileName = `Contract_Metadata_${contractData.clientCompany.replace(/\s+/g, '_')}_${timestamp}.json`;
@@ -1030,12 +1047,20 @@ function createDataBackup() {
     // Convert to JSON
     const jsonData = JSON.stringify(allData, null, 2);
     
-    // Save to Drive
+    // Save to Drive with detailed logging
     const rootFolder = getRootFolder();
+    console.log('📁 Root folder for backup:', rootFolder.getName(), 'ID:', rootFolder.getId());
+    
     const backupFolder = createSubfolder(rootFolder, 'Backups');
+    console.log('📂 Backup folder:', backupFolder.getName(), 'ID:', backupFolder.getId());
+    
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T');
     const fileName = `FreelancerData_Backup_${timestamp[0]}_${timestamp[1].split('.')[0]}.json`;
+    console.log('💾 Creating backup file:', fileName);
+    
     const file = backupFolder.createFile(Utilities.newBlob(jsonData, 'application/json', fileName));
+    console.log('✅ Backup file created:', file.getName(), 'ID:', file.getId());
+    console.log('🔗 Backup URL:', file.getUrl());
     
     // Create summary file
     const summaryData = {

@@ -573,7 +573,7 @@ function getWebAppUrl() {
 }
 
 /**
- * UTILITY: Test your connections
+ * UTILITY: Test your connections with detailed Drive folder verification
  */
 function testConnections() {
   try {
@@ -583,19 +583,89 @@ function testConnections() {
     const sheet = getSpreadsheet();
     console.log('✅ Spreadsheet connection successful:', sheet.getName());
     
-    // Test Drive folder
+    // Test Drive folder with detailed info
     const folder = getRootFolder();
     console.log('✅ Drive folder connection successful:', folder.getName());
+    console.log('📁 Drive folder ID:', folder.getId());
+    console.log('🔗 Drive folder URL:', folder.getUrl());
+    console.log('📂 Expected folder ID:', CONFIG.ROOT_FOLDER_ID);
+    
+    // Verify it's the correct folder
+    if (folder.getId() === CONFIG.ROOT_FOLDER_ID) {
+      console.log('✅ Correct folder confirmed!');
+    } else {
+      console.log('❌ WARNING: Folder ID mismatch!');
+    }
     
     // Test settings
     const companyName = getSetting('COMPANY_NAME');
     console.log('✅ Settings access successful. Company name:', companyName);
     
     console.log('🎉 All connections working perfectly!');
-    return 'All connections successful!';
+    return `All connections successful!\nDrive Folder: ${folder.getName()}\nFolder ID: ${folder.getId()}\nFolder URL: ${folder.getUrl()}\nExpected ID: ${CONFIG.ROOT_FOLDER_ID}`;
     
   } catch (error) {
     console.error('❌ Connection test failed:', error);
     return 'Connection test failed: ' + error.message;
+  }
+}
+
+/**
+ * UTILITY: Test PDF generation and verify Drive location
+ */
+function testPdfGeneration() {
+  try {
+    console.log('Testing PDF generation and Drive saving...');
+    
+    // Test contract generation with sample data
+    const testContractData = {
+      clientName: 'Test Client',
+      clientCompany: 'Test Company Ltd',
+      projectTitle: 'Test Project',
+      projectDescription: 'This is a test project for PDF generation',
+      amount: 50000,
+      currency: 'PKR',
+      startDate: '2024-01-15',
+      endDate: '2024-02-15'
+    };
+    
+    const result = generateContract(testContractData);
+    
+    if (result.success) {
+      console.log('✅ PDF generated successfully');
+      console.log('📄 File name:', result.fileName);
+      console.log('🔗 File URL:', result.fileUrl);
+      console.log('📁 File ID:', result.fileId);
+      
+      // Verify file is in correct folder
+      const file = DriveApp.getFileById(result.fileId);
+      const parentFolders = file.getParents();
+      let folderPath = '';
+      let isInCorrectFolder = false;
+      
+      while (parentFolders.hasNext()) {
+        const parent = parentFolders.next();
+        folderPath = parent.getName() + '/' + folderPath;
+        console.log('📂 Parent folder:', parent.getName(), 'ID:', parent.getId());
+        
+        if (parent.getId() === CONFIG.ROOT_FOLDER_ID) {
+          isInCorrectFolder = true;
+        }
+      }
+      
+      if (isInCorrectFolder) {
+        console.log('✅ PDF saved in correct Drive folder!');
+      } else {
+        console.log('❌ WARNING: PDF not in expected folder!');
+      }
+      
+      return `PDF Test Successful!\nFile: ${result.fileName}\nURL: ${result.fileUrl}\nFolder Path: ${folderPath}\nIn Correct Folder: ${isInCorrectFolder}`;
+    } else {
+      return `PDF Test Failed: ${result.error}`;
+    }
+    
+  } catch (error) {
+    console.error('❌ PDF test failed:', error);
+    return 'PDF test failed: ' + error.message;
   }
 }
