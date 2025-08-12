@@ -787,20 +787,68 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* Enhanced Select Styling - Fixed Arrow Positioning */
+        /* Enhanced Select Styling - COMPLETELY REMOVE ALL ARROWS */
         .form-select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23667eea' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 15px center;
-            background-repeat: no-repeat;
-            background-size: 14px;
-            appearance: none;
+            /* REMOVE ALL BACKGROUND ARROWS */
+            background-image: none !important;
+            background: transparent !important;
+            
+            /* REMOVE BROWSER DEFAULT ARROWS */
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            
+            /* BASIC STYLING ONLY */
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px 20px !important;
+            font-size: 16px;
+            color: #333;
             cursor: pointer;
-            padding-right: 45px !important;
+            transition: all 0.3s ease;
+            outline: none;
         }
 
         .form-select:focus {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23764ba2' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 15px center;
+            /* NO BACKGROUND ARROWS ON FOCUS */
+            background-image: none !important;
+            background: transparent !important;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-select:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        /* PROPOSAL MODAL SPECIFIC FIXES */
+        #proposalClient, 
+        #invoiceClient, 
+        #projectClient {
+            /* FORCE REMOVE ALL ARROWS */
+            background: white !important;
+            background-image: none !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            
+            /* CLEAN STYLING */
+            border: 2px solid #e0e0e0 !important;
+            border-radius: 12px !important;
+            padding: 15px 20px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        
+        #proposalClient:focus, 
+        #invoiceClient:focus, 
+        #projectClient:focus {
+            background: white !important;
+            background-image: none !important;
+            border-color: #667eea !important;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+            outline: none !important;
         }
 
         /* Input Icons - Fixed Overlap Issue */
@@ -2979,6 +3027,51 @@
         
         window.testDropdownNow = testDropdownNow;
         
+        // MANUAL PROPOSAL DROPDOWN TEST
+        function testProposalDropdown() {
+            console.log('🧪 TESTING PROPOSAL DROPDOWN MANUALLY');
+            
+            const proposalSelect = document.getElementById('proposalClient');
+            
+            if (!proposalSelect) {
+                alert('❌ Proposal dropdown not found! Make sure proposal modal is open.');
+                return;
+            }
+            
+            proposalSelect.innerHTML = '<option value="">🔄 Manual testing...</option>';
+            
+            google.script.run
+                .withSuccessHandler(function(clients) {
+                    console.log('✅ Manual test result:', clients);
+                    
+                    if (clients && Array.isArray(clients) && clients.length > 0) {
+                        let options = '<option value="">Choose a client...</option>';
+                        
+                        clients.forEach((client, index) => {
+                            const companyName = client.CompanyName || client.companyName || `Company ${index + 1}`;
+                            const clientId = client.ClientID || client.clientId || `CLI-${index + 1}`;
+                            const displayName = `${companyName} (${clientId})`;
+                            
+                            options += `<option value="${clientId}">${displayName}</option>`;
+                        });
+                        
+                        proposalSelect.innerHTML = options;
+                        alert(`✅ SUCCESS! Loaded ${clients.length} clients in proposal dropdown`);
+                    } else {
+                        proposalSelect.innerHTML = '<option value="">No clients found</option>';
+                        alert('❌ No clients found - Add clients first');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('❌ Manual test failed:', error);
+                    proposalSelect.innerHTML = '<option value="">Test failed</option>';
+                    alert('❌ Test failed: ' + error);
+                })
+                .getClientsForDropdown();
+        }
+        
+        window.testProposalDropdown = testProposalDropdown;
+        
         /**
          * CUSTOM DROPDOWN IMPLEMENTATION
          * Professional dropdown with no browser arrows
@@ -4028,10 +4121,10 @@
                 
                 console.log(`Opening modal: ${modalId}`);
                 
-                // Load data for specific modals - FIXED VERSION
+                // Load data for specific modals - UPDATED FIX
                 if (modalId === 'proposalModal' || modalId === 'invoiceModal' || modalId === 'projectModal') {
                     console.log('Loading clients for modal:', modalId);
-                    loadClientsDirectlyFixed(modalId);
+                    loadClientsForProposalModal(modalId);
                 }
                 if (modalId === 'invoiceModal') {
                     console.log('Loading projects for invoice modal');
@@ -4040,12 +4133,12 @@
             }
         }
 
-        // BRAND NEW CLIENT LOADING FUNCTION - NO CACHE ISSUES
-        function loadClientsDirectlyFixed(modalId) {
-            console.log('=== NEW CLIENT LOADING SYSTEM ===');
+        // PROPOSAL MODAL CLIENT LOADING - ENHANCED
+        function loadClientsForProposalModal(modalId) {
+            console.log('=== PROPOSAL MODAL CLIENT LOADING ===');
             console.log('Modal ID:', modalId);
             
-            // Show loading in dropdowns immediately
+            // Target specific dropdowns
             const clientSelects = {
                 'proposalModal': 'proposalClient',
                 'invoiceModal': 'invoiceClient', 
@@ -4058,53 +4151,116 @@
             console.log('Target select element:', selectId, selectElement);
             
             if (selectElement) {
+                // Show loading state
                 selectElement.innerHTML = '<option value="">🔄 Loading clients...</option>';
                 
-                // Single method approach - direct call
-                console.log('Calling getAllClients...');
+                // Try multiple backend methods for maximum compatibility
+                console.log('Trying getClientsForDropdown first...');
                 
                 google.script.run
                     .withSuccessHandler(function(clients) {
-                        console.log('=== CLIENT LOADING SUCCESS ===');
-                        console.log('Received clients:', clients);
-                        console.log('Clients type:', typeof clients);
-                        console.log('Is array:', Array.isArray(clients));
-                        console.log('Length:', clients ? clients.length : 'null');
+                        console.log('✅ getClientsForDropdown success:', clients);
                         
                         if (clients && Array.isArray(clients) && clients.length > 0) {
-                            console.log('Processing clients for dropdown...');
-                            
-                            let options = '<option value="">Select a client...</option>';
-                            
-                            clients.forEach((client, index) => {
-                                console.log(`Client ${index}:`, client);
-                                
-                                const companyName = client.CompanyName || client.companyName || client.Company || 'Unknown Company';
-                                const clientId = client.ClientID || client.clientId || client.ID || `CL-${index+1}`;
-                                const displayName = `${companyName} (${clientId})`;
-                                
-                                options += `<option value="${clientId}">${displayName}</option>`;
-                                console.log(`Added option: ${displayName}`);
-                            });
-                            
-                            selectElement.innerHTML = options;
-                            console.log(`✅ SUCCESS: Loaded ${clients.length} clients in ${selectId}`);
-                            
+                            populateProposalDropdown(selectElement, clients, selectId);
                         } else {
-                            console.log('No clients found or invalid data');
-                            selectElement.innerHTML = '<option value="">No clients found - Add clients first</option>';
+                            console.log('getClientsForDropdown empty, trying getAllClients...');
+                            
+                            // Fallback to getAllClients
+                            google.script.run
+                                .withSuccessHandler(function(allClients) {
+                                    console.log('✅ getAllClients fallback:', allClients);
+                                    
+                                    if (allClients && Array.isArray(allClients) && allClients.length > 0) {
+                                        populateProposalDropdown(selectElement, allClients, selectId);
+                                    } else {
+                                        console.log('getAllClients also empty, trying simple method...');
+                                        
+                                        // Final fallback
+                                        google.script.run
+                                            .withSuccessHandler(function(simpleClients) {
+                                                console.log('✅ getAllClientsSimple final:', simpleClients);
+                                                
+                                                if (simpleClients && Array.isArray(simpleClients) && simpleClients.length > 0) {
+                                                    populateProposalDropdown(selectElement, simpleClients, selectId);
+                                                } else {
+                                                    selectElement.innerHTML = '<option value="">No clients found - Add clients first</option>';
+                                                    console.error('❌ All methods returned empty');
+                                                }
+                                            })
+                                            .withFailureHandler(function(error) {
+                                                console.error('❌ Simple method failed:', error);
+                                                selectElement.innerHTML = '<option value="">Error loading clients</option>';
+                                            })
+                                            .getAllClientsSimple();
+                                    }
+                                })
+                                .withFailureHandler(function(error) {
+                                    console.error('❌ getAllClients failed:', error);
+                                    selectElement.innerHTML = '<option value="">Backend error - check console</option>';
+                                })
+                                .getAllClients();
                         }
                     })
                     .withFailureHandler(function(error) {
-                        console.error('=== CLIENT LOADING FAILED ===');
-                        console.error('Error:', error);
-                        console.error('Error type:', typeof error);
-                        selectElement.innerHTML = '<option value="">Error loading clients - Try refreshing page</option>';
+                        console.error('❌ getClientsForDropdown failed:', error);
+                        
+                        // Direct fallback to getAllClients
+                        google.script.run
+                            .withSuccessHandler(function(clients) {
+                                if (clients && clients.length > 0) {
+                                    populateProposalDropdown(selectElement, clients, selectId);
+                                } else {
+                                    selectElement.innerHTML = '<option value="">No clients available</option>';
+                                }
+                            })
+                            .withFailureHandler(function(fallbackError) {
+                                console.error('❌ All methods failed:', fallbackError);
+                                selectElement.innerHTML = '<option value="">Connection failed - reload page</option>';
+                            })
+                            .getAllClients();
                     })
-                    .getAllClients();
+                    .getClientsForDropdown();
             } else {
                 console.error('❌ Select element not found:', selectId);
             }
+        }
+        
+        // Enhanced dropdown population for proposal modal
+        function populateProposalDropdown(selectElement, clients, selectId) {
+            console.log('=== POPULATING PROPOSAL DROPDOWN ===');
+            console.log('Clients to populate:', clients);
+            console.log('Target element:', selectId);
+            
+            let options = '<option value="">Choose a client...</option>';
+            
+            clients.forEach((client, index) => {
+                console.log(`Processing client ${index}:`, client);
+                
+                // Flexible data extraction
+                const companyName = client.CompanyName || 
+                                  client.companyName || 
+                                  client['Company Name'] || 
+                                  client.Company || 
+                                  client.Name ||
+                                  `Client ${index + 1}`;
+                
+                const clientId = client.ClientID || 
+                               client.clientId || 
+                               client['Client ID'] || 
+                               client.ID || 
+                               client.id ||
+                               `CLI-${String(index + 1).padStart(3, '0')}`;
+                
+                // Format: "Company Name (Client ID)"
+                const displayName = `${companyName} (${clientId})`;
+                
+                options += `<option value="${clientId}">${displayName}</option>`;
+                console.log(`✅ Added: ${displayName}`);
+            });
+            
+            selectElement.innerHTML = options;
+            console.log(`✅ Successfully populated ${clients.length} clients in ${selectId}`);
         }
         
         // Helper function to populate dropdown
