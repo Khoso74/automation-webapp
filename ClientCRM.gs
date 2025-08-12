@@ -7,7 +7,7 @@
  * Get all clients
  */
 function getAllClients() {
-  const spreadsheet = getOrCreateSpreadsheet();
+  const spreadsheet = getSpreadsheet();
   const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
   const data = clientsSheet.getDataRange().getValues();
   
@@ -36,7 +36,7 @@ function getClientById(clientId) {
  */
 function createClient(clientData) {
   try {
-    const spreadsheet = getOrCreateSpreadsheet();
+    const spreadsheet = getSpreadsheet();
     const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
     
     // Generate unique client ID
@@ -81,7 +81,7 @@ function createClient(clientData) {
  */
 function updateClient(clientId, clientData) {
   try {
-    const spreadsheet = getOrCreateSpreadsheet();
+    const spreadsheet = getSpreadsheet();
     const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
     const data = clientsSheet.getDataRange().getValues();
     
@@ -159,7 +159,7 @@ function createClientFolder(clientId, companyName) {
  * Get client projects
  */
 function getClientProjects(clientId) {
-  const spreadsheet = getOrCreateSpreadsheet();
+  const spreadsheet = getSpreadsheet();
   const projectsSheet = spreadsheet.getSheetByName(SHEETS.PROJECTS);
   const data = projectsSheet.getDataRange().getValues();
   
@@ -181,7 +181,7 @@ function getClientProjects(clientId) {
  * Get client proposals
  */
 function getClientProposals(clientId) {
-  const spreadsheet = getOrCreateSpreadsheet();
+  const spreadsheet = getSpreadsheet();
   const proposalsSheet = spreadsheet.getSheetByName(SHEETS.PROPOSALS);
   const data = proposalsSheet.getDataRange().getValues();
   
@@ -203,7 +203,7 @@ function getClientProposals(clientId) {
  * Get client invoices
  */
 function getClientInvoices(clientId) {
-  const spreadsheet = getOrCreateSpreadsheet();
+  const spreadsheet = getSpreadsheet();
   const invoicesSheet = spreadsheet.getSheetByName(SHEETS.INVOICES);
   const data = invoicesSheet.getDataRange().getValues();
   

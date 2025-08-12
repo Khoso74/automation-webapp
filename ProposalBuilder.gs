@@ -8,7 +8,7 @@
  */
 function createProposal(proposalData) {
   try {
-    const spreadsheet = getOrCreateSpreadsheet();
+    const spreadsheet = getSpreadsheet();
     const proposalsSheet = spreadsheet.getSheetByName(SHEETS.PROPOSALS);
     
     // Generate unique proposal ID
@@ -374,7 +374,7 @@ This email was sent from our automated proposal system.
  * Get proposal by ID
  */
 function getProposalById(proposalId) {
-  const spreadsheet = getOrCreateSpreadsheet();
+  const spreadsheet = getSpreadsheet();
   const proposalsSheet = spreadsheet.getSheetByName(SHEETS.PROPOSALS);
   const data = proposalsSheet.getDataRange().getValues();
   
@@ -397,7 +397,7 @@ function getProposalById(proposalId) {
  * Update proposal PDF URL
  */
 function updateProposalPdfUrl(proposalId, pdfUrl) {
-  const spreadsheet = getOrCreateSpreadsheet();
+  const spreadsheet = getSpreadsheet();
   const proposalsSheet = spreadsheet.getSheetByName(SHEETS.PROPOSALS);
   const data = proposalsSheet.getDataRange().getValues();
   
@@ -413,7 +413,7 @@ function updateProposalPdfUrl(proposalId, pdfUrl) {
  * Update proposal status
  */
 function updateProposalStatus(proposalId, status, sentDate = null) {
-  const spreadsheet = getOrCreateSpreadsheet();
+  const spreadsheet = getSpreadsheet();
   const proposalsSheet = spreadsheet.getSheetByName(SHEETS.PROPOSALS);
   const data = proposalsSheet.getDataRange().getValues();
   
@@ -443,7 +443,7 @@ function acceptProposal(proposalId, clientSignature) {
     }
     
     // Update proposal status
-    const spreadsheet = getOrCreateSpreadsheet();
+    const spreadsheet = getSpreadsheet();
     const proposalsSheet = spreadsheet.getSheetByName(SHEETS.PROPOSALS);
     const data = proposalsSheet.getDataRange().getValues();
     
@@ -482,7 +482,7 @@ function acceptProposal(proposalId, clientSignature) {
 function createProjectFromProposal(proposal) {
   const projectId = generateId('PROJ');
   
-  const spreadsheet = getOrCreateSpreadsheet();
+  const spreadsheet = getSpreadsheet();
   const projectsSheet = spreadsheet.getSheetByName(SHEETS.PROJECTS);
   
   // Create project folder
@@ -693,7 +693,7 @@ function getProposalAcceptancePage(proposalId) {
  * Get all proposals
  */
 function getAllProposals() {
-  const spreadsheet = getOrCreateSpreadsheet();
+  const spreadsheet = getSpreadsheet();
   const proposalsSheet = spreadsheet.getSheetByName(SHEETS.PROPOSALS);
   const data = proposalsSheet.getDataRange().getValues();
   

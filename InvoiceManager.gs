@@ -8,7 +8,7 @@
  */
 function createInvoice(invoiceData) {
   try {
-    const spreadsheet = getOrCreateSpreadsheet();
+    const spreadsheet = getSpreadsheet();
     const invoicesSheet = spreadsheet.getSheetByName(SHEETS.INVOICES);
     
     // Generate unique invoice ID
@@ -409,7 +409,7 @@ function markInvoicePaid(invoiceId, paymentDate = null) {
       throw new Error('Invoice not found');
     }
     
-    const spreadsheet = getOrCreateSpreadsheet();
+    const spreadsheet = getSpreadsheet();
     const invoicesSheet = spreadsheet.getSheetByName(SHEETS.INVOICES);
     const data = invoicesSheet.getDataRange().getValues();
     
@@ -659,7 +659,7 @@ ${getSetting('COMPANY_NAME')}
  * Get invoice by ID
  */
 function getInvoiceById(invoiceId) {
-  const spreadsheet = getOrCreateSpreadsheet();
+  const spreadsheet = getSpreadsheet();
   const invoicesSheet = spreadsheet.getSheetByName(SHEETS.INVOICES);
   const data = invoicesSheet.getDataRange().getValues();
   
@@ -682,7 +682,7 @@ function getInvoiceById(invoiceId) {
  * Get all invoices
  */
 function getAllInvoices() {
-  const spreadsheet = getOrCreateSpreadsheet();
+  const spreadsheet = getSpreadsheet();
   const invoicesSheet = spreadsheet.getSheetByName(SHEETS.INVOICES);
   const data = invoicesSheet.getDataRange().getValues();
   
@@ -702,7 +702,7 @@ function getAllInvoices() {
  * Update invoice PDF URL
  */
 function updateInvoicePdfUrl(invoiceId, pdfUrl) {
-  const spreadsheet = getOrCreateSpreadsheet();
+  const spreadsheet = getSpreadsheet();
   const invoicesSheet = spreadsheet.getSheetByName(SHEETS.INVOICES);
   const data = invoicesSheet.getDataRange().getValues();
   
@@ -718,7 +718,7 @@ function updateInvoicePdfUrl(invoiceId, pdfUrl) {
  * Update invoice status
  */
 function updateInvoiceStatus(invoiceId, status) {
-  const spreadsheet = getOrCreateSpreadsheet();
+  const spreadsheet = getSpreadsheet();
   const invoicesSheet = spreadsheet.getSheetByName(SHEETS.INVOICES);
   const data = invoicesSheet.getDataRange().getValues();
   
@@ -734,7 +734,7 @@ function updateInvoiceStatus(invoiceId, status) {
  * Get project by ID
  */
 function getProjectById(projectId) {
-  const spreadsheet = getOrCreateSpreadsheet();
+  const spreadsheet = getSpreadsheet();
   const projectsSheet = spreadsheet.getSheetByName(SHEETS.PROJECTS);
   const data = projectsSheet.getDataRange().getValues();
   
@@ -757,7 +757,7 @@ function getProjectById(projectId) {
  * Get all projects
  */
 function getAllProjects() {
-  const spreadsheet = getOrCreateSpreadsheet();
+  const spreadsheet = getSpreadsheet();
   const projectsSheet = spreadsheet.getSheetByName(SHEETS.PROJECTS);
   const data = projectsSheet.getDataRange().getValues();
   
