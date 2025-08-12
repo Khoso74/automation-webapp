@@ -1257,114 +1257,69 @@ ${getSetting('COMPANY_NAME')}
  * This version uses only basic HTML and minimal JavaScript to avoid serialization errors
  */
 function getProposalAcceptancePage(proposalId) {
-  try {
-    console.log('🎯 Creating acceptance page for proposal:', proposalId);
-    
-    const proposal = getProposalById(proposalId);
-    
-    if (!proposal) {
-      return HtmlService.createHtmlOutput('<h1>Proposal not found or has expired.</h1>');
-    }
-    
-    if (proposal.Status === 'Accepted') {
-      return HtmlService.createHtmlOutput('<h1>Proposal Already Accepted</h1><p>Thank you for your business!</p>');
-    }
-    
-    // Get client info
-    const client = getClientById(proposal.ClientID);
-    const clientName = client ? client.CompanyName : 'Valued Client';
-    
-    // Format amount
-    const formattedAmount = parseFloat(proposal.Amount).toLocaleString();
-    
-    // Create ULTRA-SIMPLE HTML using only string concatenation
-    // NO complex JavaScript objects, NO template literals with complex expressions
-    const htmlContent = 
-      '<!DOCTYPE html>' +
-      '<html>' +
-      '<head>' +
-        '<title>Accept Proposal</title>' +
-        '<meta name="viewport" content="width=device-width, initial-scale=1">' +
-        '<style>' +
-          'body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }' +
-          '.container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }' +
-          '.header { text-align: center; margin-bottom: 30px; }' +
-          '.logo { font-size: 24px; font-weight: bold; color: #2c3e50; margin-bottom: 10px; }' +
-          '.title { font-size: 20px; color: #34495e; margin: 20px 0; }' +
-          '.details-box { background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #3498db; }' +
-          '.amount { font-size: 24px; font-weight: bold; color: #27ae60; margin: 15px 0; text-align: center; }' +
-          '.description { margin: 15px 0; line-height: 1.6; color: #555; }' +
-          '.form-section { margin: 25px 0; }' +
-          '.checkbox-container { margin: 20px 0; padding: 15px; background: #fff3cd; border-radius: 5px; }' +
-          '.accept-btn { background: #27ae60; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px; width: 100%; cursor: pointer; }' +
-          '.accept-btn:hover { background: #219a52; }' +
-          '.accept-btn:disabled { background: #bdc3c7; cursor: not-allowed; }' +
-          '.footer { text-align: center; margin-top: 30px; font-size: 12px; color: #666; }' +
-        '</style>' +
-      '</head>' +
-      '<body>' +
-        '<div class="container">' +
-          '<div class="header">' +
-            '<div class="logo">💼 Project Proposal</div>' +
-          '</div>' +
-          
-          '<h1 class="title">' + proposal.Title + '</h1>' +
-          
-          '<div class="details-box">' +
-            '<h3>Project Details</h3>' +
-            '<p><strong>Client:</strong> ' + clientName + '</p>' +
-            '<p class="description"><strong>Description:</strong><br>' + proposal.Description + '</p>' +
-            '<div class="amount">' + proposal.Currency + ' ' + formattedAmount + '</div>' +
-          '</div>' +
-          
-          '<form method="post" action="" id="acceptForm">' +
-            '<input type="hidden" name="action" value="acceptProposal">' +
-            '<input type="hidden" name="proposalId" value="' + proposalId + '">' +
-            '<input type="hidden" name="clientSignature" value="Digital Acceptance">' +
-            
-            '<div class="form-section">' +
-              '<div class="checkbox-container">' +
-                '<label>' +
-                  '<input type="checkbox" id="agreeCheckbox" required>' +
-                  ' I agree to the terms and conditions of this proposal' +
-                '</label>' +
-              '</div>' +
-            '</div>' +
-            
-            '<button type="submit" class="accept-btn" id="submitBtn">Accept Proposal</button>' +
-          '</form>' +
-          
-          '<div class="footer">' +
-            '<p>By accepting this proposal, you agree to the terms and payment schedule.</p>' +
-            '<p>You will receive a confirmation email shortly after acceptance.</p>' +
-          '</div>' +
-        '</div>' +
-        
-        '<script>' +
-          'console.log("Proposal acceptance page loaded for: ' + proposalId + '");' +
-          
-          'var form = document.getElementById("acceptForm");' +
-          'var submitBtn = document.getElementById("submitBtn");' +
-          
-          'form.onsubmit = function() {' +
-            'console.log("Form submission started");' +
-            'submitBtn.textContent = "Processing...";' +
-            'submitBtn.disabled = true;' +
-            'return true;' +
-          '};' +
-        '</script>' +
-      '</body>' +
-      '</html>';
-    
-    console.log('✅ Ultra-simple acceptance page created');
-    return HtmlService.createHtmlOutput(htmlContent);
-    
-  } catch (error) {
-    console.error('❌ Error creating acceptance page:', error);
-    return HtmlService.createHtmlOutput(
-      '<h1>Error</h1><p>Unable to load proposal. Please contact support.</p>'
-    );
+  const proposal = getProposalById(proposalId);
+  
+  if (!proposal) {
+    return HtmlService.createHtmlOutput('<h1>Proposal not found or has expired.</h1>');
   }
+  
+  if (proposal.Status === 'Accepted') {
+    return HtmlService.createHtmlOutput('<h1>Proposal Already Accepted</h1><p>Thank you for your business!</p>');
+  }
+  
+  // Create ultra-simple HTML without complex JavaScript or variable interpolation
+  const simpleHtml = 
+    '<html>' +
+    '<head>' +
+      '<title>Accept Proposal</title>' +
+      '<style>' +
+        'body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }' +
+        '.container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }' +
+        '.amount { font-size: 24px; font-weight: bold; color: #2c3e50; margin: 20px 0; }' +
+        '.accept-btn { background: #27ae60; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px; width: 100%; }' +
+      '</style>' +
+    '</head>' +
+    '<body>' +
+      '<div class="container">' +
+        '<h1>Project Proposal</h1>' +
+        '<h2>' + proposal.Title + '</h2>' +
+        '<div style="background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">' +
+          '<h3>Project Details</h3>' +
+          '<p><strong>Description:</strong> ' + proposal.Description + '</p>' +
+          '<div class="amount">Investment: ' + proposal.Currency + ' ' + parseFloat(proposal.Amount).toLocaleString() + '</div>' +
+        '</div>' +
+        '<form method="post" action="">' +
+          '<input type="hidden" name="action" value="acceptProposal">' +
+          '<input type="hidden" name="proposalId" value="' + proposalId + '">' +
+          '<input type="hidden" name="clientSignature" value="Digital Acceptance">' +
+          '<div style="margin: 20px 0;">' +
+            '<label>' +
+              '<input type="checkbox" required> I agree to the terms and conditions' +
+            '</label>' +
+          '</div>' +
+          '<button type="submit" class="accept-btn">Accept Proposal</button>' +
+        '</form>' +
+        '<p style="font-size: 12px; color: #666; margin-top: 20px;">' +
+          'By accepting this proposal, you agree to the terms and payment schedule.' +
+        '</p>' +
+      '</div>' +
+      '<script>' +
+        'console.log("Client acceptance page loaded for proposal: ' + proposalId + '");' +
+        'document.querySelector("form").onsubmit = function() {' +
+          'console.log("Form submission started");' +
+          'var btn = document.querySelector("button");' +
+          'btn.textContent = "Processing...";' +
+          'btn.disabled = true;' +
+          'console.log("Button disabled, form submitting...");' +
+          'return true;' +
+        '};' +
+        'window.addEventListener("beforeunload", function() {' +
+          'console.log("Page is unloading");' +
+        '});' +
+      '</script>' +
+    '</body>' +
+    '</html>';
+  return HtmlService.createHtmlOutput(simpleHtml);
 }
 
 /**
