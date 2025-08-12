@@ -1350,26 +1350,24 @@ function getProposalAcceptancePage(proposalId) {
             font-size: 18px;
             text-align: center;
           `;
-          progressDiv.innerHTML = \`
-            <div style="background: white; color: #333; padding: 30px; border-radius: 10px; max-width: 400px;">
-              <div style="font-size: 48px; margin-bottom: 20px;">⏳</div>
-              <h3>Processing Your Acceptance</h3>
-              <p>Please wait while we process your proposal acceptance...</p>
-              <div style="margin: 20px 0;">
-                <div style="width: 100%; height: 4px; background: #eee; border-radius: 2px; overflow: hidden;">
-                  <div style="width: 0%; height: 100%; background: #27ae60; animation: progress 3s ease-in-out infinite;"></div>
-                </div>
-              </div>
-              <p style="font-size: 14px; color: #666;">This usually takes just a few seconds...</p>
-            </div>
-            <style>
-              @keyframes progress {
-                0% { width: 0%; }
-                50% { width: 70%; }
-                100% { width: 90%; }
-              }
-            </style>
-          \`;
+          progressDiv.innerHTML = '<div style="background: white; color: #333; padding: 30px; border-radius: 10px; max-width: 400px;">' +
+            '<div style="font-size: 48px; margin-bottom: 20px;">⏳</div>' +
+            '<h3>Processing Your Acceptance</h3>' +
+            '<p>Please wait while we process your proposal acceptance...</p>' +
+            '<div style="margin: 20px 0;">' +
+              '<div style="width: 100%; height: 4px; background: #eee; border-radius: 2px; overflow: hidden;">' +
+                '<div style="width: 0%; height: 100%; background: #27ae60; animation: progress 3s ease-in-out infinite;"></div>' +
+              '</div>' +
+            '</div>' +
+            '<p style="font-size: 14px; color: #666;">This usually takes just a few seconds...</p>' +
+          '</div>' +
+          '<style>' +
+            '@keyframes progress {' +
+              '0% { width: 0%; }' +
+              '50% { width: 70%; }' +
+              '100% { width: 90%; }' +
+            '}' +
+          '</style>';
           document.body.appendChild(progressDiv);
           
           // Set timeout fallback in case of issues
