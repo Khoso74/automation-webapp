@@ -669,3 +669,324 @@ function testPdfGeneration() {
     return 'PDF test failed: ' + error.message;
   }
 }
+
+/**
+ * ===============================================
+ * TESTING FUNCTIONS FOR APPS SCRIPT CONSOLE
+ * Run these functions directly in Apps Script to test system
+ * ===============================================
+ */
+
+/**
+ * Test 1: Basic System Connectivity
+ */
+function testSystemConnectivity() {
+  try {
+    console.log('🧪 TESTING SYSTEM CONNECTIVITY...');
+    
+    // Test spreadsheet access
+    const spreadsheet = getSpreadsheet();
+    console.log('✅ Spreadsheet connected:', spreadsheet.getName());
+    console.log('✅ Spreadsheet ID:', spreadsheet.getId());
+    
+    // Test Drive folder access
+    const rootFolder = getRootFolder();
+    console.log('✅ Drive folder connected:', rootFolder.getName());
+    console.log('✅ Drive folder ID:', rootFolder.getId());
+    
+    // Test sheet tabs
+    const sheets = spreadsheet.getSheets();
+    const sheetNames = sheets.map(sheet => sheet.getName());
+    console.log('✅ Available sheets:', sheetNames);
+    
+    // Test clients sheet specifically
+    const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
+    if (clientsSheet) {
+      const lastRow = clientsSheet.getLastRow();
+      console.log(`✅ Clients sheet found with ${lastRow} rows`);
+    } else {
+      console.log('❌ Clients sheet not found');
+    }
+    
+    return {
+      success: true,
+      spreadsheetName: spreadsheet.getName(),
+      driveFolder: rootFolder.getName(),
+      availableSheets: sheetNames,
+      clientsSheetRows: clientsSheet ? clientsSheet.getLastRow() : 0,
+      message: 'System connectivity test successful'
+    };
+    
+  } catch (error) {
+    console.error('❌ System connectivity test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      message: 'System connectivity test failed'
+    };
+  }
+}
+
+/**
+ * Test 2: Client Data Retrieval
+ */
+function testClientDataRetrieval() {
+  try {
+    console.log('🧪 TESTING CLIENT DATA RETRIEVAL...');
+    
+    // Test getClientsForDropdown function
+    console.log('Testing getClientsForDropdown...');
+    const dropdownClients = getClientsForDropdown();
+    console.log('✅ getClientsForDropdown result:', dropdownClients);
+    
+    // Test getAllClients function
+    console.log('Testing getAllClients...');
+    const allClients = getAllClients();
+    console.log('✅ getAllClients result:', allClients);
+    
+    // Test getAllClientsSimple function
+    console.log('Testing getAllClientsSimple...');
+    const simpleClients = getAllClientsSimple();
+    console.log('✅ getAllClientsSimple result:', simpleClients);
+    
+    return {
+      success: true,
+      dropdownClientsCount: dropdownClients ? dropdownClients.length : 0,
+      allClientsCount: allClients ? allClients.length : 0,
+      simpleClientsCount: simpleClients ? simpleClients.length : 0,
+      sampleDropdownClient: dropdownClients && dropdownClients[0] ? dropdownClients[0] : null,
+      message: 'Client data retrieval test successful'
+    };
+    
+  } catch (error) {
+    console.error('❌ Client data retrieval test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      message: 'Client data retrieval test failed'
+    };
+  }
+}
+
+/**
+ * Test 3: Proposal Dropdown Data
+ */
+function testProposalDropdownData() {
+  try {
+    console.log('🧪 TESTING PROPOSAL DROPDOWN DATA...');
+    
+    // Test the exact function used by proposal dropdown
+    const clients = getClientsForDropdown();
+    
+    if (!clients || clients.length === 0) {
+      console.log('❌ No clients found - checking sheet data...');
+      
+      const spreadsheet = getSpreadsheet();
+      const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
+      const data = clientsSheet.getDataRange().getValues();
+      
+      console.log('Raw sheet data:', data);
+      console.log('Headers:', data[0]);
+      console.log('Data rows:', data.length - 1);
+      
+      return {
+        success: false,
+        clientsFound: 0,
+        rawDataRows: data.length - 1,
+        headers: data[0],
+        message: 'No clients found in dropdown data'
+      };
+    }
+    
+    // Process clients for dropdown display
+    const dropdownOptions = [];
+    clients.forEach((client, index) => {
+      const companyName = client.CompanyName || client.companyName || `Company ${index + 1}`;
+      const clientId = client.ClientID || client.clientId || `CLI-${index + 1}`;
+      const displayName = `${companyName} (${clientId})`;
+      
+      dropdownOptions.push({
+        value: clientId,
+        text: displayName,
+        originalData: client
+      });
+    });
+    
+    console.log('✅ Processed dropdown options:', dropdownOptions);
+    
+    return {
+      success: true,
+      clientsFound: clients.length,
+      dropdownOptions: dropdownOptions,
+      sampleOption: dropdownOptions[0],
+      message: `Successfully processed ${clients.length} clients for dropdown`
+    };
+    
+  } catch (error) {
+    console.error('❌ Proposal dropdown data test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      message: 'Proposal dropdown data test failed'
+    };
+  }
+}
+
+/**
+ * Test 4: Sheet Structure Validation
+ */
+function testSheetStructure() {
+  try {
+    console.log('🧪 TESTING SHEET STRUCTURE...');
+    
+    const spreadsheet = getSpreadsheet();
+    const results = {};
+    
+    // Check each required sheet
+    Object.keys(SHEETS).forEach(sheetKey => {
+      const sheetName = SHEETS[sheetKey];
+      const sheet = spreadsheet.getSheetByName(sheetName);
+      
+      if (sheet) {
+        const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+        const dataRows = sheet.getLastRow() - 1;
+        
+        results[sheetName] = {
+          exists: true,
+          headers: headers,
+          dataRows: dataRows
+        };
+        
+        console.log(`✅ ${sheetName} sheet: ${dataRows} rows, Headers: ${headers}`);
+      } else {
+        results[sheetName] = {
+          exists: false,
+          headers: [],
+          dataRows: 0
+        };
+        
+        console.log(`❌ ${sheetName} sheet: NOT FOUND`);
+      }
+    });
+    
+    return {
+      success: true,
+      sheetResults: results,
+      message: 'Sheet structure validation completed'
+    };
+    
+  } catch (error) {
+    console.error('❌ Sheet structure test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      message: 'Sheet structure test failed'
+    };
+  }
+}
+
+/**
+ * Test 5: Add Sample Client Data
+ */
+function addSampleClientData() {
+  try {
+    console.log('🧪 ADDING SAMPLE CLIENT DATA...');
+    
+    const spreadsheet = getSpreadsheet();
+    const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
+    
+    if (!clientsSheet) {
+      throw new Error('Clients sheet not found');
+    }
+    
+    // Sample client data
+    const sampleClients = [
+      ['CLI-001', 'ABC Corporation', 'John Smith', 'john@abc.com', '+92-300-1234567', 'Karachi, Pakistan', 'Active', new Date()],
+      ['CLI-002', 'XYZ Solutions', 'Sarah Ahmed', 'sarah@xyz.com', '+92-301-7654321', 'Lahore, Pakistan', 'Active', new Date()],
+      ['CLI-003', 'Tech Innovators', 'Ali Hassan', 'ali@techinnovators.com', '+92-302-9876543', 'Islamabad, Pakistan', 'Active', new Date()],
+      ['CLI-004', 'Digital Agency', 'Fatima Khan', 'fatima@digital.com', '+92-303-1111111', 'Peshawar, Pakistan', 'Active', new Date()],
+      ['CLI-005', 'Web Masters', 'Ahmed Ali', 'ahmed@webmasters.com', '+92-304-2222222', 'Multan, Pakistan', 'Active', new Date()]
+    ];
+    
+    // Check if headers exist
+    const lastRow = clientsSheet.getLastRow();
+    if (lastRow === 0) {
+      // Add headers first
+      const headers = ['Client ID', 'Company Name', 'Contact Name', 'Email', 'Phone', 'Address', 'Status', 'Created Date'];
+      clientsSheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      console.log('✅ Added headers to Clients sheet');
+    }
+    
+    // Add sample data
+    const startRow = clientsSheet.getLastRow() + 1;
+    clientsSheet.getRange(startRow, 1, sampleClients.length, sampleClients[0].length).setValues(sampleClients);
+    
+    console.log(`✅ Added ${sampleClients.length} sample clients`);
+    
+    return {
+      success: true,
+      clientsAdded: sampleClients.length,
+      startRow: startRow,
+      message: `Successfully added ${sampleClients.length} sample clients`
+    };
+    
+  } catch (error) {
+    console.error('❌ Add sample client data failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      message: 'Add sample client data failed'
+    };
+  }
+}
+
+/**
+ * Master Test Function - Run All Tests
+ */
+function runAllTests() {
+  console.log('🚀 RUNNING ALL SYSTEM TESTS...');
+  console.log('==========================================');
+  
+  const results = {};
+  
+  // Test 1: System Connectivity
+  console.log('\n1. Testing System Connectivity...');
+  results.connectivity = testSystemConnectivity();
+  
+  // Test 2: Client Data Retrieval
+  console.log('\n2. Testing Client Data Retrieval...');
+  results.clientData = testClientDataRetrieval();
+  
+  // Test 3: Proposal Dropdown Data
+  console.log('\n3. Testing Proposal Dropdown Data...');
+  results.proposalDropdown = testProposalDropdownData();
+  
+  // Test 4: Sheet Structure
+  console.log('\n4. Testing Sheet Structure...');
+  results.sheetStructure = testSheetStructure();
+  
+  console.log('\n==========================================');
+  console.log('🏁 ALL TESTS COMPLETED');
+  console.log('==========================================');
+  
+  // Summary
+  const passedTests = Object.values(results).filter(result => result.success).length;
+  const totalTests = Object.keys(results).length;
+  
+  console.log(`✅ Passed: ${passedTests}/${totalTests} tests`);
+  
+  if (passedTests === totalTests) {
+    console.log('🎉 ALL TESTS PASSED - System is working correctly!');
+  } else {
+    console.log('⚠️ Some tests failed - Check individual test results above');
+  }
+  
+  return {
+    testResults: results,
+    summary: {
+      passed: passedTests,
+      total: totalTests,
+      allPassed: passedTests === totalTests
+    }
+  };
+}
