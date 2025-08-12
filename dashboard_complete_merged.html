@@ -1906,6 +1906,22 @@
                             <span class="action-btn-desc">Check acceptance page</span>
                         </div>
                     </button>
+                    
+                    <button class="action-btn" onclick="testJavaScriptFreeFlow()" style="background: linear-gradient(135deg, #28a745, #218838);">
+                        <span class="action-btn-icon">🔧</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Test JS-Free Flow</span>
+                            <span class="action-btn-desc">Verify serialization fix</span>
+                        </div>
+                    </button>
+                    
+                    <button class="action-btn" onclick="verifySerializationFix()" style="background: linear-gradient(135deg, #fd7e14, #e8590c);">
+                        <span class="action-btn-icon">🎯</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Final Verification</span>
+                            <span class="action-btn-desc">Complete error fix check</span>
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>
@@ -5531,6 +5547,107 @@
                          showErrorMessage(`❌ CRITICAL: Page Generation Test Failed: ${error.message}`);
                      })
                      .testAcceptancePageGeneration();
+             }
+             
+             // Test JavaScript-Free Proposal Acceptance Flow
+             function testJavaScriptFreeFlow() {
+                 console.log('🔧 Testing JavaScript-free proposal acceptance flow...');
+                 
+                 removeMessages();
+                 showMessage('🔧 Testing serialization error fix...', 'info');
+                 
+                 google.script.run
+                     .withSuccessHandler(function(result) {
+                         console.log('🔧 JavaScript-free flow test result:', result);
+                         
+                         if (result.success) {
+                             let message = `🔧 JAVASCRIPT-FREE FLOW TEST COMPLETED!<br><br>`;
+                             
+                             message += `<strong>📊 Test Results:</strong><br>`;
+                             message += `✅ Proposal ID: ${result.testResults.proposalId}<br>`;
+                             message += `✅ Page Generated: ${result.testResults.pageGenerated ? 'Yes' : 'No'}<br>`;
+                             message += `✅ JavaScript-Free: ${result.testResults.javaScriptFree ? 'Yes' : 'No'}<br>`;
+                             message += `✅ Form Valid: ${result.testResults.formStructureValid ? 'Yes' : 'No'}<br><br>`;
+                             
+                             message += `<strong>🔍 Verification:</strong><br>`;
+                             Object.values(result.verification).forEach(check => {
+                                 message += `${check}<br>`;
+                             });
+                             
+                             message += `<br><strong>🚀 Next Steps:</strong><br>`;
+                             result.nextSteps.forEach(step => {
+                                 message += `${step}<br>`;
+                             });
+                             
+                             showSuccessMessage(message);
+                         } else {
+                             showErrorMessage(`❌ JavaScript-Free Flow Test Failed: ${result.error}`);
+                         }
+                     })
+                     .withFailureHandler(function(error) {
+                         console.error('❌ JavaScript-free flow test failed:', error);
+                         showErrorMessage(`❌ JavaScript-Free Flow Test Failed: ${error.message}`);
+                     })
+                     .testJavaScriptFreeAcceptanceFlow();
+             }
+             
+             // Verify Complete Serialization Error Fix
+             function verifySerializationFix() {
+                 console.log('🎯 Verifying complete serialization error fix...');
+                 
+                 removeMessages();
+                 showMessage('🎯 Running comprehensive fix verification...', 'info');
+                 
+                 google.script.run
+                     .withSuccessHandler(function(result) {
+                         console.log('🎯 Serialization fix verification result:', result);
+                         
+                         if (result.success) {
+                             let message = `🎯 SERIALIZATION ERROR FIX VERIFICATION COMPLETE!<br><br>`;
+                             
+                             message += `<strong>✅ ALL TESTS PASSED!</strong><br><br>`;
+                             
+                             message += `<strong>🔧 Critical Fixes Verified:</strong><br>`;
+                             result.criticalFixes.forEach(fix => {
+                                 message += `${fix}<br>`;
+                             });
+                             
+                             message += `<br><strong>🚀 Ready for Deployment:</strong> ${result.deploymentReady ? 'YES' : 'NO'}<br><br>`;
+                             
+                             message += `<strong>🎉 The "dropping postMessage.. deserialize threw error" should be completely resolved!</strong><br><br>`;
+                             
+                             message += `<strong>📋 Final Steps:</strong><br>`;
+                             message += `1. Archive your current web app deployment<br>`;
+                             message += `2. Create a new deployment with the updated code<br>`;
+                             message += `3. Test proposal acceptance with real clients<br>`;
+                             message += `4. No more blank screens or serialization errors!<br>`;
+                             
+                             showSuccessMessage(message);
+                         } else {
+                             let message = `🎯 VERIFICATION COMPLETED WITH ISSUES<br><br>`;
+                             
+                             message += `<strong>⚠️ Issues Found:</strong><br>`;
+                             if (result.results && result.results.issues) {
+                                 result.results.issues.forEach(issue => {
+                                     message += `❌ ${issue}<br>`;
+                                 });
+                             }
+                             
+                             message += `<br><strong>💡 Suggested Fixes:</strong><br>`;
+                             if (result.results && result.results.fixes) {
+                                 result.results.fixes.forEach(fix => {
+                                     message += `🔧 ${fix}<br>`;
+                                 });
+                             }
+                             
+                             showErrorMessage(message);
+                         }
+                     })
+                     .withFailureHandler(function(error) {
+                         console.error('❌ Serialization fix verification failed:', error);
+                         showErrorMessage(`❌ Verification Failed: ${error.message}`);
+                     })
+                     .verifySerializationErrorFix();
              }
          </script>
      </body>
