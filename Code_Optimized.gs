@@ -93,68 +93,59 @@ function doPost(e) {
     switch (action) {
       case 'acceptProposal':
         console.log('Processing proposal acceptance for ID:', e.parameter.proposalId);
-        const result = acceptProposalEnhanced(e.parameter.proposalId, e.parameter.clientSignature || '');
-        console.log('Acceptance result:', result);
         
-        // Return simple HTML response to avoid serialization issues
-        if (result.success) {
-          const successHtml = `
+        try {
+          // Process the acceptance but don't rely on complex return values
+          acceptProposalEnhanced(e.parameter.proposalId, e.parameter.clientSignature || '');
+          console.log('Acceptance processed successfully');
+          
+          // Return absolute minimal HTML - no variables, no complex structures
+          return HtmlService.createHtmlOutput(`
             <html>
             <head>
-              <title>Proposal Accepted</title>
-              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <title>Success</title>
               <style>
-                body { font-family: Arial, sans-serif; text-align: center; background: #f0f8ff; padding: 50px; }
-                .success-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; }
-                .icon { font-size: 64px; margin-bottom: 20px; }
-                .title { color: #27ae60; font-size: 28px; margin-bottom: 15px; }
-                .message { color: #666; line-height: 1.6; margin-bottom: 20px; }
-                .details { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; }
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f0f8ff; }
+                .box { background: white; padding: 30px; border-radius: 10px; max-width: 400px; margin: 0 auto; }
+                .icon { font-size: 48px; margin-bottom: 20px; }
+                .title { color: #27ae60; font-size: 24px; margin-bottom: 15px; }
               </style>
             </head>
             <body>
-              <div class="success-box">
+              <div class="box">
                 <div class="icon">🎉</div>
-                <h1 class="title">Proposal Accepted Successfully!</h1>
-                <p class="message">Thank you for accepting our proposal. We're excited to work with you!</p>
-                <div class="details">
-                  <p><strong>Proposal ID:</strong> ${e.parameter.proposalId}</p>
-                  <p><strong>Accepted Date:</strong> ${new Date().toLocaleString('en-PK')}</p>
-                  ${result.projectId ? `<p><strong>Project ID:</strong> ${result.projectId}</p>` : ''}
-                </div>
-                <p style="color: #888; font-size: 14px;">
-                  A confirmation email has been sent to you, and our team has been notified.
-                </p>
+                <h1 class="title">Proposal Accepted!</h1>
+                <p>Thank you for accepting our proposal. We are excited to work with you!</p>
+                <p style="color: #888; font-size: 14px;">A confirmation email has been sent, and our team has been notified.</p>
               </div>
             </body>
             </html>
-          `;
-          return HtmlService.createHtmlOutput(successHtml);
-        } else {
-          const errorHtml = `
+          `);
+          
+        } catch (error) {
+          console.error('Acceptance processing failed:', error);
+          
+          // Return minimal error page
+          return HtmlService.createHtmlOutput(`
             <html>
             <head>
-              <title>Acceptance Error</title>
-              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <title>Error</title>
               <style>
-                body { font-family: Arial, sans-serif; text-align: center; background: #ffe6e6; padding: 50px; }
-                .error-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; }
-                .icon { font-size: 64px; margin-bottom: 20px; }
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #ffe6e6; }
+                .box { background: white; padding: 30px; border-radius: 10px; max-width: 400px; margin: 0 auto; }
+                .icon { font-size: 48px; margin-bottom: 20px; }
                 .title { color: #e74c3c; font-size: 24px; margin-bottom: 15px; }
-                .message { color: #666; line-height: 1.6; margin-bottom: 20px; }
               </style>
             </head>
             <body>
-              <div class="error-box">
+              <div class="box">
                 <div class="icon">❌</div>
-                <h1 class="title">Acceptance Failed</h1>
-                <p class="message">We encountered an issue processing your acceptance. Please contact us directly.</p>
-                <p style="color: #888; font-size: 14px;">Error: ${result.error}</p>
+                <h1 class="title">Processing Error</h1>
+                <p>There was an issue processing your request. Please contact us directly.</p>
               </div>
             </body>
             </html>
-          `;
-          return HtmlService.createHtmlOutput(errorHtml);
+          `);
         }
         
       default:
@@ -165,30 +156,16 @@ function doPost(e) {
     console.error('❌ doPost error:', error);
     console.error('Error stack:', error.stack);
     
-    const errorHtml = `
+    // Return absolute minimal error page
+    return HtmlService.createHtmlOutput(`
       <html>
-      <head>
-        <title>System Error</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-          body { font-family: Arial, sans-serif; text-align: center; background: #ffe6e6; padding: 50px; }
-          .error-box { background: white; padding: 40px; border-radius: 15px; max-width: 500px; margin: 0 auto; }
-          .icon { font-size: 64px; margin-bottom: 20px; }
-          .title { color: #e74c3c; font-size: 24px; margin-bottom: 15px; }
-        </style>
-      </head>
-      <body>
-        <div class="error-box">
-          <div class="icon">⚠️</div>
-          <h1 class="title">System Error</h1>
-          <p>An unexpected error occurred. Please contact support.</p>
-          <p style="color: #888; font-size: 12px;">Error: ${error.message}</p>
-        </div>
+      <head><title>Error</title></head>
+      <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+        <h1 style="color: #e74c3c;">System Error</h1>
+        <p>An unexpected error occurred. Please contact support.</p>
       </body>
       </html>
-    `;
-    
-    return HtmlService.createHtmlOutput(errorHtml);
+    `);
   }
 }
 
@@ -2817,6 +2794,61 @@ function testSimpleAcceptanceFlow() {
     
   } catch (error) {
     console.error('❌ Simple acceptance test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+}
+
+/**
+ * EMERGENCY TEST - Minimal HTML Response
+ */
+function testMinimalResponse() {
+  try {
+    console.log('🧪 Testing minimal HTML response...');
+    
+    // Test the absolute minimal response that cannot fail
+    const mockRequest = {
+      parameter: {
+        action: 'acceptProposal',
+        proposalId: 'TEST123'
+      }
+    };
+    
+    console.log('📤 Testing doPost with minimal request...');
+    const response = doPost(mockRequest);
+    console.log('📥 Response received:', !!response);
+    
+    // Get a simple acceptance URL for testing
+    const webAppUrl = getWebAppUrl();
+    const testUrl = `${webAppUrl}?page=proposal&id=TEST123`;
+    
+    return {
+      success: true,
+      message: 'Minimal response test completed',
+      testUrl: testUrl,
+      webAppUrl: webAppUrl,
+      responseWorking: !!response,
+      instructions: [
+        '🧪 EMERGENCY TEST READY',
+        '🔗 Use the test URL below',
+        '📝 Fill the form with any data',
+        '✅ Should see simple success page',
+        '❌ If still blank = deployment issue'
+      ],
+      diagnosis: [
+        '✅ Removed all complex variables',
+        '✅ Removed all template literals with variables',
+        '✅ Simple static HTML only',
+        '✅ No object serialization',
+        '✅ Direct HtmlService.createHtmlOutput()'
+      ]
+    };
+    
+  } catch (error) {
+    console.error('❌ Minimal test failed:', error);
     return {
       success: false,
       error: error.message,

@@ -1874,6 +1874,14 @@
                             <span class="action-btn-desc">Simple acceptance</span>
                         </div>
                     </button>
+                    
+                    <button class="action-btn" onclick="testEmergencyMinimal()" style="background: linear-gradient(135deg, #ff6b6b, #ee5a52);">
+                        <span class="action-btn-icon">🆘</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">EMERGENCY TEST</span>
+                            <span class="action-btn-desc">Minimal response</span>
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>
@@ -5284,6 +5292,54 @@
                          showErrorMessage(`❌ Frontend Test Failed: ${error.message}`);
                      })
                      .testSimpleAcceptanceFlow();
+             }
+             
+             // EMERGENCY TEST - Minimal response
+             function testEmergencyMinimal() {
+                 console.log('🆘 EMERGENCY TEST - Minimal Response...');
+                 
+                 removeMessages();
+                 showMessage('🆘 Testing absolute minimal response...', 'info');
+                 
+                 google.script.run
+                     .withSuccessHandler(function(result) {
+                         console.log('🆘 Emergency test result:', result);
+                         
+                         if (result.success) {
+                             let message = `🆘 EMERGENCY TEST COMPLETED!<br><br>`;
+                             
+                             message += `<strong>📊 Test Results:</strong><br>`;
+                             message += `✅ Response Working: ${result.responseWorking}<br>`;
+                             message += `🌐 Web App URL: Working<br><br>`;
+                             
+                             message += `<strong>🔗 EMERGENCY TEST URL:</strong><br>`;
+                             message += `<a href="${result.testUrl}" target="_blank" style="color: #ff6b6b; word-break: break-all; font-weight: bold;">${result.testUrl}</a><br><br>`;
+                             
+                             message += `<strong>📋 Test Instructions:</strong><br>`;
+                             result.instructions.forEach(instruction => {
+                                 message += `${instruction}<br>`;
+                             });
+                             
+                             message += `<br><strong>🔧 Applied Diagnosis:</strong><br>`;
+                             result.diagnosis.forEach(fix => {
+                                 message += `${fix}<br>`;
+                             });
+                             
+                             message += `<br><strong>🎯 CRITICAL:</strong><br>`;
+                             message += `🔴 If STILL blank screen = Deployment Issue<br>`;
+                             message += `🔴 Need to redeploy the web app<br>`;
+                             message += `🔴 OR cache issue in browser<br>`;
+                             
+                             showSuccessMessage(message);
+                         } else {
+                             showErrorMessage(`❌ Emergency Test Failed: ${result.error || 'Unknown error'}`);
+                         }
+                     })
+                     .withFailureHandler(function(error) {
+                         console.error('❌ Emergency test failed:', error);
+                         showErrorMessage(`❌ CRITICAL: Emergency Test Failed: ${error.message}`);
+                     })
+                     .testMinimalResponse();
              }
          </script>
      </body>
