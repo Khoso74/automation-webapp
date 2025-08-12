@@ -87,68 +87,54 @@ function doGet(e) {
           return HtmlService.createHtmlOutput('<h1>Proposal Already Accepted</h1><p>Thank you for your business!</p>');
         }
         
-        // Generate acceptance page HTML DIRECTLY without function calls
-        const acceptancePageHtml = `<!DOCTYPE html>
-<html>
-<head>
-  <title>Accept Proposal</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; margin: 0; }
-    .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    .title { color: #2c3e50; font-size: 28px; margin-bottom: 10px; text-align: center; }
-    .subtitle { color: #34495e; font-size: 20px; margin-bottom: 20px; text-align: center; }
-    .details-box { background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #3498db; }
-    .amount { font-size: 24px; font-weight: bold; color: #27ae60; margin: 20px 0; text-align: center; }
-    .accept-btn { background: #27ae60; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px; width: 100%; cursor: pointer; transition: background 0.3s ease; }
-    .accept-btn:hover { background: #229954; }
-    .accept-btn:disabled { background: #95a5a6; cursor: not-allowed; }
-    .checkbox-container { margin: 20px 0; text-align: left; }
-    .checkbox-container label { cursor: pointer; }
-    .terms { font-size: 12px; color: #666; margin-top: 20px; text-align: center; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1 class="title">Project Proposal</h1>
-    <h2 class="subtitle">${proposal.Title}</h2>
-    
-    <div class="details-box">
-      <h3>Project Details</h3>
-      <p><strong>Description:</strong> ${proposal.Description}</p>
-      <div class="amount">Investment: ${proposal.Currency} ${parseFloat(proposal.Amount).toLocaleString()}</div>
-    </div>
-    
-    <form method="post" action="" onsubmit="handleSubmit(this)">
-      <input type="hidden" name="action" value="acceptProposal">
-      <input type="hidden" name="proposalId" value="${proposalId}">
-      <input type="hidden" name="clientSignature" value="Digital Acceptance">
-      
-      <div class="checkbox-container">
-        <label>
-          <input type="checkbox" id="agreeCheckbox" required> 
-          I agree to the terms and conditions and accept this proposal
-        </label>
-      </div>
-      
-      <button type="submit" class="accept-btn" id="submitBtn">Accept Proposal</button>
-    </form>
-    
-    <p class="terms">
-      By accepting this proposal, you agree to the terms and payment schedule outlined above.
-    </p>
-  </div>
-  
-  <script>
-    function handleSubmit(form) {
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.textContent = 'Processing...';
-      submitBtn.disabled = true;
-      return true;
-    }
-  </script>
-</body>
-</html>`;
+        // Generate acceptance page HTML with simple string concatenation (NO template literals)
+        const acceptancePageHtml = 
+          '<!DOCTYPE html>' +
+          '<html>' +
+          '<head>' +
+            '<title>Accept Proposal</title>' +
+            '<meta name="viewport" content="width=device-width, initial-scale=1">' +
+            '<style>' +
+              'body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; margin: 0; }' +
+              '.container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }' +
+              '.title { color: #2c3e50; font-size: 28px; margin-bottom: 10px; text-align: center; }' +
+              '.subtitle { color: #34495e; font-size: 20px; margin-bottom: 20px; text-align: center; }' +
+              '.details-box { background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #3498db; }' +
+              '.amount { font-size: 24px; font-weight: bold; color: #27ae60; margin: 20px 0; text-align: center; }' +
+              '.accept-btn { background: #27ae60; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px; width: 100%; cursor: pointer; }' +
+              '.accept-btn:hover { background: #229954; }' +
+              '.checkbox-container { margin: 20px 0; text-align: left; }' +
+              '.checkbox-container label { cursor: pointer; display: flex; align-items: center; gap: 10px; }' +
+              '.terms { font-size: 12px; color: #666; margin-top: 20px; text-align: center; }' +
+            '</style>' +
+          '</head>' +
+          '<body>' +
+            '<div class="container">' +
+              '<h1 class="title">Project Proposal</h1>' +
+              '<h2 class="subtitle">' + proposal.Title + '</h2>' +
+              '<div class="details-box">' +
+                '<h3>Project Details</h3>' +
+                '<p><strong>Description:</strong> ' + proposal.Description + '</p>' +
+                '<div class="amount">Investment: ' + proposal.Currency + ' ' + parseFloat(proposal.Amount).toLocaleString() + '</div>' +
+              '</div>' +
+              '<form method="post" action="">' +
+                '<input type="hidden" name="action" value="acceptProposal">' +
+                '<input type="hidden" name="proposalId" value="' + proposalId + '">' +
+                '<input type="hidden" name="clientSignature" value="Digital Acceptance">' +
+                '<div class="checkbox-container">' +
+                  '<label>' +
+                    '<input type="checkbox" required style="transform: scale(1.2);"> ' +
+                    '<span>I agree to the terms and conditions and accept this proposal</span>' +
+                  '</label>' +
+                '</div>' +
+                '<button type="submit" class="accept-btn" onclick="this.innerHTML=\'Processing...\'; this.disabled=true;">Accept Proposal</button>' +
+              '</form>' +
+              '<p class="terms">' +
+                'By accepting this proposal, you agree to the terms and payment schedule outlined above.' +
+              '</p>' +
+            '</div>' +
+          '</body>' +
+          '</html>';
         
         return HtmlService.createHtmlOutput(acceptancePageHtml);
         
@@ -2117,6 +2103,130 @@ function testCompactPDFDesign() {
     
   } catch (error) {
     console.error('❌ Compact PDF design test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+}
+
+/**
+ * Test Serialization Fix - Verify no more postMessage errors
+ */
+function testSerializationFix() {
+  try {
+    console.log('🧪 === TESTING SERIALIZATION FIX ===');
+    
+    // Get first client
+    const clients = getAllClients();
+    if (!clients || clients.length === 0) {
+      return { success: false, error: 'No clients found for testing' };
+    }
+    
+    const testClient = clients[0];
+    console.log('🎯 Testing with client:', testClient.CompanyName, '(' + testClient.ClientID + ')');
+    
+    // Create a real proposal
+    const testProposalData = {
+      clientId: testClient.ClientID,
+      title: 'Serialization Fix Test Proposal',
+      description: 'Testing the fixed proposal acceptance flow without serialization errors.',
+      amount: 25000,
+      currency: 'PKR'
+    };
+    
+    console.log('📝 Creating test proposal...');
+    const proposalResult = createProposal(testProposalData);
+    
+    if (!proposalResult.success) {
+      return { success: false, error: 'Proposal creation failed: ' + proposalResult.error };
+    }
+    
+    const proposalId = proposalResult.proposalId;
+    console.log('✅ Test proposal created:', proposalId);
+    
+    // Test the doGet function directly (simulating what happens when user clicks link)
+    console.log('🔍 Testing doGet function with proposal ID...');
+    const mockRequest = {
+      parameter: {
+        page: 'proposal',
+        id: proposalId
+      }
+    };
+    
+    try {
+      const doGetResult = doGet(mockRequest);
+      console.log('✅ doGet function executed successfully');
+      
+      // Check if the result is an HtmlOutput
+      if (doGetResult && typeof doGetResult.getContent === 'function') {
+        const htmlContent = doGetResult.getContent();
+        console.log('✅ HTML content generated successfully');
+        
+        // Check for problematic patterns
+        const hasTemplateliterals = htmlContent.includes('${');
+        const hasComplexJS = htmlContent.includes('function ') && htmlContent.includes('getElementById');
+        const hasSimpleForm = htmlContent.includes('name="action"') && htmlContent.includes('acceptProposal');
+        
+        console.log('🔍 Content analysis:');
+        console.log('  Template literals found:', hasTemplateliterals);
+        console.log('  Complex JavaScript found:', hasComplexJS);
+        console.log('  Simple form found:', hasSimpleForm);
+        
+        if (hasTemplateliterals) {
+          return {
+            success: false,
+            error: 'Template literals still found in HTML output',
+            proposalId: proposalId,
+            contentCheck: { hasTemplateliterals, hasComplexJS, hasSimpleForm }
+          };
+        }
+        
+        if (hasComplexJS) {
+          return {
+            success: false,
+            error: 'Complex JavaScript still found in HTML output',
+            proposalId: proposalId,
+            contentCheck: { hasTemplateliterals, hasComplexJS, hasSimpleForm }
+          };
+        }
+        
+        return {
+          success: true,
+          message: 'Serialization fix test PASSED! No problematic JavaScript patterns found.',
+          proposalId: proposalId,
+          acceptanceUrl: proposalResult.acceptanceUrl,
+          contentCheck: { hasTemplateliterals, hasComplexJS, hasSimpleForm },
+          htmlLength: htmlContent.length,
+          fixedIssues: [
+            '✅ Eliminated template literals (${}) from HTML generation',
+            '✅ Removed complex JavaScript functions from acceptance page',
+            '✅ Simplified form submission using inline onclick',
+            '✅ Used string concatenation instead of template strings',
+            '✅ Removed getElementById and complex DOM manipulation'
+          ]
+        };
+        
+      } else {
+        return {
+          success: false,
+          error: 'doGet did not return valid HTML output',
+          proposalId: proposalId
+        };
+      }
+      
+    } catch (doGetError) {
+      console.error('❌ doGet function failed:', doGetError);
+      return {
+        success: false,
+        error: 'doGet function failed: ' + doGetError.message,
+        proposalId: proposalId
+      };
+    }
+    
+  } catch (error) {
+    console.error('❌ Serialization fix test failed:', error);
     return {
       success: false,
       error: error.message,

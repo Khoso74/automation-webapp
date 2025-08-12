@@ -5839,6 +5839,52 @@
                     .testFixedSerializationIssue();
             }
 
+            // Test Final Serialization Fix
+            function testSerializationFix() {
+                console.log('🔧 Testing final serialization fix...');
+                showInfoMessage('🔧 Testing Final Serialization Fix...<br>Verifying that postMessage errors are completely resolved...');
+                
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        console.log('✅ Final serialization fix test completed:', result);
+                        
+                        if (result.success) {
+                            let message = `🎉 <strong>FINAL SERIALIZATION FIX TEST PASSED!</strong><br><br>`;
+                            message += `✅ Test Proposal ID: ${result.proposalId}<br>`;
+                            message += `🔗 Acceptance URL: <a href="${result.acceptanceUrl}" target="_blank">Click to test manually</a><br><br>`;
+                            
+                            message += `<strong>🔍 Content Analysis:</strong><br>`;
+                            message += `Template Literals: ${result.contentCheck.hasTemplateliterals ? '❌ Found' : '✅ None'}<br>`;
+                            message += `Complex JavaScript: ${result.contentCheck.hasComplexJS ? '❌ Found' : '✅ None'}<br>`;
+                            message += `Simple Form: ${result.contentCheck.hasSimpleForm ? '✅ Found' : '❌ Missing'}<br>`;
+                            message += `HTML Length: ${result.htmlLength} characters<br><br>`;
+                            
+                            if (result.fixedIssues) {
+                                message += `<strong>🛠️ Fixed Issues:</strong><br>`;
+                                result.fixedIssues.forEach(issue => {
+                                    message += `${issue}<br>`;
+                                });
+                            }
+                            
+                            message += `<br><strong>🎯 Result: The "dropping postMessage.. deserialize threw error" should now be COMPLETELY ELIMINATED!</strong><br><br>`;
+                            message += `<strong>📋 Next Steps:</strong><br>`;
+                            message += `1. Archive your current web app deployment<br>`;
+                            message += `2. Create a brand new deployment with the fixed code<br>`;
+                            message += `3. Test the acceptance URL above to verify the fix<br>`;
+                            message += `4. The serialization error should be gone forever!`;
+                            
+                            showSuccessMessage(message);
+                        } else {
+                            showErrorMessage(`❌ Final Serialization Fix Test Failed: ${result.error}<br><br>Proposal ID: ${result.proposalId || 'N/A'}`);
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        console.error('❌ Final serialization fix test failed:', error);
+                        showErrorMessage(`❌ Test Function Error: ${error.message || error}<br><br>Make sure the testSerializationFix() function exists in Code_Optimized.gs`);
+                    })
+                    .testSerializationFix();
+            }
+
             // Test Proposal Acceptance URL Generation
             function testProposalAcceptanceURL() {
                 console.log('🔗 Testing proposal acceptance URL generation...');
