@@ -1261,6 +1261,64 @@ function testDropdownDataIssue() {
 }
 
 /**
+ * Test Proposal PDF Drive Integration
+ */
+function testProposalPDFIntegration() {
+  try {
+    console.log('🧪 TESTING PROPOSAL PDF DRIVE INTEGRATION...');
+    
+    // Test data
+    const testProposalData = {
+      proposalId: 'PROP-TEST-001',
+      clientId: 'CLI17549788052741908',
+      clientName: 'visa elite',
+      title: 'Website Development Project',
+      description: 'Complete website redesign and development',
+      amount: 50000,
+      currency: 'PKR'
+    };
+    
+    console.log('Test proposal data:', testProposalData);
+    
+    // Test client folder finding
+    console.log('\n🔍 Testing client folder access...');
+    const clientFolderResult = getClientProposalsFolder(testProposalData.clientId, testProposalData.clientName);
+    
+    if (clientFolderResult.success) {
+      console.log('✅ Client folder structure:');
+      console.log(`   Client Folder: ${clientFolderResult.clientFolderName}`);
+      console.log(`   Client Folder ID: ${clientFolderResult.clientFolderId}`);
+      console.log(`   Proposals Folder: ${clientFolderResult.proposalsFolderName}`);
+      console.log(`   Proposals Folder ID: ${clientFolderResult.proposalsFolderId}`);
+      console.log(`   Client Folder URL: ${clientFolderResult.clientFolderUrl}`);
+      console.log(`   Proposals Folder URL: ${clientFolderResult.proposalsFolderUrl}`);
+      
+      return {
+        success: true,
+        message: 'Client folder structure working correctly',
+        clientFolder: clientFolderResult,
+        testData: testProposalData
+      };
+    } else {
+      console.log('❌ Client folder test failed:', clientFolderResult.error);
+      return {
+        success: false,
+        error: clientFolderResult.error,
+        message: 'Client folder structure test failed'
+      };
+    }
+    
+  } catch (error) {
+    console.error('❌ Proposal PDF integration test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      message: 'Proposal PDF integration test failed'
+    };
+  }
+}
+
+/**
  * Quick Test - Just for Missing Function
  */
 function testMissingFunction() {

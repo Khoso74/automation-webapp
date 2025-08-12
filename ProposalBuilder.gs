@@ -86,15 +86,25 @@ function generateProposalPDF(proposalId) {
     // Update proposal with PDF URL
     updateProposalPdfUrl(proposalId, pdfFile.getUrl());
     
-    // Also save to client folder
+    // ENHANCED: Save to client folder with better structure
+    let clientFolderResult = null;
     try {
-      const clientFolder = getClientFolder(proposal.ClientID);
-      if (clientFolder) {
-        const clientProposalsFolder = createSubfolder(clientFolder, 'Proposals');
-        pdfFile.makeCopy(fileName, clientProposalsFolder);
+      console.log('🔄 Finding client folder for proposal PDF...');
+      clientFolderResult = getClientProposalsFolder(proposal.ClientID, client ? client.CompanyName : 'Unknown Client');
+      
+      if (clientFolderResult.success) {
+        const clientProposalsFolder = DriveApp.getFolderById(clientFolderResult.proposalsFolderId);
+        const clientPdfCopy = pdfFile.makeCopy(fileName, clientProposalsFolder);
+        console.log(`✅ PDF copied to client proposals folder: ${clientProposalsFolder.getName()}`);
+        console.log(`✅ Client PDF URL: ${clientPdfCopy.getUrl()}`);
+        
+        clientFolderResult.clientPdfId = clientPdfCopy.getId();
+        clientFolderResult.clientPdfUrl = clientPdfCopy.getUrl();
+      } else {
+        console.log('⚠️ Could not access client folder, PDF saved to main proposals folder only');
       }
     } catch (error) {
-      console.log('Could not save to client folder:', error.message);
+      console.log('⚠️ Could not save to client folder:', error.message);
     }
     
     logActivity('Proposal', `PDF generated for proposal: ${proposal.Title}`, proposalId);
@@ -103,13 +113,104 @@ function generateProposalPDF(proposalId) {
       success: true,
       fileId: pdfFile.getId(),
       fileName: fileName,
-      url: pdfFile.getUrl()
+      url: pdfFile.getUrl(),
+      clientFolder: clientFolderResult
     };
     
   } catch (error) {
     console.error('Error generating proposal PDF:', error);
     logActivity('Proposal', `Failed to generate PDF: ${error.message}`, proposalId, 'Error');
     return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Get client's proposals folder for saving PDF
+ * Enhanced version that works with current folder structure
+ */
+function getClientProposalsFolder(clientId, clientName) {
+  try {
+    console.log('🔍 Finding client proposals folder:', clientId, clientName);
+    
+    const rootFolder = getRootFolder();
+    console.log('✅ Root folder accessed');
+    
+    // Find Clients folder
+    const clientsFolders = rootFolder.getFoldersByName('Clients');
+    if (!clientsFolders.hasNext()) {
+      console.log('❌ Clients folder not found');
+      return { success: false, error: 'Clients folder not found' };
+    }
+    
+    const clientsFolder = clientsFolders.next();
+    console.log('✅ Clients folder found');
+    
+    // Find client-specific folder (search by multiple patterns)
+    const possibleClientFolderNames = [
+      `${clientId} - ${clientName}`,
+      `${clientName} (${clientId})`,
+      clientId,
+      clientName
+    ];
+    
+    let clientFolder = null;
+    
+    for (let folderName of possibleClientFolderNames) {
+      const safeName = folderName.replace(/[^a-zA-Z0-9\s-_()]/g, '').trim();
+      console.log(`🔍 Searching for client folder: "${safeName}"`);
+      
+      const clientFolders = clientsFolder.getFoldersByName(safeName);
+      if (clientFolders.hasNext()) {
+        clientFolder = clientFolders.next();
+        console.log(`✅ Client folder found: ${clientFolder.getName()}`);
+        break;
+      }
+    }
+    
+    if (!clientFolder) {
+      console.log('❌ Client folder not found, creating new one...');
+      // Create client folder if not found
+      const safeName = clientName.replace(/[^a-zA-Z0-9\s-_]/g, '').trim();
+      const newFolderName = `${clientId} - ${safeName}`;
+      clientFolder = clientsFolder.createFolder(newFolderName);
+      console.log(`✅ Created client folder: ${newFolderName}`);
+      
+      // Create standard subfolders
+      const subfolders = ['Proposals', 'Contracts', 'Projects', 'Invoices', 'Communications'];
+      subfolders.forEach(subfolder => {
+        clientFolder.createFolder(subfolder);
+        console.log(`✅ Created subfolder: ${subfolder}`);
+      });
+    }
+    
+    // Find or create Proposals subfolder
+    let proposalsFolder;
+    const proposalsFolders = clientFolder.getFoldersByName('Proposals');
+    
+    if (proposalsFolders.hasNext()) {
+      proposalsFolder = proposalsFolders.next();
+      console.log('✅ Proposals subfolder found');
+    } else {
+      proposalsFolder = clientFolder.createFolder('Proposals');
+      console.log('✅ Proposals subfolder created');
+    }
+    
+    return {
+      success: true,
+      clientFolderId: clientFolder.getId(),
+      proposalsFolderId: proposalsFolder.getId(),
+      clientFolderName: clientFolder.getName(),
+      proposalsFolderName: proposalsFolder.getName(),
+      clientFolderUrl: clientFolder.getUrl(),
+      proposalsFolderUrl: proposalsFolder.getUrl()
+    };
+    
+  } catch (error) {
+    console.error('❌ Error finding client proposals folder:', error);
+    return {
+      success: false,
+      error: error.message
+    };
   }
 }
 
