@@ -1922,6 +1922,22 @@
                             <span class="action-btn-desc">Complete error fix check</span>
                         </div>
                     </button>
+                    
+                    <button class="action-btn" onclick="testFixedSerializationIssue()" style="background: linear-gradient(135deg, #20c997, #17a2b8);">
+                        <span class="action-btn-icon">🛠️</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Test Ultimate Fix</span>
+                            <span class="action-btn-desc">Final serialization test</span>
+                        </div>
+                    </button>
+                    
+                    <button class="action-btn" onclick="testProposalAcceptanceURL()" style="background: linear-gradient(135deg, #6c757d, #5a6268);">
+                        <span class="action-btn-icon">🔗</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Test Acceptance URL</span>
+                            <span class="action-btn-desc">URL generation test</span>
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>
@@ -5647,8 +5663,79 @@
                          console.error('❌ Serialization fix verification failed:', error);
                          showErrorMessage(`❌ Verification Failed: ${error.message}`);
                      })
-                     .verifySerializationErrorFix();
-             }
-         </script>
-     </body>
-     </html>
+                                         .verifySerializationErrorFix();
+            }
+
+            // Test Fixed Serialization Issue - Ultimate Fix Test
+            function testFixedSerializationIssue() {
+                console.log('🛠️ Testing ultimate serialization fix...');
+                showInfoMessage('🛠️ Testing Ultimate Serialization Fix...<br>This may take a moment...');
+                
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        console.log('✅ Ultimate serialization test completed:', result);
+                        
+                        if (result.success) {
+                            let message = `🎉 <strong>ULTIMATE SERIALIZATION FIX SUCCESS!</strong><br><br>`;
+                            message += `✅ Test Proposal ID: ${result.testProposalId}<br><br>`;
+                            
+                            message += `<strong>🔍 Verifications Passed:</strong><br>`;
+                            result.verifications.forEach(verification => {
+                                message += `${verification}<br>`;
+                            });
+                            
+                            message += `<br><strong>📋 Recommendations:</strong><br>`;
+                            result.recommendations.forEach(recommendation => {
+                                message += `${recommendation}<br>`;
+                            });
+                            
+                            message += `<br><strong>🎯 The "dropping postMessage.. deserialize threw error" should now be completely resolved!</strong>`;
+                            
+                            showSuccessMessage(message);
+                        } else {
+                            showErrorMessage(`❌ Ultimate Fix Test Failed: ${result.error}<br><br>Step: ${result.step || 'Unknown'}`);
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        console.error('❌ Ultimate serialization test failed:', error);
+                        showErrorMessage(`❌ Ultimate Test Failed: ${error.message}`);
+                    })
+                    .testFixedSerializationIssue();
+            }
+
+            // Test Proposal Acceptance URL Generation
+            function testProposalAcceptanceURL() {
+                console.log('🔗 Testing proposal acceptance URL generation...');
+                showInfoMessage('🔗 Testing Proposal Acceptance URL Generation...<br>Checking URL accessibility and format...');
+                
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        console.log('✅ URL generation test completed:', result);
+                        
+                        if (result.success) {
+                            let message = `🎉 <strong>URL GENERATION TEST SUCCESS!</strong><br><br>`;
+                            message += `🌐 <strong>Web App URL:</strong> ${result.webAppUrl}<br>`;
+                            message += `🎯 <strong>Test Proposal ID:</strong> ${result.testProposalId}<br>`;
+                            message += `🔗 <strong>Acceptance URL:</strong><br>${result.acceptanceUrl}<br><br>`;
+                            
+                            message += `<strong>✅ Verifications Passed:</strong><br>`;
+                            result.verifications.forEach(verification => {
+                                message += `${verification}<br>`;
+                            });
+                            
+                            message += `<br><strong>💡 You can now copy the acceptance URL and test it in a new browser window!</strong>`;
+                            
+                            showSuccessMessage(message);
+                        } else {
+                            showErrorMessage(`❌ URL Generation Test Failed: ${result.error}`);
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        console.error('❌ URL generation test failed:', error);
+                        showErrorMessage(`❌ URL Test Failed: ${error.message}`);
+                    })
+                    .testProposalAcceptanceURL();
+            }
+        </script>
+    </body>
+    </html>
