@@ -4,19 +4,24 @@
  */
 
 /**
- * Create new proposal
+ * Create new proposal with enhanced debugging
  */
 function createProposal(proposalData) {
   try {
+    console.log('🚀 === CREATING NEW PROPOSAL ===');
+    console.log('📝 Proposal Data:', proposalData);
+    
     const spreadsheet = getSpreadsheet();
     const proposalsSheet = spreadsheet.getSheetByName(SHEETS.PROPOSALS);
     
     // Generate unique proposal ID
     const proposalId = generateId('PROP');
+    console.log('🆔 Generated Proposal ID:', proposalId);
     
     // Generate acceptance URL
     const webAppUrl = getWebAppUrl();
     const acceptanceUrl = `${webAppUrl}?page=proposal&id=${proposalId}`;
+    console.log('🔗 Acceptance URL:', acceptanceUrl);
     
     // Prepare proposal data
     const newProposal = [
@@ -34,20 +39,38 @@ function createProposal(proposalData) {
       acceptanceUrl
     ];
     
+    console.log('📊 Proposal Row Data:', newProposal);
+    
     // Add to sheet
     proposalsSheet.appendRow(newProposal);
+    console.log('✅ Proposal added to Google Sheets');
+    
+    // IMMEDIATELY try to generate PDF
+    console.log('🔄 Starting PDF generation process...');
+    const pdfResult = generateProposalPDF(proposalId);
+    console.log('📄 PDF Generation Result:', pdfResult);
     
     // Log activity
     logActivity('Proposal', `New proposal created: ${proposalData.title}`, proposalId);
+    console.log('📝 Activity logged');
     
-    return {
+    const result = {
       success: true,
       proposalId: proposalId,
-      acceptanceUrl: acceptanceUrl
+      acceptanceUrl: acceptanceUrl,
+      pdfResult: pdfResult
     };
     
+    console.log('🎉 === PROPOSAL CREATION COMPLETE ===');
+    console.log('Final Result:', result);
+    
+    return result;
+    
   } catch (error) {
+    console.error('❌ === PROPOSAL CREATION ERROR ===');
     console.error('Error creating proposal:', error);
+    console.error('Error stack:', error.stack);
+    
     logActivity('Proposal', `Failed to create proposal: ${error.message}`, '', 'Error');
     return { success: false, error: error.message };
   }
@@ -86,26 +109,55 @@ function generateProposalPDF(proposalId) {
     // Update proposal with PDF URL
     updateProposalPdfUrl(proposalId, pdfFile.getUrl());
     
-    // ENHANCED: Save to client folder with better structure
+    // ENHANCED: Save to client folder with detailed debugging
     let clientFolderResult = null;
     try {
-      console.log('🔄 Finding client folder for proposal PDF...');
-      clientFolderResult = getClientProposalsFolder(proposal.ClientID, client ? client.CompanyName : 'Unknown Client');
+      console.log('🔄 === STARTING CLIENT FOLDER PDF COPY PROCESS ===');
+      console.log(`🔍 Looking for client folder for: ${proposal.ClientID}`);
+      console.log(`🔍 Client company name: ${client ? client.CompanyName : 'Unknown Client'}`);
       
-      if (clientFolderResult.success) {
+      clientFolderResult = getClientProposalsFolder(proposal.ClientID, client ? client.CompanyName : 'Unknown Client');
+      console.log('📁 Client folder search result:', clientFolderResult);
+      
+      if (clientFolderResult && clientFolderResult.success) {
+        console.log('✅ Client folder found! Attempting to copy PDF...');
+        console.log(`📁 Target proposals folder ID: ${clientFolderResult.proposalsFolderId}`);
+        
         const clientProposalsFolder = DriveApp.getFolderById(clientFolderResult.proposalsFolderId);
+        console.log(`📁 Proposals folder accessed: ${clientProposalsFolder.getName()}`);
+        
+        console.log(`📄 Copying PDF file: ${fileName}`);
         const clientPdfCopy = pdfFile.makeCopy(fileName, clientProposalsFolder);
-        console.log(`✅ PDF copied to client proposals folder: ${clientProposalsFolder.getName()}`);
+        
+        console.log(`✅ PDF successfully copied to client folder!`);
+        console.log(`✅ Client PDF ID: ${clientPdfCopy.getId()}`);
         console.log(`✅ Client PDF URL: ${clientPdfCopy.getUrl()}`);
+        console.log(`✅ Client Proposals Folder URL: ${clientProposalsFolder.getUrl()}`);
         
         clientFolderResult.clientPdfId = clientPdfCopy.getId();
         clientFolderResult.clientPdfUrl = clientPdfCopy.getUrl();
+        
+        // Verify the file was actually created
+        const filesInFolder = clientProposalsFolder.getFilesByName(fileName);
+        if (filesInFolder.hasNext()) {
+          console.log('✅ VERIFICATION: PDF file confirmed in client folder');
+        } else {
+          console.log('❌ VERIFICATION: PDF file NOT found in client folder!');
+        }
+        
       } else {
-        console.log('⚠️ Could not access client folder, PDF saved to main proposals folder only');
+        console.log('❌ Client folder search failed!');
+        console.log('❌ Reason:', clientFolderResult ? clientFolderResult.error : 'No result returned');
+        console.log('⚠️ PDF saved to main proposals folder only');
       }
     } catch (error) {
-      console.log('⚠️ Could not save to client folder:', error.message);
+      console.error('❌ === CLIENT FOLDER PDF COPY ERROR ===');
+      console.error('❌ Error details:', error.message);
+      console.error('❌ Error stack:', error.stack);
+      console.log('⚠️ Fallback: PDF saved to main proposals folder only');
     }
+    
+    console.log('🔄 === CLIENT FOLDER PDF COPY PROCESS COMPLETE ===');
     
     logActivity('Proposal', `PDF generated for proposal: ${proposal.Title}`, proposalId);
     

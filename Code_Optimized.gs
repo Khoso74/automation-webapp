@@ -1632,3 +1632,162 @@ function forceCreateClientFolders() {
     };
   }
 }
+
+/**
+ * Test Real Proposal Creation Process
+ */
+function testRealProposalCreation() {
+  try {
+    console.log('🧪 === TESTING REAL PROPOSAL CREATION PROCESS ===');
+    
+    // Get first client for testing
+    const clients = getAllClients();
+    if (!clients || clients.length === 0) {
+      return {
+        success: false,
+        error: 'No clients found for testing'
+      };
+    }
+    
+    const testClient = clients[0];
+    console.log('🎯 Testing with client:', testClient.CompanyName, '(' + testClient.ClientID + ')');
+    
+    // Create test proposal data (same as frontend would send)
+    const testProposalData = {
+      clientId: testClient.ClientID,
+      title: 'Test Website Development Project',
+      description: 'Complete website redesign and development with modern features and responsive design.',
+      amount: 75000,
+      currency: 'PKR'
+    };
+    
+    console.log('📝 Test proposal data:', testProposalData);
+    
+    // Call the actual createProposal function (same as frontend)
+    console.log('🚀 Calling createProposal function...');
+    const result = createProposal(testProposalData);
+    
+    console.log('🎯 === PROPOSAL CREATION TEST RESULT ===');
+    console.log('Result:', result);
+    
+    if (result.success) {
+      console.log('✅ Proposal created successfully!');
+      console.log(`✅ Proposal ID: ${result.proposalId}`);
+      
+      if (result.pdfResult) {
+        console.log('📄 PDF Result:', result.pdfResult);
+        
+        if (result.pdfResult.success) {
+          console.log('✅ PDF generated successfully!');
+          
+          if (result.pdfResult.clientFolder && result.pdfResult.clientFolder.success) {
+            console.log('✅ PDF saved to client folder!');
+            console.log(`📁 Client PDF URL: ${result.pdfResult.clientFolder.clientPdfUrl}`);
+          } else {
+            console.log('❌ PDF NOT saved to client folder');
+            console.log('❌ Client folder error:', result.pdfResult.clientFolder ? result.pdfResult.clientFolder.error : 'No client folder data');
+          }
+        } else {
+          console.log('❌ PDF generation failed:', result.pdfResult.error);
+        }
+      } else {
+        console.log('❌ No PDF result returned');
+      }
+    } else {
+      console.log('❌ Proposal creation failed:', result.error);
+    }
+    
+    return {
+      success: true,
+      testClient: testClient,
+      proposalData: testProposalData,
+      result: result
+    };
+    
+  } catch (error) {
+    console.error('❌ Test proposal creation failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+}
+
+/**
+ * Quick Check - What happens when we manually try to copy a file to client folder
+ */
+function testManualClientFolderCopy() {
+  try {
+    console.log('🧪 === TESTING MANUAL CLIENT FOLDER COPY ===');
+    
+    // Get first client
+    const clients = getAllClients();
+    if (!clients || clients.length === 0) {
+      return { success: false, error: 'No clients found' };
+    }
+    
+    const testClient = clients[0];
+    console.log('🎯 Testing with client:', testClient.CompanyName, '(' + testClient.ClientID + ')');
+    
+    // Find client's proposals folder
+    const folderResult = getClientProposalsFolder(testClient.ClientID, testClient.CompanyName);
+    
+    if (!folderResult.success) {
+      return {
+        success: false,
+        error: 'Could not find client folder: ' + folderResult.error
+      };
+    }
+    
+    console.log('✅ Client folder found:', folderResult.clientFolderName);
+    console.log('✅ Proposals folder found:', folderResult.proposalsFolderName);
+    
+    // Try to create a simple test file in the client's proposals folder
+    const proposalsFolder = DriveApp.getFolderById(folderResult.proposalsFolderId);
+    console.log('📁 Accessing proposals folder...');
+    
+    // Create a simple text file as test
+    const testFileName = `Test_File_${new Date().getTime()}.txt`;
+    const testContent = `Test file created at ${new Date().toISOString()}\nClient: ${testClient.CompanyName}\nClient ID: ${testClient.ClientID}`;
+    
+    console.log('📄 Creating test file:', testFileName);
+    const testFile = proposalsFolder.createFile(testFileName, testContent, 'text/plain');
+    
+    console.log('✅ Test file created successfully!');
+    console.log('✅ File ID:', testFile.getId());
+    console.log('✅ File URL:', testFile.getUrl());
+    
+    // Verify file exists
+    const verifyFiles = proposalsFolder.getFilesByName(testFileName);
+    if (verifyFiles.hasNext()) {
+      console.log('✅ VERIFICATION: Test file confirmed in client folder');
+      
+      // Clean up - delete test file
+      testFile.setTrashed(true);
+      console.log('🗑️ Test file cleaned up');
+      
+      return {
+        success: true,
+        message: 'Manual file creation in client folder works correctly',
+        testClient: testClient,
+        folderResult: folderResult,
+        testFileId: testFile.getId()
+      };
+    } else {
+      console.log('❌ VERIFICATION: Test file NOT found in client folder!');
+      return {
+        success: false,
+        error: 'Test file creation appeared to succeed but file not found in folder'
+      };
+    }
+    
+  } catch (error) {
+    console.error('❌ Manual client folder copy test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+}

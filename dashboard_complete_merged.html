@@ -2042,20 +2042,34 @@
                         🔧 Force Create Folders
                     </button>
                     
-                    <button onclick="google.script.run.runAllTests(); showMessage('Running all backend tests...', 'info');" 
-                            style="padding: 15px 20px; background: #6f42c1; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                        🚀 Run All Backend Tests
-                    </button>
+                                            <button onclick="google.script.run.runAllTests(); showMessage('Running all backend tests...', 'info');" 
+                                style="padding: 15px 20px; background: #6f42c1; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                            🚀 Run All Backend Tests
+                        </button>
+                        
+                        <button onclick="testRealProposalCreation()" 
+                                style="padding: 15px 20px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                            🎯 Test Real Proposal Creation
+                        </button>
+                        
+                        <button onclick="testManualCopy()" 
+                                style="padding: 15px 20px; background: #fd7e14; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                            📋 Test Manual File Copy
+                        </button>
                 </div>
                 
                 <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px;">
-                    <strong>📋 Debug Instructions:</strong>
+                    <strong>📋 Debug Instructions (Updated):</strong>
                     <ol style="margin: 10px 0; padding-left: 20px;">
-                        <li>First click "Debug Folder Structure" to see what folders exist</li>
-                        <li>If no client folders found, click "Force Create Folders"</li>
-                        <li>Test PDF saving with "Test PDF Saving"</li>
-                        <li>Create a proposal and check if PDF saves to client folder</li>
+                        <li><strong>Debug Folder Structure</strong> - Check what folders exist in Drive</li>
+                        <li><strong>Test Manual File Copy</strong> - Verify basic file creation in client folder works</li>
+                        <li><strong>Test Real Proposal Creation</strong> - 🎯 <strong>MAIN TEST</strong> - Simulate exactly what happens when creating proposal</li>
+                        <li><strong>Force Create Folders</strong> - Create missing client folders if needed</li>
+                        <li><strong>Run All Backend Tests</strong> - Comprehensive system tests</li>
                     </ol>
+                    <p style="margin: 10px 0; font-weight: bold; color: #e74c3c;">
+                        🎯 Start with "Test Real Proposal Creation" - this will show exactly why PDF isn't saving to client folder!
+                    </p>
                 </div>
                 
                 <p style="margin-top: 15px; font-size: 12px; color: #999;">
@@ -4714,6 +4728,83 @@
                 btn.style.opacity = '0.7';
             });
             event.target.closest('.action-btn').style.opacity = '1';
+        }
+        
+        // Test real proposal creation
+        function testRealProposalCreation() {
+            console.log('🎯 Testing Real Proposal Creation from Frontend...');
+            
+            removeMessages();
+            showMessage('🔄 Testing real proposal creation process...', 'info');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    console.log('✅ Real proposal test result:', result);
+                    
+                    if (result.success) {
+                        let message = `✅ Test Complete!<br>`;
+                        
+                        if (result.result && result.result.success) {
+                            message += `📄 Proposal: ${result.result.proposalId}<br>`;
+                            
+                            if (result.result.pdfResult) {
+                                if (result.result.pdfResult.success) {
+                                    message += `📄 PDF: Generated successfully<br>`;
+                                    
+                                    if (result.result.pdfResult.clientFolder && result.result.pdfResult.clientFolder.success) {
+                                        message += `✅ PDF saved to client folder!<br>`;
+                                        message += `📁 URL: ${result.result.pdfResult.clientFolder.clientPdfUrl}`;
+                                    } else {
+                                        message += `❌ PDF NOT saved to client folder<br>`;
+                                        message += `❌ Error: ${result.result.pdfResult.clientFolder ? result.result.pdfResult.clientFolder.error : 'Unknown error'}`;
+                                    }
+                                } else {
+                                    message += `❌ PDF generation failed: ${result.result.pdfResult.error}`;
+                                }
+                            } else {
+                                message += `❌ No PDF result`;
+                            }
+                        } else {
+                            message += `❌ Proposal creation failed: ${result.result ? result.result.error : 'Unknown error'}`;
+                        }
+                        
+                        showSuccessMessage(message);
+                    } else {
+                        showErrorMessage(`❌ Test Failed: ${result.error || 'Unknown error'}`);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('❌ Frontend test failed:', error);
+                    showErrorMessage(`❌ Frontend Test Failed: ${error.message}`);
+                })
+                .testRealProposalCreation();
+        }
+        
+        // Test manual file copy
+        function testManualCopy() {
+            console.log('📋 Testing Manual File Copy from Frontend...');
+            
+            removeMessages();
+            showMessage('🔄 Testing manual file copy to client folder...', 'info');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    console.log('✅ Manual copy test result:', result);
+                    
+                    if (result.success) {
+                        showSuccessMessage(`✅ Manual File Copy Test Passed!<br>
+                                         📁 Client: ${result.testClient.CompanyName}<br>
+                                         📁 Folder: ${result.folderResult.clientFolderName}<br>
+                                         ✅ File creation and verification successful`);
+                    } else {
+                        showErrorMessage(`❌ Manual Copy Test Failed: ${result.error || 'Unknown error'}`);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('❌ Frontend manual copy test failed:', error);
+                    showErrorMessage(`❌ Frontend Manual Copy Test Failed: ${error.message}`);
+                })
+                .testManualClientFolderCopy();
         }
     </script>
 </body>
