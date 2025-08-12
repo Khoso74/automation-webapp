@@ -2978,3 +2978,93 @@ function createTestProposalForTesting() {
     };
   }
 }
+
+/**
+ * VERIFY DEPLOYMENT - Check if latest code is deployed
+ */
+function verifyDeploymentStatus() {
+  try {
+    console.log('🔍 === DEPLOYMENT VERIFICATION ===');
+    
+    const timestamp = new Date().toISOString();
+    console.log('🕐 Current time:', timestamp);
+    
+    // Test the current doPost implementation
+    const mockRequest = {
+      parameter: {
+        action: 'acceptProposal',
+        proposalId: 'VERIFICATION_TEST'
+      }
+    };
+    
+    console.log('🧪 Testing current doPost implementation...');
+    
+    try {
+      const response = doPost(mockRequest);
+      const responseType = typeof response;
+      const hasCreateHtmlOutput = response && response.getContent;
+      
+      console.log('📥 Response type:', responseType);
+      console.log('📄 Is HtmlOutput:', hasCreateHtmlOutput);
+      
+      // Check if it's using the NEW simplified version
+      if (hasCreateHtmlOutput) {
+        const content = response.getContent();
+        const isSimplified = content.includes('Proposal Accepted!') && content.includes('text-align: center');
+        
+        return {
+          success: true,
+          deploymentStatus: isSimplified ? 'NEW_SIMPLIFIED' : 'OLD_COMPLEX',
+          message: isSimplified ? 'Latest simplified code is deployed!' : 'Old complex code still deployed!',
+          timestamp: timestamp,
+          details: {
+            responseWorking: true,
+            isHtmlOutput: hasCreateHtmlOutput,
+            isSimplifiedVersion: isSimplified,
+            contentPreview: content.substring(0, 200) + '...'
+          },
+          recommendations: isSimplified ? [
+            '✅ Code is properly deployed',
+            '✅ Using simplified HTML response',
+            '✅ Should work without serialization errors',
+            '🔍 If still getting errors, it\'s a browser cache issue'
+          ] : [
+            '❌ OLD CODE STILL DEPLOYED!',
+            '🔴 CRITICAL: Need to redeploy immediately',
+            '🔴 Archive current deployment completely',
+            '🔴 Create brand new deployment'
+          ]
+        };
+      } else {
+        return {
+          success: false,
+          deploymentStatus: 'BROKEN',
+          message: 'doPost not returning proper HTML response',
+          timestamp: timestamp,
+          error: 'Response is not HtmlOutput object'
+        };
+      }
+      
+    } catch (error) {
+      console.error('❌ doPost test failed:', error);
+      return {
+        success: false,
+        deploymentStatus: 'ERROR',
+        message: 'doPost function has errors',
+        timestamp: timestamp,
+        error: error.message,
+        stack: error.stack
+      };
+    }
+    
+  } catch (error) {
+    console.error('❌ Deployment verification failed:', error);
+    return {
+      success: false,
+      deploymentStatus: 'VERIFICATION_FAILED',
+      message: 'Could not verify deployment',
+      timestamp: timestamp,
+      error: error.message
+    };
+  }
+}

@@ -1890,6 +1890,14 @@
                             <span class="action-btn-desc">For testing acceptance</span>
                         </div>
                     </button>
+                    
+                    <button class="action-btn" onclick="verifyDeployment()" style="background: linear-gradient(135deg, #17a2b8, #138496);">
+                        <span class="action-btn-icon">🔍</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Verify Deployment</span>
+                            <span class="action-btn-desc">Check code version</span>
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>
@@ -5398,6 +5406,67 @@
                          showErrorMessage(`❌ CRITICAL: Test Proposal Creation Failed: ${error.message}`);
                      })
                      .createTestProposalForTesting();
+             }
+             
+             // Verify deployment status
+             function verifyDeployment() {
+                 console.log('🔍 Verifying deployment status...');
+                 
+                 removeMessages();
+                 showMessage('🔍 Checking if latest code is deployed...', 'info');
+                 
+                 google.script.run
+                     .withSuccessHandler(function(result) {
+                         console.log('🔍 Deployment verification result:', result);
+                         
+                         if (result.success) {
+                             let message = `🔍 DEPLOYMENT VERIFICATION COMPLETE!<br><br>`;
+                             
+                             message += `<strong>📊 Status: ${result.deploymentStatus}</strong><br>`;
+                             message += `📝 ${result.message}<br>`;
+                             message += `🕐 Checked at: ${result.timestamp}<br><br>`;
+                             
+                             if (result.details) {
+                                 message += `<strong>🔧 Technical Details:</strong><br>`;
+                                 message += `✅ Response Working: ${result.details.responseWorking}<br>`;
+                                 message += `📄 HTML Output: ${result.details.isHtmlOutput}<br>`;
+                                 message += `🆕 Simplified Version: ${result.details.isSimplifiedVersion}<br><br>`;
+                                 
+                                 message += `<strong>📋 Content Preview:</strong><br>`;
+                                 message += `<code style="background: #f8f9fa; padding: 10px; display: block; font-size: 12px; overflow-wrap: break-word;">${result.details.contentPreview}</code><br>`;
+                             }
+                             
+                             message += `<strong>💡 Recommendations:</strong><br>`;
+                             result.recommendations.forEach(rec => {
+                                 const color = rec.includes('❌') || rec.includes('🔴') ? 'color: #dc3545;' : 
+                                              rec.includes('✅') ? 'color: #28a745;' : 'color: #666;';
+                                 message += `<span style="${color}">${rec}</span><br>`;
+                             });
+                             
+                             if (result.deploymentStatus === 'NEW_SIMPLIFIED') {
+                                 message += `<br><strong>🎯 CONCLUSION:</strong><br>`;
+                                 message += `<span style="color: #28a745;">✅ Code is properly deployed!</span><br>`;
+                                 message += `<span style="color: #007bff;">🔍 If still getting errors = Browser cache issue</span><br>`;
+                                 message += `<span style="color: #6c757d;">💡 Clear browser cache completely and try again</span><br>`;
+                             } else {
+                                 message += `<br><strong>🚨 CRITICAL ACTION REQUIRED:</strong><br>`;
+                                 message += `<span style="color: #dc3545;">🔴 Must redeploy Apps Script immediately!</span><br>`;
+                             }
+                             
+                             showSuccessMessage(message);
+                         } else {
+                             let errorMessage = `❌ DEPLOYMENT VERIFICATION FAILED!<br><br>`;
+                             errorMessage += `📊 Status: ${result.deploymentStatus}<br>`;
+                             errorMessage += `❌ Error: ${result.error || 'Unknown error'}<br>`;
+                             
+                             showErrorMessage(errorMessage);
+                         }
+                     })
+                     .withFailureHandler(function(error) {
+                         console.error('❌ Deployment verification failed:', error);
+                         showErrorMessage(`❌ CRITICAL: Verification Failed: ${error.message}`);
+                     })
+                     .verifyDeploymentStatus();
              }
          </script>
      </body>
