@@ -254,6 +254,26 @@ function checkSheetData() {
 }
 
 /**
+ * Quick function to test if backend is working
+ */
+function testBackendWorking() {
+  try {
+    console.log('Backend is working!');
+    return {
+      status: 'working',
+      timestamp: new Date().toISOString(),
+      message: 'Backend connection successful'
+    };
+  } catch (error) {
+    console.error('Backend test failed:', error);
+    return {
+      status: 'error',
+      error: error.message
+    };
+  }
+}
+
+/**
  * OPTIMIZED: Get all clients with better performance
  */
 function getAllClients() {

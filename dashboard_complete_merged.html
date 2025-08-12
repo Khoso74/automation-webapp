@@ -2906,6 +2906,37 @@
 
         // Make test function available globally
         window.testClientLoading = testClientLoading;
+        
+        // Emergency debug function
+        function emergencyTest() {
+            console.log('=== EMERGENCY TEST ===');
+            
+            // Test 1: Backend connection
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    console.log('✅ Backend test:', result);
+                    alert(`Backend Status: ${result.status}\nMessage: ${result.message}`);
+                    
+                    // Test 2: Try original getAllClients
+                    google.script.run
+                        .withSuccessHandler(function(clients) {
+                            console.log('✅ getAllClients:', clients);
+                            alert(`getAllClients: Found ${clients ? clients.length : 0} clients`);
+                        })
+                        .withFailureHandler(function(error) {
+                            console.error('❌ getAllClients failed:', error);
+                            alert('getAllClients failed: ' + error);
+                        })
+                        .getAllClients();
+                })
+                .withFailureHandler(function(error) {
+                    console.error('❌ Backend test failed:', error);
+                    alert('Backend test failed: ' + error);
+                })
+                .testBackendWorking();
+        }
+        
+        window.emergencyTest = emergencyTest;
 
         // Form submission handlers
         function submitClientForm(event) {
@@ -3616,9 +3647,9 @@
             }
         }
 
-        // Direct client loading with immediate feedback
+        // Direct client loading with immediate feedback - SIMPLIFIED
         function loadClientsDirectly(modalId) {
-            console.log('=== DIRECT CLIENT LOADING ===');
+            console.log('=== DIRECT CLIENT LOADING (SIMPLIFIED) ===');
             
             // Show loading in dropdowns immediately
             const clientSelects = {
@@ -3633,76 +3664,89 @@
             if (selectElement) {
                 selectElement.innerHTML = '<option value="">🔄 Loading clients...</option>';
                 
-                // First check if there's any data at all
+                // Try multiple methods in sequence
+                console.log('Trying getAllClients method...');
+                
                 google.script.run
-                    .withSuccessHandler(function(dataCheck) {
-                        console.log('✅ Sheet data check result:', dataCheck);
+                    .withSuccessHandler(function(clients) {
+                        console.log('✅ getAllClients result:', clients);
                         
-                        if (!dataCheck.hasData) {
-                            selectElement.innerHTML = '<option value="">No clients in database - Add clients first</option>';
-                            console.log('❌ No client data found in sheet');
-                            return;
-                        }
-                        
-                        console.log('✅ Data exists, trying to load clients...');
-                        
-                        // Try the simple method
-                        google.script.run
-                            .withSuccessHandler(function(clients) {
-                                console.log('✅ getAllClientsSimple result:', clients);
-                                
-                                if (clients && Array.isArray(clients) && clients.length > 0) {
-                                    let options = '<option value="">Choose your client...</option>';
-                                    clients.forEach(client => {
-                                        const companyName = client.CompanyName || client.companyName || 'Unknown Company';
-                                        const clientId = client.ClientID || client.clientId || 'No-ID';
-                                        const displayName = `${companyName} (${clientId})`;
-                                        options += `<option value="${clientId}">${displayName}</option>`;
-                                    });
-                                    selectElement.innerHTML = options;
-                                    console.log(`✅ Successfully loaded ${clients.length} clients in ${selectId}`);
-                                } else {
-                                    console.log('Simple method returned empty/null, trying basic test...');
+                        if (clients && Array.isArray(clients) && clients.length > 0) {
+                            populateDropdownWithClients(selectElement, clients, selectId);
+                        } else {
+                            console.log('getAllClients empty, trying getAllClientsSimple...');
+                            
+                            google.script.run
+                                .withSuccessHandler(function(simpleClients) {
+                                    console.log('✅ getAllClientsSimple result:', simpleClients);
                                     
-                                    // Fallback to basic test
-                                    google.script.run
-                                        .withSuccessHandler(function(basicClients) {
-                                            console.log('✅ getClientsTest result:', basicClients);
-                                            
-                                            if (basicClients && Array.isArray(basicClients) && basicClients.length > 0) {
-                                                let options = '<option value="">Choose your client...</option>';
-                                                basicClients.forEach(client => {
-                                                    const displayName = `${client.CompanyName} (${client.ClientID})`;
-                                                    options += `<option value="${client.ClientID}">${displayName}</option>`;
-                                                });
-                                                selectElement.innerHTML = options;
-                                                console.log(`✅ Basic method loaded ${basicClients.length} clients`);
-                                            } else {
-                                                selectElement.innerHTML = '<option value="">Failed to load clients - Check Apps Script console</option>';
-                                                console.error('❌ All methods failed to return client data');
-                                            }
-                                        })
-                                        .withFailureHandler(function(error) {
-                                            console.error('❌ Basic method also failed:', error);
-                                            selectElement.innerHTML = '<option value="">All loading methods failed</option>';
-                                        })
-                                        .getClientsTest();
+                                    if (simpleClients && Array.isArray(simpleClients) && simpleClients.length > 0) {
+                                        populateDropdownWithClients(selectElement, simpleClients, selectId);
+                                    } else {
+                                        console.log('Simple method empty, trying getClientsTest...');
+                                        
+                                        google.script.run
+                                            .withSuccessHandler(function(testClients) {
+                                                console.log('✅ getClientsTest result:', testClients);
+                                                
+                                                if (testClients && Array.isArray(testClients) && testClients.length > 0) {
+                                                    populateDropdownWithClients(selectElement, testClients, selectId);
+                                                } else {
+                                                    selectElement.innerHTML = '<option value="">No clients found - Add clients first</option>';
+                                                    console.error('❌ All methods returned empty data');
+                                                }
+                                            })
+                                            .withFailureHandler(function(error) {
+                                                console.error('❌ getClientsTest failed:', error);
+                                                selectElement.innerHTML = '<option value="">Error: Test method failed</option>';
+                                            })
+                                            .getClientsTest();
+                                    }
+                                })
+                                .withFailureHandler(function(error) {
+                                    console.error('❌ getAllClientsSimple failed:', error);
+                                    selectElement.innerHTML = '<option value="">Error: Simple method failed</option>';
+                                })
+                                .getAllClientsSimple();
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        console.error('❌ getAllClients failed:', error);
+                        console.log('Main method failed, trying simple method...');
+                        
+                        google.script.run
+                            .withSuccessHandler(function(simpleClients) {
+                                if (simpleClients && Array.isArray(simpleClients) && simpleClients.length > 0) {
+                                    populateDropdownWithClients(selectElement, simpleClients, selectId);
+                                } else {
+                                    selectElement.innerHTML = '<option value="">No clients - Add clients first</option>';
                                 }
                             })
-                            .withFailureHandler(function(error) {
-                                console.error('❌ Simple method failed:', error);
-                                selectElement.innerHTML = '<option value="">Error loading clients - Check console</option>';
+                            .withFailureHandler(function(simpleError) {
+                                console.error('❌ Fallback also failed:', simpleError);
+                                selectElement.innerHTML = '<option value="">Connection error - Reload page</option>';
                             })
                             .getAllClientsSimple();
                     })
-                    .withFailureHandler(function(error) {
-                        console.error('❌ Sheet data check failed:', error);
-                        selectElement.innerHTML = '<option value="">Cannot access sheet data</option>';
-                    })
-                    .checkSheetData();
+                    .getAllClients();
             } else {
                 console.error('Select element not found:', selectId);
             }
+        }
+        
+        // Helper function to populate dropdown
+        function populateDropdownWithClients(selectElement, clients, selectId) {
+            let options = '<option value="">Choose your client...</option>';
+            
+            clients.forEach(client => {
+                const companyName = client.CompanyName || client.companyName || 'Unknown Company';
+                const clientId = client.ClientID || client.clientId || client.ClientID || 'No-ID';
+                const displayName = `${companyName} (${clientId})`;
+                options += `<option value="${clientId}">${displayName}</option>`;
+            });
+            
+            selectElement.innerHTML = options;
+            console.log(`✅ Successfully loaded ${clients.length} clients in ${selectId}`);
         }
         
         function closeModal(modalId) {
