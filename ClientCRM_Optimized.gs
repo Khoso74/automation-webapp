@@ -274,6 +274,89 @@ function testBackendWorking() {
 }
 
 /**
+ * CUSTOM DROPDOWN FUNCTIONS - For proposal form
+ * Enhanced client retrieval for custom dropdown
+ */
+
+/**
+ * Get clients optimized for custom dropdown
+ * Returns clean array with ClientID and CompanyName
+ */
+function getClientsForDropdown() {
+  try {
+    console.log('🔄 Fetching clients for custom dropdown...');
+    
+    const spreadsheet = getSpreadsheet();
+    const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
+    
+    if (!clientsSheet) {
+      console.error('Clients sheet not found');
+      return [];
+    }
+    
+    const data = clientsSheet.getDataRange().getValues();
+    
+    if (data.length <= 1) {
+      console.log('No client data found');
+      return [];
+    }
+    
+    const headers = data[0];
+    console.log('Sheet headers:', headers);
+    
+    // Find column indices with flexible matching
+    const clientIdCol = findColumnIndex(headers, ['Client ID', 'ClientID', 'ID']);
+    const companyNameCol = findColumnIndex(headers, ['Company Name', 'CompanyName', 'Company', 'Name']);
+    const statusCol = findColumnIndex(headers, ['Status']);
+    
+    // Process client data
+    const clients = [];
+    
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      
+      // Skip empty rows
+      if (!row[clientIdCol] && !row[companyNameCol]) {
+        continue;
+      }
+      
+      const client = {
+        ClientID: row[clientIdCol] || `AUTO-${i}`,
+        CompanyName: row[companyNameCol] || 'Unknown Company',
+        Status: row[statusCol] || 'Active'
+      };
+      
+      // Only include active clients
+      if (client.Status.toLowerCase() !== 'inactive') {
+        clients.push(client);
+        console.log(`✅ Added dropdown client: ${client.CompanyName} (${client.ClientID})`);
+      }
+    }
+    
+    console.log(`✅ Dropdown clients loaded: ${clients.length}`);
+    return clients;
+    
+  } catch (error) {
+    console.error('Error fetching dropdown clients:', error);
+    console.error('Error stack:', error.stack);
+    return [];
+  }
+}
+
+/**
+ * Helper function to find column index by multiple possible names
+ */
+function findColumnIndex(headers, possibleNames) {
+  for (let name of possibleNames) {
+    const index = headers.findIndex(header => 
+      header.toString().toLowerCase().replace(/\s+/g, '') === name.toLowerCase().replace(/\s+/g, '')
+    );
+    if (index !== -1) return index;
+  }
+  return -1; // Not found
+}
+
+/**
  * OPTIMIZED: Get all clients with better performance
  */
 function getAllClients() {

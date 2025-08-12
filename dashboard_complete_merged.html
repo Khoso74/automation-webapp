@@ -2978,6 +2978,358 @@
         }
         
         window.testDropdownNow = testDropdownNow;
+        
+        /**
+         * CUSTOM DROPDOWN IMPLEMENTATION
+         * Professional dropdown with no browser arrows
+         */
+        
+        // Custom Dropdown Class for Clean Implementation
+        class ProfessionalDropdown {
+            constructor(containerId, options = {}) {
+                this.container = document.getElementById(containerId);
+                this.options = {
+                    placeholder: 'Choose an option...',
+                    noDataText: 'No options available',
+                    loadingText: 'Loading...',
+                    ...options
+                };
+                
+                this.isOpen = false;
+                this.selectedValue = '';
+                this.selectedText = '';
+                this.data = [];
+                
+                if (this.container) {
+                    this.init();
+                }
+            }
+            
+            init() {
+                this.createDropdownHTML();
+                this.attachEvents();
+            }
+            
+            createDropdownHTML() {
+                this.container.innerHTML = `
+                    <div class="pro-dropdown">
+                        <div class="pro-dropdown-button" id="${this.container.id}_button">
+                            <span class="pro-dropdown-text">${this.options.placeholder}</span>
+                            <div class="pro-dropdown-arrow"></div>
+                        </div>
+                        <div class="pro-dropdown-menu" id="${this.container.id}_menu">
+                            <div class="pro-dropdown-loading">${this.options.loadingText}</div>
+                        </div>
+                    </div>
+                `;
+                
+                this.button = document.getElementById(`${this.container.id}_button`);
+                this.text = this.button.querySelector('.pro-dropdown-text');
+                this.menu = document.getElementById(`${this.container.id}_menu`);
+            }
+            
+            attachEvents() {
+                // Toggle dropdown
+                this.button.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggle();
+                });
+                
+                // Close on outside click
+                document.addEventListener('click', (e) => {
+                    if (!this.container.contains(e.target)) {
+                        this.close();
+                    }
+                });
+            }
+            
+            toggle() {
+                if (this.isOpen) {
+                    this.close();
+                } else {
+                    this.open();
+                }
+            }
+            
+            open() {
+                this.isOpen = true;
+                this.button.classList.add('active');
+                this.menu.classList.add('open');
+            }
+            
+            close() {
+                this.isOpen = false;
+                this.button.classList.remove('active');
+                this.menu.classList.remove('open');
+            }
+            
+            loadData(fetchFunction) {
+                this.menu.innerHTML = `<div class="pro-dropdown-loading">${this.options.loadingText}</div>`;
+                
+                google.script.run
+                    .withSuccessHandler((data) => {
+                        this.data = data || [];
+                        this.populateMenu();
+                    })
+                    .withFailureHandler((error) => {
+                        console.error('Dropdown data loading failed:', error);
+                        this.menu.innerHTML = `<div class="pro-dropdown-error">Failed to load data</div>`;
+                    })[fetchFunction]();
+            }
+            
+            populateMenu() {
+                this.menu.innerHTML = '';
+                
+                if (!this.data || this.data.length === 0) {
+                    this.menu.innerHTML = `<div class="pro-dropdown-no-data">${this.options.noDataText}</div>`;
+                    return;
+                }
+                
+                this.data.forEach((item, index) => {
+                    const option = document.createElement('div');
+                    option.className = 'pro-dropdown-option';
+                    option.textContent = item.CompanyName || item.text || `Option ${index + 1}`;
+                    option.dataset.value = item.ClientID || item.value || item.CompanyName;
+                    option.dataset.text = option.textContent;
+                    
+                    option.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.selectOption(option.dataset.value, option.dataset.text);
+                    });
+                    
+                    this.menu.appendChild(option);
+                });
+            }
+            
+            selectOption(value, text) {
+                this.selectedValue = value;
+                this.selectedText = text;
+                
+                this.text.textContent = text;
+                this.text.classList.add('selected');
+                
+                // Update visual selection
+                this.menu.querySelectorAll('.pro-dropdown-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                const selectedOption = this.menu.querySelector(`[data-value="${value}"]`);
+                if (selectedOption) {
+                    selectedOption.classList.add('selected');
+                }
+                
+                this.close();
+                
+                // Trigger change event
+                const changeEvent = new CustomEvent('dropdownChange', {
+                    detail: { value: this.selectedValue, text: this.selectedText }
+                });
+                this.container.dispatchEvent(changeEvent);
+                
+                console.log(`✅ Selected: ${text} (${value})`);
+            }
+            
+            getValue() {
+                return this.selectedValue;
+            }
+            
+            getText() {
+                return this.selectedText;
+            }
+            
+            reset() {
+                this.selectedValue = '';
+                this.selectedText = '';
+                this.text.textContent = this.options.placeholder;
+                this.text.classList.remove('selected');
+                
+                this.menu.querySelectorAll('.pro-dropdown-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+            }
+        }
+        
+        // CSS for Professional Dropdown (inject into head)
+        function injectDropdownCSS() {
+            const style = document.createElement('style');
+            style.textContent = `
+                /* Professional Dropdown Styles */
+                .pro-dropdown {
+                    position: relative;
+                    width: 100%;
+                }
+                
+                .pro-dropdown-button {
+                    width: 100%;
+                    padding: 12px 16px;
+                    background: white;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    font-size: 14px;
+                    color: #333;
+                    transition: all 0.2s ease;
+                    min-height: 44px;
+                    box-sizing: border-box;
+                }
+                
+                .pro-dropdown-button:hover {
+                    border-color: #667eea;
+                    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+                }
+                
+                .pro-dropdown-button.active {
+                    border-color: #667eea;
+                    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+                }
+                
+                .pro-dropdown-text {
+                    flex: 1;
+                    text-align: left;
+                    color: #999;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                
+                .pro-dropdown-text.selected {
+                    color: #333;
+                    font-weight: 500;
+                }
+                
+                .pro-dropdown-arrow {
+                    width: 16px;
+                    height: 16px;
+                    position: relative;
+                    margin-left: 8px;
+                    flex-shrink: 0;
+                }
+                
+                .pro-dropdown-arrow::before {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) rotate(45deg);
+                    width: 6px;
+                    height: 6px;
+                    border-right: 2px solid #667eea;
+                    border-bottom: 2px solid #667eea;
+                    transition: transform 0.2s ease;
+                }
+                
+                .pro-dropdown-button.active .pro-dropdown-arrow::before {
+                    transform: translate(-50%, -50%) rotate(-135deg);
+                }
+                
+                .pro-dropdown-menu {
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    width: 100%;
+                    background: white;
+                    border: 2px solid #e0e0e0;
+                    border-top: none;
+                    border-radius: 0 0 8px 8px;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    z-index: 1000;
+                    opacity: 0;
+                    visibility: hidden;
+                    transform: translateY(-5px);
+                    transition: all 0.2s ease;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                }
+                
+                .pro-dropdown-menu.open {
+                    opacity: 1;
+                    visibility: visible;
+                    transform: translateY(0);
+                }
+                
+                .pro-dropdown-option {
+                    padding: 12px 16px;
+                    cursor: pointer;
+                    border-bottom: 1px solid #f0f0f0;
+                    transition: background-color 0.15s ease;
+                    font-size: 14px;
+                    color: #333;
+                }
+                
+                .pro-dropdown-option:last-child {
+                    border-bottom: none;
+                }
+                
+                .pro-dropdown-option:hover {
+                    background-color: #f8f9ff;
+                    color: #667eea;
+                }
+                
+                .pro-dropdown-option.selected {
+                    background-color: #667eea;
+                    color: white;
+                }
+                
+                .pro-dropdown-loading,
+                .pro-dropdown-no-data,
+                .pro-dropdown-error {
+                    padding: 12px 16px;
+                    text-align: center;
+                    color: #999;
+                    font-style: italic;
+                    font-size: 14px;
+                }
+                
+                .pro-dropdown-error {
+                    color: #dc3545;
+                }
+                
+                .pro-dropdown-no-data {
+                    color: #6c757d;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Initialize professional dropdown
+        function initProfessionalDropdown() {
+            injectDropdownCSS();
+            
+            // Example usage for client dropdown
+            window.clientDropdown = new ProfessionalDropdown('clientDropdownContainer', {
+                placeholder: 'Select a client...',
+                noDataText: 'No clients found – Add clients first',
+                loadingText: '🔄 Loading clients...'
+            });
+            
+            // Load client data
+            if (window.clientDropdown) {
+                window.clientDropdown.loadData('getClientsForDropdown');
+                
+                // Listen for selection changes
+                document.getElementById('clientDropdownContainer').addEventListener('dropdownChange', function(e) {
+                    console.log('Client selected:', e.detail);
+                    // Update hidden input if exists
+                    const hiddenInput = document.getElementById('selectedClientId');
+                    if (hiddenInput) {
+                        hiddenInput.value = e.detail.value;
+                    }
+                });
+            }
+        }
+        
+        // Global function to create professional dropdown
+        window.createProfessionalDropdown = function(containerId, options = {}) {
+            return new ProfessionalDropdown(containerId, options);
+        };
+        
+        // Auto-initialize if container exists
+        if (document.getElementById('clientDropdownContainer')) {
+            initProfessionalDropdown();
+        }
 
         // Form submission handlers
         function submitClientForm(event) {
