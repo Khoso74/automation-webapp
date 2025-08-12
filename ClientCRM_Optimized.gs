@@ -99,37 +99,83 @@ function getAllClientsSimple() {
     console.log('=== SIMPLE CLIENT RETRIEVAL ===');
     const spreadsheet = getSpreadsheet();
     const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
-    const data = clientsSheet.getDataRange().getValues();
     
-    console.log('Raw sheet data:', data);
+    // Get all data
+    const data = clientsSheet.getDataRange().getValues();
+    console.log('Raw sheet data rows:', data.length);
+    console.log('First few rows:', data.slice(0, 3));
     
     if (data.length <= 1) {
-      console.log('No client data found');
+      console.log('No client data found (only headers or empty)');
       return [];
     }
     
     const headers = data[0];
-    console.log('Headers:', headers);
+    console.log('Sheet headers:', headers);
     
-    const clients = data.slice(1).map(row => {
-      const client = {
-        ClientID: row[0],
-        CompanyName: row[1],
-        ContactName: row[2],
-        Email: row[3],
-        Phone: row[4],
-        Address: row[5],
-        CreatedDate: row[6],
-        Status: row[7]
-      };
-      return client;
-    });
+    // Process each client row
+    const clients = [];
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      if (row[0]) { // Only if ClientID exists
+        const client = {
+          ClientID: row[0],
+          CompanyName: row[1] || 'Unknown Company',
+          ContactName: row[2] || 'Unknown Contact',
+          Email: row[3] || '',
+          Phone: row[4] || '',
+          Address: row[5] || '',
+          CreatedDate: row[6] || new Date(),
+          Status: row[7] || 'Active'
+        };
+        clients.push(client);
+        console.log(`Client ${i}: ${client.CompanyName} (${client.ClientID})`);
+      }
+    }
     
-    console.log('Processed clients:', clients);
+    console.log(`Total clients processed: ${clients.length}`);
+    console.log('=== SIMPLE CLIENT RETRIEVAL SUCCESS ===');
     return clients;
     
   } catch (error) {
-    console.error('Simple client retrieval failed:', error);
+    console.error('=== SIMPLE CLIENT RETRIEVAL ERROR ===');
+    console.error('Error details:', error);
+    console.error('Error stack:', error.stack);
+    return [];
+  }
+}
+
+/**
+ * Even simpler test function - just returns basic data
+ */
+function getClientsTest() {
+  try {
+    console.log('=== BASIC CLIENT TEST ===');
+    const spreadsheet = getSpreadsheet();
+    const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
+    const lastRow = clientsSheet.getLastRow();
+    
+    console.log('Sheet last row:', lastRow);
+    
+    if (lastRow <= 1) {
+      return [];
+    }
+    
+    // Get just the first few columns we need
+    const range = clientsSheet.getRange(2, 1, lastRow - 1, 3);
+    const values = range.getValues();
+    
+    const clients = values.map(row => ({
+      ClientID: row[0],
+      CompanyName: row[1],
+      ContactName: row[2]
+    })).filter(client => client.ClientID);
+    
+    console.log('Basic test clients:', clients);
+    return clients;
+    
+  } catch (error) {
+    console.error('Basic client test failed:', error);
     return [];
   }
 }

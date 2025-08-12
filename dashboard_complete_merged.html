@@ -787,18 +787,20 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* Enhanced Select Styling */
+        /* Enhanced Select Styling - Fixed Arrow Positioning */
         .form-select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23667eea' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 22px center;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23667eea' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 15px center;
             background-repeat: no-repeat;
-            background-size: 18px;
+            background-size: 14px;
             appearance: none;
             cursor: pointer;
+            padding-right: 45px !important;
         }
 
         .form-select:focus {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23764ba2' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23764ba2' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 15px center;
         }
 
         /* Input Icons - Fixed Overlap Issue */
@@ -2845,6 +2847,49 @@
         // Make test function globally available
         window.testBackendConnection = testBackendConnection;
 
+        // Manual client loading test function
+        function testClientLoading() {
+            console.log('=== MANUAL CLIENT LOADING TEST ===');
+            
+            // Test multiple methods
+            console.log('Testing getAllClientsSimple...');
+            google.script.run
+                .withSuccessHandler(function(clients) {
+                    console.log('✅ getAllClientsSimple result:', clients);
+                    
+                    if (clients && clients.length > 0) {
+                        console.log('Sample client:', clients[0]);
+                        console.log('Client keys:', Object.keys(clients[0]));
+                        alert(`✅ Simple method: Found ${clients.length} clients\nFirst client: ${clients[0].CompanyName}`);
+                    } else {
+                        console.log('No clients from simple method, trying basic test...');
+                        
+                        // Try the even simpler method
+                        google.script.run
+                            .withSuccessHandler(function(basicClients) {
+                                console.log('✅ getClientsTest result:', basicClients);
+                                if (basicClients && basicClients.length > 0) {
+                                    alert(`✅ Basic method: Found ${basicClients.length} clients\nFirst client: ${basicClients[0].CompanyName}`);
+                                } else {
+                                    alert('❌ No clients found with any method');
+                                }
+                            })
+                            .withFailureHandler(function(error) {
+                                alert('❌ All methods failed: ' + error);
+                            })
+                            .getClientsTest();
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('❌ getAllClientsSimple failed:', error);
+                    alert('❌ Simple method failed: ' + error);
+                })
+                .getAllClientsSimple();
+        }
+
+        // Make test function available globally
+        window.testClientLoading = testClientLoading;
+
         // Form submission handlers
         function submitClientForm(event) {
             event.preventDefault();
@@ -3540,13 +3585,62 @@
                 modal.style.display = 'block';
                 document.body.style.overflow = 'hidden';
                 
-                // Load data for specific modals
+                console.log(`Opening modal: ${modalId}`);
+                
+                // Load data for specific modals with immediate debugging
                 if (modalId === 'proposalModal' || modalId === 'invoiceModal' || modalId === 'projectModal') {
-                    loadClients();
+                    console.log('Loading clients for modal:', modalId);
+                    loadClientsDirectly(modalId);
                 }
                 if (modalId === 'invoiceModal') {
+                    console.log('Loading projects for invoice modal');
                     loadProjects();
                 }
+            }
+        }
+
+        // Direct client loading with immediate feedback
+        function loadClientsDirectly(modalId) {
+            console.log('=== DIRECT CLIENT LOADING ===');
+            
+            // Show loading in dropdowns immediately
+            const clientSelects = {
+                'proposalModal': 'proposalClient',
+                'invoiceModal': 'invoiceClient', 
+                'projectModal': 'projectClient'
+            };
+            
+            const selectId = clientSelects[modalId];
+            const selectElement = document.getElementById(selectId);
+            
+            if (selectElement) {
+                selectElement.innerHTML = '<option value="">🔄 Loading clients...</option>';
+                
+                // Test with the simple method first
+                google.script.run
+                    .withSuccessHandler(function(clients) {
+                        console.log('✅ Direct client loading successful:', clients);
+                        
+                        if (clients && clients.length > 0) {
+                            let options = '<option value="">Choose your client...</option>';
+                            clients.forEach(client => {
+                                const displayName = `${client.CompanyName || client.companyName || 'Unknown Company'} (${client.ClientID || client.clientId || 'No-ID'})`;
+                                options += `<option value="${client.ClientID || client.clientId}">${displayName}</option>`;
+                            });
+                            selectElement.innerHTML = options;
+                            console.log(`✅ Successfully loaded ${clients.length} clients in ${selectId}`);
+                        } else {
+                            selectElement.innerHTML = '<option value="">No clients found - Add a client first</option>';
+                            console.log('❌ No clients found');
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        console.error('❌ Direct client loading failed:', error);
+                        selectElement.innerHTML = '<option value="">Error loading clients</option>';
+                    })
+                    .getAllClientsSimple();
+            } else {
+                console.error('Select element not found:', selectId);
             }
         }
         
