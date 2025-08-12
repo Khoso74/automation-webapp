@@ -1827,20 +1827,27 @@
                         </div>
                     </button>
                     
+                    <button class="action-btn" onclick="openModal('sendProposalModal')" style="background: linear-gradient(135deg, #17a2b8, #138496);">
+                        <span class="action-btn-icon">📧</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Send Proposal</span>
+                            <span class="action-btn-desc">Email to client</span>
+                        </div>
+                    </button>
+                    
+                    <button class="action-btn" onclick="openModal('sampleProposalModal')" style="background: linear-gradient(135deg, #e83e8c, #dc3545);">
+                        <span class="action-btn-icon">🎨</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Sample Proposal</span>
+                            <span class="action-btn-desc">Preview design</span>
+                        </div>
+                    </button>
+                    
                     <button class="action-btn" onclick="generateReports()">
                         <span class="action-btn-icon">📊</span>
                         <div class="action-btn-text">
                             <span class="action-btn-title">Generate Reports</span>
                             <span class="action-btn-desc">Business analytics</span>
-                        </div>
-                    </button>
-                    
-                    <!-- TEMPORARY DEBUG BUTTON -->
-                    <button class="action-btn" onclick="showTab('debug')" style="background: linear-gradient(135deg, #dc3545, #c82333); border: 2px solid #dc3545;">
-                        <span class="action-btn-icon">🔧</span>
-                        <div class="action-btn-text">
-                            <span class="action-btn-title">Debug Tools</span>
-                            <span class="action-btn-desc">Fix PDF saving</span>
                         </div>
                     </button>
                 </div>
@@ -2023,93 +2030,7 @@
             </div>
         </div>
         
-        <!-- DEBUG TAB (TEMPORARY) -->
-        <div id="debug" class="tab-content">
-            <div class="panel" style="background: #f8f9fa; border-left: 4px solid #dc3545;">
-                <h3 style="color: #dc3545;">🔧 Debug Tools (Temporary)</h3>
-                <p style="margin-bottom: 20px; color: #666;">Use these tools to debug the proposal PDF saving issue:</p>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                    <button onclick="debugClientFolders()" 
-                            style="padding: 15px 20px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                        🔍 Debug Folder Structure
-                    </button>
-                    
-                    <button onclick="testProposalPDFSaving()" 
-                            style="padding: 15px 20px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                        🧪 Test PDF Saving
-                    </button>
-                    
-                    <button onclick="forceCreateClientFolders()" 
-                            style="padding: 15px 20px; background: #ffc107; color: #212529; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                        🔧 Force Create Folders
-                    </button>
-                    
-                                            <button onclick="google.script.run.runAllTests(); showMessage('Running all backend tests...', 'info');" 
-                                style="padding: 15px 20px; background: #6f42c1; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                            🚀 Run All Backend Tests
-                        </button>
-                        
-                        <button onclick="testRealProposalCreation()" 
-                                style="padding: 15px 20px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                            🎯 Test Real Proposal Creation
-                        </button>
-                        
-                        <button onclick="testManualCopy()" 
-                                style="padding: 15px 20px; background: #fd7e14; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                            📋 Test Manual File Copy
-                        </button>
-                        
-                        <button onclick="testPDFGenerationFix()" 
-                                style="padding: 15px 20px; background: #20c997; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                            🔧 Test PDF Fix
-                        </button>
-                        
-                        <button onclick="testCompactPDFDesign()" 
-                                style="padding: 15px 20px; background: #e83e8c; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                            🎨 Test New PDF Design
-                        </button>
-                        
-                        <button onclick="sendProposalToClient()" 
-                                style="padding: 15px 20px; background: #17a2b8; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                            📧 Send Proposal to Client
-                        </button>
-                        
-                        <button onclick="testCompleteProposalWorkflow()" 
-                                style="padding: 15px 20px; background: #6610f2; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                            🔄 Test Complete Workflow (Fixed)
-                        </button>
-                        
-                        <button onclick="testProjectCreation()" 
-                                style="padding: 15px 20px; background: #20c997; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                            🚀 Test Project Creation Only
-                        </button>
-                </div>
-                
-                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px;">
-                    <strong>📋 Complete Proposal System Guide:</strong>
-                    <ol style="margin: 10px 0; padding-left: 20px;">
-                        <li><strong>🎨 Test New PDF Design</strong> - Create proposal with compact 2-page PDF</li>
-                        <li><strong>📧 Send Proposal to Client</strong> - Send proposal via email with automatic sheet updates</li>
-                        <li><strong>🔄 Test Complete Workflow</strong> - Full end-to-end test (create → send → accept)</li>
-                        <li><strong>🔍 Debug Folder Structure</strong> - Check Drive folder structure</li>
-                        <li><strong>🚀 Run All Backend Tests</strong> - Comprehensive system diagnostics</li>
-                    </ol>
-                    <div style="margin: 10px 0; padding: 10px; background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px;">
-                        <p style="margin: 0; font-weight: bold; color: #0c5460;">
-                            🎯 COMPLETE PROPOSAL AUTOMATION SYSTEM READY!
-                        </p>
-                        <p style="margin: 5px 0 0 0; color: #0c5460;">
-                            ✅ Auto PDF generation | ✅ Auto email sending | ✅ Auto sheet updates | ✅ Auto notifications
-                        </p>
-                    </div>
-                </div>
-                
-                <p style="margin-top: 15px; font-size: 12px; color: #999;">
-                    Note: These debug tools will be removed once the issue is resolved.
-                </p>
-            </div>
-        </div>
+
     </div>
 
     <!-- Premium Tools Dialogs -->
@@ -2443,46 +2364,41 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title">
-                    <span class="modal-title-icon">👥</span>
+                    <span class="modal-title-icon">👤</span>
                     Add New Client
                 </h2>
-                <p class="modal-subtitle">Register a new client and build your business network</p>
-                <button class="close" onclick="closeModal('clientModal')">&times;</button>
+                <p class="modal-subtitle">Create a comprehensive client profile</p>
+                <span class="close" onclick="closeModal('clientModal')">&times;</span>
             </div>
             <div class="modal-body">
                 <form id="clientForm" onsubmit="submitClientForm(event)">
                     <div class="form-row">
-                        <div class="form-group with-icon">
-                            <label class="form-label" for="companyName">Company Name *</label>
-                            <input type="text" class="form-input" id="companyName" name="companyName" 
-                                   placeholder="Enter company name..." required>
+                        <div class="form-group">
+                            <label class="form-label">Company Name</label>
+                            <input type="text" class="form-input" name="companyName" required>
                         </div>
-                        <div class="form-group with-icon user-icon">
-                            <label class="form-label" for="contactName">Contact Name *</label>
-                            <input type="text" class="form-input" id="contactName" name="contactName" 
-                                   placeholder="Contact person name..." required>
+                        <div class="form-group">
+                            <label class="form-label">Contact Person</label>
+                            <input type="text" class="form-input" name="contactName" required>
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group with-icon email-icon">
-                            <label class="form-label" for="email">Email Address *</label>
-                            <input type="email" class="form-input" id="email" name="email" 
-                                   placeholder="professional@company.com" required>
+                        <div class="form-group">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-input" name="email" required>
                         </div>
-                        <div class="form-group with-icon phone-icon">
-                            <label class="form-label" for="phone">Phone Number</label>
-                            <input type="tel" class="form-input" id="phone" name="phone" 
-                                   placeholder="+92-300-1234567">
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-input" name="phone" required>
                         </div>
                     </div>
-                    <div class="form-group with-icon address-icon">
-                        <label class="form-label" for="address">Business Address</label>
-                        <textarea class="form-textarea" id="address" name="address" 
-                                  placeholder="Complete business address with city and postal code..."></textarea>
+                    <div class="form-group">
+                        <label class="form-label">Address</label>
+                        <textarea class="form-textarea" name="address" rows="3"></textarea>
                     </div>
                     <div class="modal-actions">
-                        <button type="button" class="modal-btn modal-btn-secondary" onclick="closeModal('clientModal')">Cancel</button>
-                        <button type="submit" class="btn-premium">✨ Create Client</button>
+                        <button type="button" class="modal-btn secondary" onclick="closeModal('clientModal')">Cancel</button>
+                        <button type="submit" class="modal-btn primary">Add Client</button>
                     </div>
                 </form>
             </div>
@@ -2637,6 +2553,73 @@
                     <div class="modal-actions">
                         <button type="button" class="modal-btn modal-btn-secondary" onclick="closeModal('projectModal')">Cancel</button>
                         <button type="submit" class="btn-premium">⚡ Create Project</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Proposal Modal -->
+    <div id="sendProposalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <span class="modal-title-icon">📧</span>
+                    Send Proposal to Client
+                </h2>
+                <p class="modal-subtitle">Send professional proposal with PDF attachment</p>
+                <span class="close" onclick="closeModal('sendProposalModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="sendProposalForm" onsubmit="submitSendProposal(event)">
+                    <div class="form-group">
+                        <label class="form-label">Proposal ID</label>
+                        <input type="text" class="form-input" name="proposalId" placeholder="e.g., PROP17550241653901873" required>
+                        <small style="color: #666; font-size: 12px;">Find Proposal ID from your Proposals sheet</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Personal Message (Optional)</label>
+                        <textarea class="form-textarea" name="personalMessage" rows="4" placeholder="Add a personal note for the client..."></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="modal-btn secondary" onclick="closeModal('sendProposalModal')">Cancel</button>
+                        <button type="submit" class="modal-btn primary">Send Proposal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Sample Proposal Modal -->
+    <div id="sampleProposalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <span class="modal-title-icon">🎨</span>
+                    Create Sample Proposal
+                </h2>
+                <p class="modal-subtitle">Generate a test proposal to preview design</p>
+                <span class="close" onclick="closeModal('sampleProposalModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="sampleProposalForm" onsubmit="submitSampleProposal(event)">
+                    <div class="form-group dropdown-field">
+                        <label class="form-label">Select Client</label>
+                        <select class="form-select" name="clientId" id="sampleProposalClient" required>
+                            <option value="">Select a client...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Sample Project Title</label>
+                        <input type="text" class="form-input" name="title" value="Website Development - Sample Project" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Sample Amount (PKR)</label>
+                        <input type="number" class="form-input" name="amount" value="75000" required>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="modal-btn secondary" onclick="closeModal('sampleProposalModal')">Cancel</button>
+                        <button type="submit" class="modal-btn primary">Create Sample</button>
                     </div>
                 </form>
             </div>
@@ -5029,8 +5012,109 @@
                      console.error('❌ Frontend project creation test failed:', error);
                      showErrorMessage(`❌ Frontend Project Creation Test Failed: ${error.message}`);
                  })
-                 .testProjectCreationOnly();
-         }
-    </script>
-</body>
-</html>
+                                   .testProjectCreationOnly();
+          }
+          
+          // Send Proposal form submission
+          function submitSendProposal(event) {
+              event.preventDefault();
+              
+              const formData = new FormData(event.target);
+              const proposalId = formData.get('proposalId').trim();
+              const personalMessage = formData.get('personalMessage') || '';
+              
+              if (!proposalId) {
+                  showErrorMessage('Please enter a valid Proposal ID');
+                  return;
+              }
+              
+              removeMessages();
+              showMessage('📧 Sending proposal to client...', 'info');
+              
+              // Disable submit button
+              const submitBtn = event.target.querySelector('button[type="submit"]');
+              submitBtn.disabled = true;
+              submitBtn.textContent = 'Sending...';
+              
+              google.script.run
+                  .withSuccessHandler(function(result) {
+                      if (result.success) {
+                          showSuccessMessage(`✅ Proposal Sent Successfully!<br>
+                                           📧 Sent to: ${result.clientEmail}<br>
+                                           📅 Sent Date: ${result.sentDate}<br>
+                                           📊 Sheet automatically updated`);
+                          closeModal('sendProposalModal');
+                      } else {
+                          showErrorMessage(`❌ Failed to Send Proposal: ${result.error || 'Unknown error'}`);
+                      }
+                      
+                      // Re-enable submit button
+                      submitBtn.disabled = false;
+                      submitBtn.textContent = 'Send Proposal';
+                  })
+                  .withFailureHandler(function(error) {
+                      console.error('❌ Frontend send proposal failed:', error);
+                      showErrorMessage(`❌ Send Failed: ${error.message}`);
+                      
+                      // Re-enable submit button
+                      submitBtn.disabled = false;
+                      submitBtn.textContent = 'Send Proposal';
+                  })
+                  .sendProposalToClient(proposalId, personalMessage);
+          }
+          
+          // Sample Proposal form submission  
+          function submitSampleProposal(event) {
+              event.preventDefault();
+              
+              const formData = new FormData(event.target);
+              const sampleData = {
+                  clientId: formData.get('clientId'),
+                  title: formData.get('title'),
+                  amount: parseFloat(formData.get('amount')),
+                  currency: 'PKR',
+                  description: 'This is a sample proposal to preview the design and functionality of our proposal system. It includes all the standard elements like project overview, pricing, terms, and professional presentation.'
+              };
+              
+              if (!sampleData.clientId) {
+                  showErrorMessage('Please select a client');
+                  return;
+              }
+              
+              removeMessages();
+              showMessage('🎨 Creating sample proposal...', 'info');
+              
+              // Disable submit button
+              const submitBtn = event.target.querySelector('button[type="submit"]');
+              submitBtn.disabled = true;
+              submitBtn.textContent = 'Creating...';
+              
+              google.script.run
+                  .withSuccessHandler(function(result) {
+                      if (result.success) {
+                          showSuccessMessage(`✅ Sample Proposal Created Successfully!<br>
+                                           🆔 Proposal ID: ${result.proposalId}<br>
+                                           📄 PDF Generated: <a href="${result.pdfResult?.url || '#'}" target="_blank">View PDF</a><br>
+                                           📁 Saved to client folder automatically`);
+                          closeModal('sampleProposalModal');
+                      } else {
+                          showErrorMessage(`❌ Failed to Create Sample: ${result.error || 'Unknown error'}`);
+                      }
+                      
+                      // Re-enable submit button
+                      submitBtn.disabled = false;
+                      submitBtn.textContent = 'Create Sample';
+                  })
+                  .withFailureHandler(function(error) {
+                      console.error('❌ Frontend sample creation failed:', error);
+                      showErrorMessage(`❌ Creation Failed: ${error.message}`);
+                      
+                      // Re-enable submit button
+                      submitBtn.disabled = false;
+                      submitBtn.textContent = 'Create Sample';
+                  })
+                  .createProposal(sampleData);
+          }
+      </script>
+  </body>
+  </html>
