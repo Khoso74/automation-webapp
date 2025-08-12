@@ -1874,3 +1874,100 @@ function testPDFGenerationFix() {
     };
   }
 }
+
+/**
+ * Test New Compact PDF Design
+ */
+function testCompactPDFDesign() {
+  try {
+    console.log('🎨 === TESTING NEW COMPACT PDF DESIGN ===');
+    
+    // Get first client
+    const clients = getAllClients();
+    if (!clients || clients.length === 0) {
+      return { success: false, error: 'No clients found' };
+    }
+    
+    const testClient = clients[0];
+    console.log('🎯 Testing compact PDF with client:', testClient.CompanyName, '(' + testClient.ClientID + ')');
+    
+    // Create test proposal with longer description to test compactness
+    const testProposalData = {
+      clientId: testClient.ClientID,
+      title: 'Modern Website Development & Digital Marketing Package',
+      description: `This comprehensive project includes:
+      
+• Complete website design and development using modern technologies
+• Responsive design that works perfectly on all devices (desktop, tablet, mobile)
+• Search Engine Optimization (SEO) to improve Google rankings
+• Social media integration and marketing setup
+• Content management system for easy updates
+• SSL certificate and security implementation
+• Performance optimization for fast loading
+• Professional email setup and integration
+• Basic digital marketing strategy and implementation
+• Training sessions for website management
+• 30 days of free support and maintenance`,
+      amount: 125000,
+      currency: 'PKR'
+    };
+    
+    console.log('📝 Creating proposal with comprehensive description...');
+    const result = createProposal(testProposalData);
+    
+    console.log('🎨 === COMPACT PDF DESIGN TEST RESULT ===');
+    
+    if (result.success) {
+      console.log('✅ Proposal created:', result.proposalId);
+      
+      if (result.pdfResult && result.pdfResult.success) {
+        console.log('✅ Compact PDF generated successfully!');
+        console.log('✅ PDF URL:', result.pdfResult.url);
+        
+        // Check if saved to client folder too
+        if (result.pdfResult.clientFolder && result.pdfResult.clientFolder.success) {
+          console.log('✅ PDF also saved to client folder!');
+          console.log('✅ Client PDF URL:', result.pdfResult.clientFolder.clientPdfUrl);
+        }
+        
+        return {
+          success: true,
+          message: 'New compact PDF design working perfectly! Should be maximum 2 pages.',
+          proposalId: result.proposalId,
+          pdfUrl: result.pdfResult.url,
+          clientPdfUrl: result.pdfResult.clientFolder ? result.pdfResult.clientFolder.clientPdfUrl : null,
+          designFeatures: [
+            '✅ Smaller font sizes (12px body, 14px headings)',
+            '✅ Compact spacing and margins',
+            '✅ Two-column layout for better space usage',
+            '✅ Professional gradient header',
+            '✅ Modern typography (Segoe UI)',
+            '✅ Compressed sections and lists',
+            '✅ Optimized for 2 pages maximum'
+          ]
+        };
+      } else {
+        console.log('❌ PDF generation failed');
+        return {
+          success: false,
+          error: 'PDF generation failed: ' + (result.pdfResult ? result.pdfResult.error : 'No PDF result'),
+          proposalId: result.proposalId
+        };
+      }
+    } else {
+      console.log('❌ Proposal creation failed');
+      return {
+        success: false,
+        error: 'Proposal creation failed: ' + result.error
+      };
+    }
+    
+  } catch (error) {
+    console.error('❌ Compact PDF design test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+}

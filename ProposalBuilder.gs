@@ -358,33 +358,171 @@ function createProposalHTML(proposal) {
     <meta charset="utf-8">
     <title>Proposal ${proposal.ProposalID}</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #333; line-height: 1.6; }
-        .proposal-header { background: linear-gradient(135deg, #2c5aa0, #1e4080); color: white; padding: 30px; margin-bottom: 30px; border-radius: 10px; }
-        .proposal-title { font-size: 32px; margin: 0; font-weight: 300; }
-        .proposal-subtitle { font-size: 16px; margin: 10px 0 0 0; opacity: 0.9; }
-        .company-info { margin-bottom: 30px; }
-        .company-name { font-size: 24px; color: #2c5aa0; margin-bottom: 10px; font-weight: bold; }
-        .section { margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #2c5aa0; }
-        .section h3 { color: #2c5aa0; margin-top: 0; margin-bottom: 15px; }
-        .client-info { background: #e8f4fd; border-left-color: #007bff; }
-        .project-scope { background: #f0f8e8; border-left-color: #28a745; }
-        .pricing-section { background: #fff3cd; border-left-color: #ffc107; }
-        .amount-highlight { font-size: 28px; font-weight: bold; color: #2c5aa0; text-align: center; 
-                           background: white; padding: 20px; margin: 20px 0; border-radius: 8px; 
-                           border: 2px solid #2c5aa0; }
-        .timeline { background: #f8d7da; border-left-color: #dc3545; }
-        .payment-terms { background: #d4edda; border-left-color: #28a745; }
-        .cta-section { text-align: center; margin: 40px 0; }
-        .accept-button { background: #28a745; color: white; padding: 15px 30px; font-size: 18px; 
-                        text-decoration: none; border-radius: 5px; display: inline-block; 
-                        transition: background 0.3s; }
-        .accept-button:hover { background: #218838; }
-        .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #666; 
-                 border-top: 1px solid #ddd; padding-top: 20px; }
-        .contact-info { display: flex; justify-content: space-around; flex-wrap: wrap; margin: 20px 0; }
-        .contact-item { margin: 10px; }
-        ul { margin: 0; padding-left: 20px; }
-        li { margin: 8px 0; }
+        /* OPTIMIZED FOR 2 PAGES MAXIMUM */
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0; 
+            padding: 15px; 
+            color: #333; 
+            line-height: 1.4; 
+            font-size: 12px;
+            background: white;
+        }
+        
+        .proposal-header { 
+            background: linear-gradient(135deg, #2c5aa0, #1e4080); 
+            color: white; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            border-radius: 8px;
+            text-align: center;
+        }
+        .proposal-title { 
+            font-size: 24px; 
+            margin: 0; 
+            font-weight: bold; 
+            letter-spacing: 1px;
+        }
+        .proposal-subtitle { 
+            font-size: 13px; 
+            margin: 8px 0 0 0; 
+            opacity: 0.9; 
+        }
+        
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+        }
+        .company-section, .client-section {
+            width: 48%;
+        }
+        .company-name { 
+            font-size: 16px; 
+            color: #2c5aa0; 
+            margin-bottom: 8px; 
+            font-weight: bold; 
+        }
+        .contact-info { 
+            font-size: 11px; 
+            line-height: 1.3;
+        }
+        
+        .section { 
+            margin: 15px 0; 
+            padding: 12px; 
+            background: #fdfdfd; 
+            border-radius: 6px; 
+            border-left: 3px solid #2c5aa0;
+            page-break-inside: avoid;
+        }
+        .section h3 { 
+            color: #2c5aa0; 
+            margin: 0 0 8px 0; 
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .section h4 { 
+            color: #333; 
+            margin: 8px 0 6px 0; 
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .section p { 
+            margin: 6px 0; 
+            font-size: 12px;
+        }
+        
+        .two-column {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        .column {
+            width: 48%;
+        }
+        
+        .amount-highlight { 
+            font-size: 20px; 
+            font-weight: bold; 
+            color: #2c5aa0; 
+            text-align: center; 
+            background: #fff3cd; 
+            padding: 12px; 
+            margin: 10px 0; 
+            border-radius: 6px; 
+            border: 2px solid #ffc107;
+        }
+        
+        .compact-list {
+            margin: 8px 0;
+            padding-left: 15px;
+        }
+        .compact-list li {
+            margin: 4px 0;
+            font-size: 11px;
+            line-height: 1.3;
+        }
+        
+        .highlight-box {
+            background: #e8f4fd;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 3px solid #007bff;
+        }
+        
+        .cta-section { 
+            text-align: center; 
+            margin: 20px 0 15px 0;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+        }
+        .accept-button { 
+            background: #28a745; 
+            color: white; 
+            padding: 10px 20px; 
+            font-size: 14px; 
+            text-decoration: none; 
+            border-radius: 4px; 
+            display: inline-block;
+            font-weight: bold;
+        }
+        
+        .footer { 
+            margin-top: 20px; 
+            text-align: center; 
+            font-size: 10px; 
+            color: #666; 
+            border-top: 1px solid #ddd; 
+            padding-top: 15px;
+        }
+        
+        .payment-grid {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .payment-item {
+            background: #d4edda;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            text-align: center;
+            flex: 1;
+        }
+        
+        /* Print optimization */
+        @media print {
+            body { font-size: 11px; }
+            .section { margin: 10px 0; padding: 8px; }
+        }
     </style>
 </head>
 <body>
@@ -393,108 +531,103 @@ function createProposalHTML(proposal) {
         <div class="proposal-subtitle">Proposal #${proposal.ProposalID} | ${new Date(proposal.CreatedDate).toLocaleDateString('en-PK')}</div>
     </div>
 
-    <div class="company-info">
-        <h2 class="company-name">${companyName}</h2>
-        <div class="contact-info">
-            <div class="contact-item">📍 ${companyAddress}</div>
-            <div class="contact-item">📧 ${companyEmail}</div>
-            <div class="contact-item">📞 ${companyPhone}</div>
+    <div class="header-info">
+        <div class="company-section">
+            <h2 class="company-name">${companyName}</h2>
+            <div class="contact-info">
+                📍 ${companyAddress}<br>
+                📧 ${companyEmail}<br>
+                📞 ${companyPhone}
+            </div>
         </div>
-    </div>
-
-    <div class="section client-info">
-        <h3>👤 Prepared For</h3>
-        <p><strong>${companyClientName}</strong></p>
-        <p>Attention: ${clientName}</p>
-    </div>
-
-    <div class="section project-scope">
-        <h3>🎯 Project Overview</h3>
-        <h4>${proposal.Title}</h4>
-        <div>${proposal.Description.replace(/\n/g, '<br>')}</div>
-    </div>
-
-    <div class="section pricing-section">
-        <h3>💰 Investment Required</h3>
-        <div class="amount-highlight">
-            Total Project Cost: ${currencySymbol} ${formattedAmount}
+        <div class="client-section">
+            <h3 style="color: #2c5aa0; margin: 0 0 8px 0; font-size: 14px; font-weight: bold;">👤 Prepared For</h3>
+            <p style="margin: 4px 0; font-weight: bold;">${companyClientName}</p>
+            <p style="margin: 4px 0; font-size: 11px;">Attention: ${clientName}</p>
         </div>
-        <p><strong>What's Included:</strong></p>
-        <ul>
-            <li>Complete project development as specified</li>
-            <li>Regular progress updates and communication</li>
-            <li>Quality assurance and testing</li>
-            <li>Post-delivery support (${getSetting('PAYMENT_TERMS_DAYS')} days)</li>
-            <li>Source files and documentation</li>
-        </ul>
-    </div>
-
-    <div class="section timeline">
-        <h3>⏰ Project Timeline</h3>
-        <p><strong>Estimated Completion:</strong> ${new Date(proposal.Deadline).toLocaleDateString('en-PK')}</p>
-        <p>We understand the importance of timely delivery and commit to completing your project within the agreed timeframe.</p>
-        
-        <p><strong>Project Phases:</strong></p>
-        <ul>
-            <li>Requirements gathering and planning (1-2 days)</li>
-            <li>Development and implementation</li>
-            <li>Testing and quality assurance</li>
-            <li>Final delivery and documentation</li>
-        </ul>
-    </div>
-
-    <div class="section payment-terms">
-        <h3>💳 Payment Terms</h3>
-        <p><strong>Currency:</strong> Pakistani Rupees (PKR)</p>
-        <p><strong>Payment Structure:</strong></p>
-        <ul>
-            <li>50% advance payment to start the project</li>
-            <li>50% upon completion and delivery</li>
-        </ul>
-        
-        <p><strong>Accepted Payment Methods:</strong></p>
-        <ul>
-            <li>💳 JazzCash</li>
-            <li>💳 EasyPaisa</li>
-            <li>🏦 Bank Transfer</li>
-            <li>🌐 PayPal (for international clients)</li>
-        </ul>
-        
-        <p><strong>Payment Terms:</strong> ${getSetting('PAYMENT_TERMS_DAYS')} days from invoice date</p>
     </div>
 
     <div class="section">
-        <h3>✅ Why Choose Us?</h3>
-        <ul>
-            <li><strong>Quality Assured:</strong> We deliver high-quality work that meets your expectations</li>
-            <li><strong>Timely Delivery:</strong> We respect deadlines and deliver on time</li>
-            <li><strong>Clear Communication:</strong> Regular updates throughout the project</li>
-            <li><strong>Local Expertise:</strong> Understanding of Pakistani market and business needs</li>
-            <li><strong>Ongoing Support:</strong> Post-delivery support to ensure smooth operation</li>
-        </ul>
+        <h3>🎯 ${proposal.Title}</h3>
+        <p>${proposal.Description.replace(/\n/g, '<br>')}</p>
+        
+        <div class="amount-highlight">
+            Total Investment: ${currencySymbol} ${formattedAmount}
+        </div>
+    </div>
+
+    <div class="two-column">
+        <div class="column">
+            <div class="section">
+                <h3>📋 What's Included</h3>
+                <ul class="compact-list">
+                    <li>Complete project development as specified</li>
+                    <li>Regular progress updates and communication</li>
+                    <li>Quality assurance and testing</li>
+                    <li>Post-delivery support (30 days)</li>
+                    <li>Source files and documentation</li>
+                </ul>
+            </div>
+        </div>
+        <div class="column">
+            <div class="section">
+                <h3>⏰ Project Timeline</h3>
+                <div class="highlight-box">
+                    <strong>Estimated Completion:</strong><br>
+                    ${new Date(Date.now() + 14*24*60*60*1000).toLocaleDateString('en-PK')}
+                </div>
+                <ul class="compact-list">
+                    <li>Requirements gathering (1-2 days)</li>
+                    <li>Development and implementation</li>
+                    <li>Testing and quality assurance</li>
+                    <li>Final delivery and documentation</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>💳 Payment & Terms</h3>
+        <div class="two-column">
+            <div class="column">
+                <p><strong>Payment Structure:</strong></p>
+                <ul class="compact-list">
+                    <li>50% advance to start project</li>
+                    <li>50% upon completion</li>
+                </ul>
+                <div class="payment-grid">
+                    <div class="payment-item">💳 JazzCash</div>
+                    <div class="payment-item">💳 EasyPaisa</div>
+                    <div class="payment-item">🏦 Bank Transfer</div>
+                </div>
+            </div>
+            <div class="column">
+                <p><strong>Why Choose Us:</strong></p>
+                <ul class="compact-list">
+                    <li><strong>Quality Assured</strong> - High-quality work guaranteed</li>
+                    <li><strong>Timely Delivery</strong> - We respect deadlines</li>
+                    <li><strong>Clear Communication</strong> - Regular updates</li>
+                    <li><strong>Local Expertise</strong> - Pakistani market knowledge</li>
+                    <li><strong>Ongoing Support</strong> - Post-delivery assistance</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <div class="cta-section">
-        <h3 style="color: #2c5aa0; margin-bottom: 20px;">Ready to Get Started?</h3>
-        <p>Click the button below to accept this proposal and begin your project!</p>
+        <h3 style="color: #2c5aa0; margin-bottom: 10px; font-size: 16px;">Ready to Get Started?</h3>
         <a href="${getWebAppUrl()}?action=accept&proposalId=${proposal.ProposalID}" class="accept-button">
             ✅ Accept Proposal & Start Project
         </a>
-        <p style="margin-top: 20px; font-size: 14px; color: #666;">
-            Or contact us at ${companyEmail} for any questions or modifications.
+        <p style="margin-top: 10px; font-size: 11px; color: #666;">
+            Contact us at ${companyEmail} for questions or modifications.
         </p>
     </div>
 
     <div class="footer">
-        <p><strong>Thank you for considering our services!</strong></p>
-        <p>This proposal is valid for 30 days from the date of issue.</p>
-        <p>Generated on ${new Date().toLocaleDateString('en-PK')} at ${new Date().toLocaleTimeString('en-PK')}</p>
-        
-        <div style="margin-top: 20px;">
-            <strong>${companyName}</strong><br>
-            ${companyEmail} | ${companyPhone}<br>
-            ${companyAddress}
-        </div>
+        <p><strong>Thank you for considering our services!</strong> | Valid for 30 days</p>
+        <p>Generated: ${new Date().toLocaleDateString('en-PK')} at ${new Date().toLocaleTimeString('en-PK')}</p>
+        <p><strong>${companyName}</strong> | ${companyEmail} | ${companyPhone}</p>
     </div>
 </body>
 </html>`;

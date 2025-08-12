@@ -2061,6 +2061,11 @@
                                 style="padding: 15px 20px; background: #20c997; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
                             🔧 Test PDF Fix
                         </button>
+                        
+                        <button onclick="testCompactPDFDesign()" 
+                                style="padding: 15px 20px; background: #e83e8c; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                            🎨 Test New PDF Design
+                        </button>
                 </div>
                 
                 <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px;">
@@ -2074,10 +2079,10 @@
                     </ol>
                     <div style="margin: 10px 0; padding: 10px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px;">
                         <p style="margin: 0; font-weight: bold; color: #155724;">
-                            🎯 ISSUE FOUND & FIXED: "Invalid argument: id" error in PDF generation
+                            ✅ PDF GENERATION FIXED & REDESIGNED
                         </p>
                         <p style="margin: 5px 0 0 0; color: #155724;">
-                            ✅ Click "🔧 Test PDF Fix" to verify the fix works!
+                            🎨 Click "🎨 Test New PDF Design" to see the compact, professional 2-page PDF!
                         </p>
                     </div>
                 </div>
@@ -4850,6 +4855,47 @@
                     showErrorMessage(`❌ Frontend PDF Fix Test Failed: ${error.message}`);
                 })
                 .testPDFGenerationFix();
+        }
+        
+        // Test compact PDF design
+        function testCompactPDFDesign() {
+            console.log('🎨 Testing Compact PDF Design from Frontend...');
+            
+            removeMessages();
+            showMessage('🔄 Testing new compact PDF design...', 'info');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    console.log('✅ Compact PDF design test result:', result);
+                    
+                    if (result.success) {
+                        let message = `✅ New Compact PDF Design Test Passed!<br>`;
+                        message += `📄 Proposal: ${result.proposalId}<br>`;
+                        message += `📄 PDF URL: <a href="${result.pdfUrl}" target="_blank">Open PDF</a><br>`;
+                        
+                        if (result.clientPdfUrl) {
+                            message += `📁 Client PDF: <a href="${result.clientPdfUrl}" target="_blank">Client Folder PDF</a><br>`;
+                        }
+                        
+                        if (result.designFeatures) {
+                            message += `<br><strong>📋 Design Features:</strong><br>`;
+                            result.designFeatures.forEach(feature => {
+                                message += `${feature}<br>`;
+                            });
+                        }
+                        
+                        message += `<br>🎯 <strong>PDF should now be maximum 2 pages with professional design!</strong>`;
+                        
+                        showSuccessMessage(message);
+                    } else {
+                        showErrorMessage(`❌ Compact PDF Design Test Failed: ${result.error || 'Unknown error'}`);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('❌ Frontend compact PDF test failed:', error);
+                    showErrorMessage(`❌ Frontend Compact PDF Test Failed: ${error.message}`);
+                })
+                .testCompactPDFDesign();
         }
     </script>
 </body>
