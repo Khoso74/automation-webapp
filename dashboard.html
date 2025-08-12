@@ -81,6 +81,7 @@
         }
         
         .proposals .stat-number { color: #3498db; }
+        .clients .stat-number { color: #3498db; }
         .projects .stat-number { color: #27ae60; }
         .invoices .stat-number { color: #e74c3c; }
         .revenue .stat-number { color: #f39c12; }
@@ -327,25 +328,25 @@
         
         <!-- Statistics -->
         <div class="stats-grid">
-            <div class="stat-card proposals">
-                <div class="stat-number"><?= stats.totalProposals || 0 ?></div>
-                <div class="stat-label">Total Proposals</div>
+            <div class="stat-card clients">
+                <div class="stat-number" id="totalClients">0</div>
+                <div class="stat-label">Total Clients</div>
             </div>
             <div class="stat-card pending">
-                <div class="stat-number"><?= stats.pendingProposals || 0 ?></div>
+                <div class="stat-number" id="pendingProposals">0</div>
                 <div class="stat-label">Pending Proposals</div>
             </div>
             <div class="stat-card projects">
-                <div class="stat-number"><?= stats.activeProjects || 0 ?></div>
+                <div class="stat-number" id="activeProjects">0</div>
                 <div class="stat-label">Active Projects</div>
             </div>
             <div class="stat-card invoices">
-                <div class="stat-number"><?= stats.overdueInvoices || 0 ?></div>
+                <div class="stat-number" id="overdueInvoices">0</div>
                 <div class="stat-label">Overdue Invoices</div>
             </div>
             <div class="stat-card revenue">
-                <div class="stat-number">$<?= (stats.totalRevenue || 0).toLocaleString() ?></div>
-                <div class="stat-label">Total Revenue</div>
+                <div class="stat-number" id="monthlyRevenue">Rs. 0</div>
+                <div class="stat-label">Monthly Revenue (PKR)</div>
             </div>
         </div>
         
@@ -423,7 +424,7 @@
                 </div>
                 <div class="form-group">
                     <label for="phone">Phone</label>
-                    <input type="tel" id="phone" name="phone">
+                    <input type="tel" id="phone" name="phone" placeholder="+92-300-1234567">
                 </div>
                 <div class="form-group">
                     <label for="address">Address</label>
@@ -462,10 +463,11 @@
                 <div class="form-group">
                     <label for="proposalCurrency">Currency</label>
                     <select id="proposalCurrency" name="currency">
-                        <option value="USD">USD</option>
-                        <option value="EUR">EUR</option>
-                        <option value="GBP">GBP</option>
-                        <option value="CAD">CAD</option>
+                        <option value="PKR" selected>PKR - Pakistani Rupee</option>
+                        <option value="USD">USD - US Dollar</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="GBP">GBP - British Pound</option>
+                        <option value="CAD">CAD - Canadian Dollar</option>
                     </select>
                 </div>
                 <button type="submit" class="btn-primary">Create Proposal</button>
@@ -499,10 +501,11 @@
                 <div class="form-group">
                     <label for="invoiceCurrency">Currency</label>
                     <select id="invoiceCurrency" name="currency">
-                        <option value="USD">USD</option>
-                        <option value="EUR">EUR</option>
-                        <option value="GBP">GBP</option>
-                        <option value="CAD">CAD</option>
+                        <option value="PKR" selected>PKR - Pakistani Rupee</option>
+                        <option value="USD">USD - US Dollar</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="GBP">GBP - British Pound</option>
+                        <option value="CAD">CAD - Canadian Dollar</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -736,7 +739,8 @@
           document.getElementById('totalClients').textContent = stats.totalClients || 0;
           document.getElementById('activeProjects').textContent = stats.activeProjects || 0;
           document.getElementById('pendingProposals').textContent = stats.pendingProposals || 0;
-          document.getElementById('monthlyRevenue').textContent = formatCurrency(stats.monthlyRevenue, 'PKR');
+          document.getElementById('overdueInvoices').textContent = stats.overdueInvoices || 0;
+          document.getElementById('monthlyRevenue').textContent = formatCurrency(stats.monthlyRevenue || 0, 'PKR');
         }
 
         // Display recent activity

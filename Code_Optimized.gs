@@ -417,17 +417,32 @@ function getDashboardStats() {
   
   try {
     // Get all data in one go for better performance
+    const clientsData = spreadsheet.getSheetByName(SHEETS.CLIENTS).getDataRange().getValues();
     const proposalsData = spreadsheet.getSheetByName(SHEETS.PROPOSALS).getDataRange().getValues();
     const projectsData = spreadsheet.getSheetByName(SHEETS.PROJECTS).getDataRange().getValues();
     const invoicesData = spreadsheet.getSheetByName(SHEETS.INVOICES).getDataRange().getValues();
     
+    // Calculate current month revenue (Pakistani format)
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const monthlyRevenue = invoicesData.slice(1)
+      .filter(row => {
+        const invoiceDate = new Date(row[8]); // CreatedDate column
+        return row[7] === 'Paid' && 
+               invoiceDate.getMonth() === currentMonth && 
+               invoiceDate.getFullYear() === currentYear;
+      })
+      .reduce((sum, row) => sum + (parseFloat(row[3]) || 0), 0);
+    
     const stats = {
+      totalClients: Math.max(0, clientsData.length - 1),
       totalProposals: Math.max(0, proposalsData.length - 1),
       pendingProposals: proposalsData.slice(1).filter(row => row[6] === 'Sent').length,
       activeProjects: projectsData.slice(1).filter(row => row[4] === 'In Progress').length,
       overdueInvoices: invoicesData.slice(1).filter(row => {
         return row[7] === 'Sent' && new Date(row[6]) < new Date();
       }).length,
+      monthlyRevenue: monthlyRevenue,
       totalRevenue: invoicesData.slice(1)
         .filter(row => row[7] === 'Paid')
         .reduce((sum, row) => sum + (parseFloat(row[3]) || 0), 0)
@@ -437,10 +452,12 @@ function getDashboardStats() {
   } catch (error) {
     console.error('Error getting dashboard stats:', error);
     return {
+      totalClients: 0,
       totalProposals: 0,
       pendingProposals: 0,
       activeProjects: 0,
       overdueInvoices: 0,
+      monthlyRevenue: 0,
       totalRevenue: 0
     };
   }
