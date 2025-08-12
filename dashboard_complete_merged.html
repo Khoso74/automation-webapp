@@ -669,41 +669,155 @@
             border-radius: 10px;
         }
 
-        /* Form Elements Styling */
+        /* Premium Form Elements Styling */
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+            position: relative;
         }
 
         .form-label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
+            margin-bottom: 12px;
+            font-weight: 700;
             color: #2c3e50;
-            font-size: 0.95em;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        .form-label::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
         }
 
         .form-input, .form-select, .form-textarea {
             width: 100%;
-            padding: 15px 20px;
-            border: 2px solid rgba(102, 126, 234, 0.1);
-            border-radius: 15px;
-            font-size: 1em;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
+            padding: 20px 26px;
+            border: 2px solid rgba(102, 126, 234, 0.12);
+            border-radius: 20px;
+            font-size: 1.05em;
+            font-weight: 500;
+            color: #2c3e50;
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(248, 250, 254, 0.95) 50%,
+                rgba(255, 255, 255, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 
+                0 4px 20px rgba(102, 126, 234, 0.08),
+                inset 0 1px 3px rgba(255, 255, 255, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-input::before, .form-select::before, .form-textarea::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(102, 126, 234, 0.1), 
+                transparent);
+            transition: left 0.6s;
+            z-index: 1;
+        }
+
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: rgba(44, 62, 80, 0.4);
+            font-style: italic;
+            font-weight: 400;
             transition: all 0.3s ease;
         }
 
         .form-input:focus, .form-select:focus, .form-textarea:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.98) 0%, 
+                rgba(248, 250, 254, 0.98) 50%,
+                rgba(255, 255, 255, 0.98) 100%);
+            box-shadow: 
+                0 0 0 4px rgba(102, 126, 234, 0.15),
+                0 12px 40px rgba(102, 126, 234, 0.25),
+                inset 0 2px 8px rgba(255, 255, 255, 0.9);
+            transform: translateY(-4px) scale(1.02);
+        }
+
+        .form-input:focus::placeholder, .form-textarea:focus::placeholder {
+            color: rgba(102, 126, 234, 0.6);
+            transform: translateX(10px);
+        }
+
+        .form-input:hover, .form-select:hover, .form-textarea:hover {
+            border-color: rgba(102, 126, 234, 0.25);
+            box-shadow: 
+                0 8px 30px rgba(102, 126, 234, 0.15),
+                inset 0 1px 3px rgba(255, 255, 255, 0.8);
             transform: translateY(-2px);
         }
 
         .form-textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 130px;
+            max-height: 220px;
+            line-height: 1.7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
+        /* Enhanced Select Styling */
+        .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23667eea' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 22px center;
+            background-repeat: no-repeat;
+            background-size: 18px;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23764ba2' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        }
+
+        /* Input Icons */
+        .form-group.with-icon {
+            position: relative;
+        }
+
+        .form-group.with-icon .form-input {
+            padding-left: 55px;
+        }
+
+        .form-group.with-icon::before {
+            content: '💼';
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+            z-index: 2;
+        }
+
+        .form-group.email-icon::before { content: '📧'; }
+        .form-group.phone-icon::before { content: '📱'; }
+        .form-group.address-icon::before { content: '📍'; }
+        .form-group.money-icon::before { content: '💰'; }
+        .form-group.calendar-icon::before { content: '📅'; }
+        .form-group.user-icon::before { content: '👤'; }
 
         /* Button Styles */
         .btn-group {
@@ -1018,6 +1132,100 @@
         .modal-btn-secondary:hover {
             background: rgba(108, 117, 125, 0.2);
             transform: translateY(-2px);
+        }
+
+        /* Enhanced Button Styles for Modals */
+        .btn-premium {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            padding: 16px 32px;
+            font-size: 1.1em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 8px 25px rgba(102, 126, 234, 0.3),
+                inset 0 1px 3px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-premium::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent);
+            transition: left 0.6s;
+        }
+
+        .btn-premium:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 15px 40px rgba(102, 126, 234, 0.4),
+                inset 0 2px 6px rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-premium:hover::before {
+            left: 100%;
+        }
+
+        .btn-premium:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        /* Success Message Styling */
+        .success-message {
+            background: linear-gradient(135deg, #00c851 0%, #00a63f 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            animation: slideInSuccess 0.5s ease;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            animation: slideInError 0.5s ease;
+        }
+
+        @keyframes slideInSuccess {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInError {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         /* Activity and Deadline Styles */
@@ -1809,32 +2017,37 @@
             <div class="modal-body">
                 <form id="clientForm" onsubmit="submitClientForm(event)">
                     <div class="form-row">
-                        <div class="form-group">
-                            <label for="companyName">Company Name *</label>
-                            <input type="text" id="companyName" name="companyName" required>
+                        <div class="form-group with-icon">
+                            <label class="form-label" for="companyName">Company Name *</label>
+                            <input type="text" class="form-input" id="companyName" name="companyName" 
+                                   placeholder="Enter company name..." required>
                         </div>
-                        <div class="form-group">
-                            <label for="contactName">Contact Name *</label>
-                            <input type="text" id="contactName" name="contactName" required>
+                        <div class="form-group with-icon user-icon">
+                            <label class="form-label" for="contactName">Contact Name *</label>
+                            <input type="text" class="form-input" id="contactName" name="contactName" 
+                                   placeholder="Contact person name..." required>
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label for="email">Email *</label>
-                            <input type="email" id="email" name="email" required>
+                        <div class="form-group with-icon email-icon">
+                            <label class="form-label" for="email">Email Address *</label>
+                            <input type="email" class="form-input" id="email" name="email" 
+                                   placeholder="professional@company.com" required>
                         </div>
-                        <div class="form-group">
-                            <label for="phone">Phone</label>
-                            <input type="tel" id="phone" name="phone" placeholder="+92-300-1234567">
+                        <div class="form-group with-icon phone-icon">
+                            <label class="form-label" for="phone">Phone Number</label>
+                            <input type="tel" class="form-input" id="phone" name="phone" 
+                                   placeholder="+92-300-1234567">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="address">Address</label>
-                        <textarea id="address" name="address" placeholder="Complete business address"></textarea>
+                    <div class="form-group with-icon address-icon">
+                        <label class="form-label" for="address">Business Address</label>
+                        <textarea class="form-textarea" id="address" name="address" 
+                                  placeholder="Complete business address with city and postal code..."></textarea>
                     </div>
                     <div class="modal-actions">
                         <button type="button" class="modal-btn modal-btn-secondary" onclick="closeModal('clientModal')">Cancel</button>
-                        <button type="submit" class="modal-btn modal-btn-primary">Create Client</button>
+                        <button type="submit" class="btn-premium">✨ Create Client</button>
                     </div>
                 </form>
             </div>
@@ -1844,112 +2057,154 @@
     <!-- Proposal Modal -->
     <div id="proposalModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal('proposalModal')">&times;</span>
-            <h2>Create New Proposal</h2>
-            <form id="proposalForm">
-                <div class="form-group">
-                    <label for="proposalClient">Client *</label>
-                    <select id="proposalClient" name="clientId" required>
-                        <option value="">Select a client...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="proposalTitle">Project Title *</label>
-                    <input type="text" id="proposalTitle" name="title" required>
-                </div>
-                <div class="form-group">
-                    <label for="proposalDescription">Description *</label>
-                    <textarea id="proposalDescription" name="description" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="proposalAmount">Amount *</label>
-                    <input type="number" id="proposalAmount" name="amount" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label for="proposalCurrency">Currency</label>
-                    <select id="proposalCurrency" name="currency">
-                        <option value="PKR" selected>PKR - Pakistani Rupee</option>
-                        <option value="USD">USD - US Dollar</option>
-                        <option value="EUR">EUR - Euro</option>
-                        <option value="GBP">GBP - British Pound</option>
-                        <option value="CAD">CAD - Canadian Dollar</option>
-                    </select>
-                </div>
-                <button type="submit" class="action-btn">Create Proposal</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal('proposalModal')">Cancel</button>
-            </form>
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <span class="modal-title-icon">📄</span>
+                    Create New Proposal
+                </h2>
+                <p class="modal-subtitle">Generate professional proposals to win more clients</p>
+                <button class="close" onclick="closeModal('proposalModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="proposalForm" onsubmit="submitProposalForm(event)">
+                    <div class="form-row">
+                        <div class="form-group with-icon user-icon">
+                            <label class="form-label" for="proposalClient">Select Client *</label>
+                            <select class="form-select" id="proposalClient" name="clientId" required>
+                                <option value="">Choose your client...</option>
+                            </select>
+                        </div>
+                        <div class="form-group with-icon money-icon">
+                            <label class="form-label" for="proposalCurrency">Currency *</label>
+                            <select class="form-select" id="proposalCurrency" name="currency" required>
+                                <option value="PKR" selected>PKR - Pakistani Rupee</option>
+                                <option value="USD">USD - US Dollar</option>
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="GBP">GBP - British Pound</option>
+                                <option value="CAD">CAD - Canadian Dollar</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="proposalTitle">Project Title *</label>
+                        <input type="text" class="form-input" id="proposalTitle" name="title" 
+                               placeholder="Enter an attractive project title..." required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="proposalDescription">Project Description *</label>
+                        <textarea class="form-textarea" id="proposalDescription" name="description" 
+                                  placeholder="Describe the project scope, deliverables, and timeline..." required></textarea>
+                    </div>
+                    <div class="form-group with-icon money-icon">
+                        <label class="form-label" for="proposalAmount">Total Amount *</label>
+                        <input type="number" class="form-input" id="proposalAmount" name="amount" 
+                               step="0.01" placeholder="Enter project amount..." required>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="modal-btn modal-btn-secondary" onclick="closeModal('proposalModal')">Cancel</button>
+                        <button type="submit" class="btn-premium">🚀 Create Proposal</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
     
     <!-- Invoice Modal -->
     <div id="invoiceModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal('invoiceModal')">&times;</span>
-            <h2>Create New Invoice</h2>
-            <form id="invoiceForm">
-                <div class="form-group">
-                    <label for="invoiceProject">Project</label>
-                    <select id="invoiceProject" name="projectId">
-                        <option value="">Select a project...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="invoiceClient">Client *</label>
-                    <select id="invoiceClient" name="clientId" required>
-                        <option value="">Select a client...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="invoiceAmount">Amount *</label>
-                    <input type="number" id="invoiceAmount" name="amount" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label for="invoiceCurrency">Currency</label>
-                    <select id="invoiceCurrency" name="currency">
-                        <option value="PKR" selected>PKR - Pakistani Rupee</option>
-                        <option value="USD">USD - US Dollar</option>
-                        <option value="EUR">EUR - Euro</option>
-                        <option value="GBP">GBP - British Pound</option>
-                        <option value="CAD">CAD - Canadian Dollar</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="invoiceDueDate">Due Date *</label>
-                    <input type="date" id="invoiceDueDate" name="dueDate" required>
-                </div>
-                <button type="submit" class="action-btn">Create Invoice</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal('invoiceModal')">Cancel</button>
-            </form>
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <span class="modal-title-icon">💰</span>
+                    Create New Invoice
+                </h2>
+                <p class="modal-subtitle">Generate professional invoices for faster payments</p>
+                <button class="close" onclick="closeModal('invoiceModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="invoiceForm" onsubmit="submitInvoiceForm(event)">
+                    <div class="form-row">
+                        <div class="form-group with-icon user-icon">
+                            <label class="form-label" for="invoiceClient">Select Client *</label>
+                            <select class="form-select" id="invoiceClient" name="clientId" required>
+                                <option value="">Choose your client...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="invoiceProject">Related Project</label>
+                            <select class="form-select" id="invoiceProject" name="projectId">
+                                <option value="">Link to project (optional)...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group with-icon money-icon">
+                            <label class="form-label" for="invoiceAmount">Invoice Amount *</label>
+                            <input type="number" class="form-input" id="invoiceAmount" name="amount" 
+                                   step="0.01" placeholder="Enter invoice amount..." required>
+                        </div>
+                        <div class="form-group with-icon money-icon">
+                            <label class="form-label" for="invoiceCurrency">Currency *</label>
+                            <select class="form-select" id="invoiceCurrency" name="currency" required>
+                                <option value="PKR" selected>PKR - Pakistani Rupee</option>
+                                <option value="USD">USD - US Dollar</option>
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="GBP">GBP - British Pound</option>
+                                <option value="CAD">CAD - Canadian Dollar</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group with-icon calendar-icon">
+                        <label class="form-label" for="invoiceDueDate">Payment Due Date *</label>
+                        <input type="date" class="form-input" id="invoiceDueDate" name="dueDate" required>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="modal-btn modal-btn-secondary" onclick="closeModal('invoiceModal')">Cancel</button>
+                        <button type="submit" class="btn-premium">💎 Create Invoice</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
     
     <!-- Project Modal -->
     <div id="projectModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal('projectModal')">&times;</span>
-            <h2>Add New Project</h2>
-            <form id="projectForm">
-                <div class="form-group">
-                    <label for="projectClient">Client *</label>
-                    <select id="projectClient" name="clientId" required>
-                        <option value="">Select a client...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="projectTitle">Project Title *</label>
-                    <input type="text" id="projectTitle" name="title" required>
-                </div>
-                <div class="form-group">
-                    <label for="projectDescription">Description</label>
-                    <textarea id="projectDescription" name="description"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="projectDueDate">Due Date</label>
-                    <input type="date" id="projectDueDate" name="dueDate">
-                </div>
-                <button type="submit" class="action-btn">Create Project</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal('projectModal')">Cancel</button>
-            </form>
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <span class="modal-title-icon">🎯</span>
+                    Add New Project
+                </h2>
+                <p class="modal-subtitle">Organize and track your client projects efficiently</p>
+                <button class="close" onclick="closeModal('projectModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="projectForm" onsubmit="submitProjectForm(event)">
+                    <div class="form-group with-icon user-icon">
+                        <label class="form-label" for="projectClient">Select Client *</label>
+                        <select class="form-select" id="projectClient" name="clientId" required>
+                            <option value="">Choose your client...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="projectTitle">Project Title *</label>
+                        <input type="text" class="form-input" id="projectTitle" name="title" 
+                               placeholder="Enter descriptive project title..." required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="projectDescription">Project Description</label>
+                        <textarea class="form-textarea" id="projectDescription" name="description" 
+                                  placeholder="Describe project goals, scope, and requirements..."></textarea>
+                    </div>
+                    <div class="form-group with-icon calendar-icon">
+                        <label class="form-label" for="projectDueDate">Project Deadline</label>
+                        <input type="date" class="form-input" id="projectDueDate" name="dueDate">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="modal-btn modal-btn-secondary" onclick="closeModal('projectModal')">Cancel</button>
+                        <button type="submit" class="btn-premium">⚡ Create Project</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
