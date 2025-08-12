@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposal Form - Custom Dropdown</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        /* Custom Dropdown Styles */
+        .custom-dropdown {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .dropdown-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .dropdown-button {
+            width: 100%;
+            padding: 15px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            color: #333;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 50px;
+        }
+
+        .dropdown-button:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .dropdown-button.active {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .dropdown-text {
+            flex: 1;
+            text-align: left;
+            color: #666;
+        }
+
+        .dropdown-text.selected {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .dropdown-text.placeholder {
+            color: #999;
+        }
+
+        /* Custom Arrow - Completely Hide Default */
+        .dropdown-arrow {
+            width: 20px;
+            height: 20px;
+            position: relative;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+
+        .dropdown-arrow::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid #667eea;
+            border-bottom: 2px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-button.active .dropdown-arrow::before {
+            transform: translate(-50%, -50%) rotate(-135deg);
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .dropdown-menu.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-option {
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s ease;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .dropdown-option:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-option:hover {
+            background-color: #f8f9ff;
+            color: #667eea;
+        }
+
+        .dropdown-option.selected {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .dropdown-option.no-clients {
+            color: #999;
+            font-style: italic;
+            cursor: default;
+        }
+
+        .dropdown-option.no-clients:hover {
+            background-color: transparent;
+            color: #999;
+        }
+
+        /* Loading State */
+        .dropdown-loading {
+            padding: 15px 20px;
+            text-align: center;
+            color: #667eea;
+            font-style: italic;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Debug Info */
+        .debug-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Custom Scrollbar */
+        .dropdown-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dropdown-menu::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .dropdown-menu::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
+        }
+
+        .dropdown-menu::-webkit-scrollbar-thumb:hover {
+            background: #5a6fd8;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .form-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="form-title">📋 Create Proposal</h1>
+        
+        <form id="proposalForm">
+            <!-- Custom Client Dropdown -->
+            <div class="form-group">
+                <div class="custom-dropdown" id="clientDropdown">
+                    <label class="dropdown-label">Select Client *</label>
+                    <div class="dropdown-button" id="dropdownButton">
+                        <span class="dropdown-text placeholder" id="dropdownText">Choose a client...</span>
+                        <div class="dropdown-arrow"></div>
+                    </div>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <div class="dropdown-loading">
+                            <span class="loading-spinner"></span>Loading clients...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden Input for Client ID -->
+            <input type="hidden" id="selectedClientId" name="clientId" value="">
+
+            <!-- Other Form Fields -->
+            <div class="form-group">
+                <label class="form-label" for="proposalTitle">Proposal Title *</label>
+                <input type="text" id="proposalTitle" name="proposalTitle" class="form-input" 
+                       placeholder="Enter proposal title..." required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="proposalAmount">Amount (PKR) *</label>
+                <input type="number" id="proposalAmount" name="proposalAmount" class="form-input" 
+                       placeholder="Enter amount..." required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="proposalDescription">Description</label>
+                <textarea id="proposalDescription" name="proposalDescription" class="form-input" 
+                          rows="4" placeholder="Enter proposal description..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                🚀 Create Proposal
+            </button>
+        </form>
+
+        <!-- Debug Information -->
+        <div class="debug-info" id="debugInfo">
+            <strong>Debug Info:</strong><br>
+            Selected Client ID: <span id="debugClientId">None</span><br>
+            Selected Client Name: <span id="debugClientName">None</span><br>
+            Clients Loaded: <span id="debugClientsCount">0</span>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Custom Dropdown Component for Client Selection
+         * Loads clients from Google Sheets via Apps Script
+         */
+        class CustomDropdown {
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
+                this.button = this.container.querySelector('#dropdownButton');
+                this.text = this.container.querySelector('#dropdownText');
+                this.menu = this.container.querySelector('#dropdownMenu');
+                this.hiddenInput = document.getElementById('selectedClientId');
+                
+                this.isOpen = false;
+                this.selectedValue = '';
+                this.selectedText = '';
+                this.clients = [];
+                
+                this.init();
+            }
+
+            init() {
+                // Event listeners
+                this.button.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggle();
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!this.container.contains(e.target)) {
+                        this.close();
+                    }
+                });
+
+                // Load clients from Google Sheets
+                this.loadClients();
+            }
+
+            toggle() {
+                if (this.isOpen) {
+                    this.close();
+                } else {
+                    this.open();
+                }
+            }
+
+            open() {
+                this.isOpen = true;
+                this.button.classList.add('active');
+                this.menu.classList.add('open');
+            }
+
+            close() {
+                this.isOpen = false;
+                this.button.classList.remove('active');
+                this.menu.classList.remove('open');
+            }
+
+            /**
+             * Load clients from Google Apps Script
+             */
+            loadClients() {
+                console.log('🔄 Loading clients from Google Sheets...');
+                
+                // Show loading state
+                this.menu.innerHTML = `
+                    <div class="dropdown-loading">
+                        <span class="loading-spinner"></span>Loading clients...
+                    </div>
+                `;
+
+                // Call Google Apps Script function
+                google.script.run
+                    .withSuccessHandler((clients) => {
+                        console.log('✅ Clients loaded successfully:', clients);
+                        this.clients = clients;
+                        this.populateDropdown(clients);
+                        this.updateDebugInfo();
+                    })
+                    .withFailureHandler((error) => {
+                        console.error('❌ Failed to load clients:', error);
+                        this.showError('Failed to load clients. Please try again.');
+                    })
+                    .getAllClients(); // Google Apps Script function
+            }
+
+            /**
+             * Populate dropdown with client data
+             */
+            populateDropdown(clients) {
+                this.menu.innerHTML = '';
+
+                if (!clients || clients.length === 0) {
+                    // No clients found
+                    const noClientsOption = document.createElement('div');
+                    noClientsOption.className = 'dropdown-option no-clients';
+                    noClientsOption.textContent = 'No clients found – Add clients first';
+                    this.menu.appendChild(noClientsOption);
+                    return;
+                }
+
+                // Add clients to dropdown
+                clients.forEach((client, index) => {
+                    const option = document.createElement('div');
+                    option.className = 'dropdown-option';
+                    option.textContent = client.CompanyName || client.companyName || `Client ${index + 1}`;
+                    option.dataset.value = client.ClientID || client.clientId || `client-${index}`;
+                    option.dataset.text = option.textContent;
+
+                    // Click handler for option selection
+                    option.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.selectOption(option.dataset.value, option.dataset.text);
+                    });
+
+                    this.menu.appendChild(option);
+                });
+            }
+
+            /**
+             * Select an option from dropdown
+             */
+            selectOption(value, text) {
+                // Update selected values
+                this.selectedValue = value;
+                this.selectedText = text;
+
+                // Update UI
+                this.text.textContent = text;
+                this.text.classList.remove('placeholder');
+                this.text.classList.add('selected');
+
+                // Update hidden input
+                this.hiddenInput.value = value;
+
+                // Update visual selection
+                this.menu.querySelectorAll('.dropdown-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                const selectedOption = this.menu.querySelector(`[data-value="${value}"]`);
+                if (selectedOption) {
+                    selectedOption.classList.add('selected');
+                }
+
+                // Close dropdown
+                this.close();
+
+                // Update debug info
+                this.updateDebugInfo();
+
+                console.log(`✅ Client selected: ${text} (ID: ${value})`);
+            }
+
+            /**
+             * Show error message in dropdown
+             */
+            showError(message) {
+                this.menu.innerHTML = `
+                    <div class="dropdown-option no-clients">
+                        ❌ ${message}
+                    </div>
+                `;
+            }
+
+            /**
+             * Update debug information
+             */
+            updateDebugInfo() {
+                document.getElementById('debugClientId').textContent = this.selectedValue || 'None';
+                document.getElementById('debugClientName').textContent = this.selectedText || 'None';
+                document.getElementById('debugClientsCount').textContent = this.clients.length;
+            }
+
+            /**
+             * Get selected client data
+             */
+            getSelectedClient() {
+                return {
+                    id: this.selectedValue,
+                    name: this.selectedText,
+                    isSelected: this.selectedValue !== ''
+                };
+            }
+
+            /**
+             * Reset dropdown selection
+             */
+            reset() {
+                this.selectedValue = '';
+                this.selectedText = '';
+                this.text.textContent = 'Choose a client...';
+                this.text.classList.add('placeholder');
+                this.text.classList.remove('selected');
+                this.hiddenInput.value = '';
+                
+                this.menu.querySelectorAll('.dropdown-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                this.updateDebugInfo();
+            }
+        }
+
+        // Initialize dropdown when page loads
+        let clientDropdown;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Initializing custom dropdown...');
+            
+            // Initialize custom dropdown
+            clientDropdown = new CustomDropdown('clientDropdown');
+
+            // Form submission handler
+            document.getElementById('proposalForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const selectedClient = clientDropdown.getSelectedClient();
+                
+                if (!selectedClient.isSelected) {
+                    alert('❌ Please select a client first!');
+                    return;
+                }
+
+                // Get form data
+                const formData = {
+                    clientId: selectedClient.id,
+                    clientName: selectedClient.name,
+                    proposalTitle: document.getElementById('proposalTitle').value,
+                    proposalAmount: document.getElementById('proposalAmount').value,
+                    proposalDescription: document.getElementById('proposalDescription').value
+                };
+
+                console.log('📋 Form submitted with data:', formData);
+                
+                // Here you can send data to Google Apps Script
+                submitProposal(formData);
+            });
+        });
+
+        /**
+         * Submit proposal to Google Apps Script
+         */
+        function submitProposal(formData) {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Creating proposal...';
+
+            google.script.run
+                .withSuccessHandler((result) => {
+                    console.log('✅ Proposal created successfully:', result);
+                    alert('✅ Proposal created successfully!');
+                    
+                    // Reset form
+                    document.getElementById('proposalForm').reset();
+                    clientDropdown.reset();
+                    
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '🚀 Create Proposal';
+                })
+                .withFailureHandler((error) => {
+                    console.error('❌ Failed to create proposal:', error);
+                    alert('❌ Failed to create proposal. Please try again.');
+                    
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '🚀 Create Proposal';
+                })
+                .createProposal(formData); // Google Apps Script function
+        }
+
+        // Manual test function for debugging
+        function testDropdown() {
+            console.log('🧪 Testing dropdown manually...');
+            if (clientDropdown) {
+                clientDropdown.loadClients();
+            }
+        }
+
+        // Make test function globally available
+        window.testDropdown = testDropdown;
+    </script>
+</body>
+</html>
