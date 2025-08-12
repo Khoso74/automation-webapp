@@ -1276,7 +1276,9 @@ function getProposalAcceptancePage(proposalId) {
         'body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }' +
         '.container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }' +
         '.amount { font-size: 24px; font-weight: bold; color: #2c3e50; margin: 20px 0; }' +
-        '.accept-btn { background: #27ae60; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px; width: 100%; }' +
+        '.accept-btn { background: #27ae60; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px; width: 100%; transition: background 0.3s ease; cursor: pointer; }' +
+        '.accept-btn:hover { background: #229954; }' +
+        '.accept-btn:active { background: #1e7e34; transform: translateY(1px); }' +
       '</style>' +
     '</head>' +
     '<body>' +
@@ -1303,20 +1305,6 @@ function getProposalAcceptancePage(proposalId) {
           'By accepting this proposal, you agree to the terms and payment schedule.' +
         '</p>' +
       '</div>' +
-      '<script>' +
-        'console.log("Client acceptance page loaded for proposal: ' + proposalId + '");' +
-        'document.querySelector("form").onsubmit = function() {' +
-          'console.log("Form submission started");' +
-          'var btn = document.querySelector("button");' +
-          'btn.textContent = "Processing...";' +
-          'btn.disabled = true;' +
-          'console.log("Button disabled, form submitting...");' +
-          'return true;' +
-        '};' +
-        'window.addEventListener("beforeunload", function() {' +
-          'console.log("Page is unloading");' +
-        '});' +
-      '</script>' +
     '</body>' +
     '</html>';
   return HtmlService.createHtmlOutput(simpleHtml);
