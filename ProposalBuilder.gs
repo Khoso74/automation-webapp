@@ -1259,130 +1259,67 @@ function getProposalAcceptancePage(proposalId) {
   const proposal = getProposalById(proposalId);
   
   if (!proposal) {
-    return HtmlService.createHtmlOutput('Proposal not found or has expired.');
+    return HtmlService.createHtmlOutput('<h1>Proposal not found or has expired.</h1>');
   }
   
   if (proposal.Status === 'Accepted') {
-    return HtmlService.createHtmlOutput(
-      '<div style="text-align: center; font-family: Arial, sans-serif; margin: 50px;">' +
-        '<h2>Proposal Already Accepted</h2>' +
-        '<p>This proposal has already been accepted. Thank you for your business!</p>' +
-      '</div>'
-    );
+    return HtmlService.createHtmlOutput('<h1>Proposal Already Accepted</h1><p>Thank you for your business!</p>');
   }
   
-  const client = getClientById(proposal.ClientID);
-  const clientName = client ? client.CompanyName : 'Unknown';
-  const proposalAmount = parseFloat(proposal.Amount).toLocaleString();
-  
-  const htmlContent = 
-    '<!DOCTYPE html>' +
+  // Create ultra-simple HTML without complex JavaScript or variable interpolation
+  const simpleHtml = 
     '<html>' +
     '<head>' +
-      '<title>Accept Proposal - ' + proposal.Title + '</title>' +
-      '<meta name="viewport" content="width=device-width, initial-scale=1">' +
+      '<title>Accept Proposal</title>' +
       '<style>' +
-        'body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }' +
-        '.container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }' +
-        '.header { text-align: center; margin-bottom: 30px; }' +
-        '.proposal-details { background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0; }' +
-        '.amount { font-size: 24px; font-weight: bold; color: #2c3e50; }' +
-        '.accept-btn { background: #27ae60; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; width: 100%; }' +
-        '.accept-btn:hover { background: #229954; }' +
-        '.terms { font-size: 12px; color: #666; margin: 20px 0; }' +
+        'body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }' +
+        '.container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }' +
+        '.amount { font-size: 24px; font-weight: bold; color: #2c3e50; margin: 20px 0; }' +
+        '.accept-btn { background: #27ae60; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px; width: 100%; }' +
       '</style>' +
     '</head>' +
     '<body>' +
       '<div class="container">' +
-        '<div class="header">' +
-          '<h1>Project Proposal</h1>' +
-          '<p><strong>' + proposal.Title + '</strong></p>' +
-        '</div>' +
-        
-        '<div class="proposal-details">' +
+        '<h1>Project Proposal</h1>' +
+        '<h2>' + proposal.Title + '</h2>' +
+        '<div style="background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">' +
           '<h3>Project Details</h3>' +
-          '<p><strong>Client:</strong> ' + clientName + '</p>' +
           '<p><strong>Description:</strong> ' + proposal.Description + '</p>' +
-          '<div class="amount">Investment: ' + proposal.Currency + ' ' + proposalAmount + '</div>' +
+          '<div class="amount">Investment: ' + proposal.Currency + ' ' + parseFloat(proposal.Amount).toLocaleString() + '</div>' +
         '</div>' +
-        
-        '<form id="acceptForm" method="post" action="">' +
+        '<form method="post" action="">' +
           '<input type="hidden" name="action" value="acceptProposal">' +
           '<input type="hidden" name="proposalId" value="' + proposalId + '">' +
           '<input type="hidden" name="clientSignature" value="Digital Acceptance">' +
-          
           '<div style="margin: 20px 0;">' +
             '<label>' +
-              '<input type="checkbox" id="agreeCheckbox" required> I agree to the terms and conditions outlined in this proposal' +
+              '<input type="checkbox" required> I agree to the terms and conditions' +
             '</label>' +
           '</div>' +
-          
-          '<button type="submit" class="accept-btn" id="acceptBtn">Accept Proposal</button>' +
+          '<button type="submit" class="accept-btn">Accept Proposal</button>' +
         '</form>' +
-        
-        '<div class="terms">' +
-          'By accepting this proposal, you agree to the terms and payment schedule outlined. ' +
-          'A deposit of 50% is required to begin work.' +
-        '</div>' +
+        '<p style="font-size: 12px; color: #666; margin-top: 20px;">' +
+          'By accepting this proposal, you agree to the terms and payment schedule.' +
+        '</p>' +
       '</div>' +
-      
-             '<script>' +
-         'console.log("Client acceptance page loaded for proposal: ' + proposalId + '");' +
-         
-         'document.getElementById("acceptForm").onsubmit = function(e) {' +
-           'console.log("Form submission started");' +
-           
-           'var checkbox = document.getElementById("agreeCheckbox");' +
-           'if (!checkbox.checked) {' +
-             'alert("Please agree to the terms and conditions before accepting.");' +
-             'e.preventDefault();' +
-             'return false;' +
-           '}' +
-           
-           'var submitBtn = document.getElementById("acceptBtn");' +
-           'var originalText = submitBtn.textContent;' +
-           'submitBtn.textContent = "⏳ Processing...";' +
-           'submitBtn.disabled = true;' +
-           'submitBtn.style.background = "#95a5a6";' +
-           
-           'console.log("Button disabled, form submitting...");' +
-           
-           'document.body.style.cursor = "wait";' +
-           
-           'var loadingMsg = document.createElement("div");' +
-           'loadingMsg.id = "loadingMessage";' +
-           'loadingMsg.style.cssText = "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); ' +
-             'background: rgba(0,0,0,0.9); color: white; padding: 20px; border-radius: 10px; z-index: 10000; ' +
-             'text-align: center; font-size: 18px;";' +
-           'loadingMsg.innerHTML = "<div>⏳ Processing your acceptance...</div><div style=\\"font-size: 14px; margin-top: 10px;\\">Please wait...</div>";' +
-           'document.body.appendChild(loadingMsg);' +
-           
-           'setTimeout(function() {' +
-             'if (document.getElementById("loadingMessage")) {' +
-               'loadingMsg.innerHTML = "<div>⏳ Still processing...</div><div style=\\"font-size: 14px; margin-top: 10px;\\">This may take a moment...</div>";' +
-             '}' +
-           '}, 3000);' +
-           
-           'setTimeout(function() {' +
-             'if (document.getElementById("loadingMessage")) {' +
-               'console.log("Form taking too long, possible issue");' +
-               'loadingMsg.innerHTML = "<div>❌ Taking longer than expected</div><div style=\\"font-size: 14px; margin-top: 10px;\\">Please contact support if this continues.</div>";' +
-             '}' +
-           '}, 15000);' +
-           
-           'return true;' +
-         '};' +
-         
-         'window.addEventListener("beforeunload", function() {' +
-           'console.log("Page is unloading");' +
-         '});' +
-       '</script>' +
+      '<script>' +
+        'console.log("Client acceptance page loaded for proposal: ' + proposalId + '");' +
+        'document.querySelector("form").onsubmit = function() {' +
+          'console.log("Form submission started");' +
+          'var btn = document.querySelector("button");' +
+          'btn.textContent = "Processing...";' +
+          'btn.disabled = true;' +
+          'console.log("Button disabled, form submitting...");' +
+          'return true;' +
+        '};' +
+        'window.addEventListener("beforeunload", function() {' +
+          'console.log("Page is unloading");' +
+        '});' +
+      '</script>' +
     '</body>' +
     '</html>';
-  
-  return HtmlService.createHtmlOutput(htmlContent)
-    .setTitle('Accept Proposal')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+
+  return HtmlService.createHtmlOutput(simpleHtml);
 }
 
 /**

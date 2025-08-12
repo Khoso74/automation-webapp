@@ -1898,6 +1898,14 @@
                             <span class="action-btn-desc">Check code version</span>
                         </div>
                     </button>
+                    
+                    <button class="action-btn" onclick="testPageGeneration()" style="background: linear-gradient(135deg, #6f42c1, #5a32a3);">
+                        <span class="action-btn-icon">📄</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Test Page Generation</span>
+                            <span class="action-btn-desc">Check acceptance page</span>
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>
@@ -5467,6 +5475,62 @@
                          showErrorMessage(`❌ CRITICAL: Verification Failed: ${error.message}`);
                      })
                      .verifyDeploymentStatus();
+             }
+             
+             // Test acceptance page generation
+             function testPageGeneration() {
+                 console.log('📄 Testing acceptance page generation...');
+                 
+                 removeMessages();
+                 showMessage('📄 Testing simplified acceptance page generation...', 'info');
+                 
+                 google.script.run
+                     .withSuccessHandler(function(result) {
+                         console.log('📄 Page generation test result:', result);
+                         
+                         if (result.success) {
+                             let message = `📄 ACCEPTANCE PAGE TEST COMPLETE!<br><br>`;
+                             
+                             message += `<strong>📊 Test Results:</strong><br>`;
+                             message += `📋 Proposal ID: ${result.testDetails.proposalId}<br>`;
+                             message += `📝 Title: ${result.testDetails.proposalTitle}<br>`;
+                             message += `✅ Page Generated: ${result.testDetails.pageGenerated}<br>`;
+                             message += `🔧 Simplified: ${result.testDetails.isSimplified}<br><br>`;
+                             
+                             message += `<strong>📋 Content Preview:</strong><br>`;
+                             message += `<code style="background: #f8f9fa; padding: 10px; display: block; font-size: 12px; overflow-wrap: break-word;">${result.testDetails.contentPreview}</code><br>`;
+                             
+                             message += `<strong>🔧 Diagnosis:</strong><br>`;
+                             result.diagnosis.forEach(diag => {
+                                 const color = diag.includes('❌') ? 'color: #dc3545;' : 'color: #28a745;';
+                                 message += `<span style="${color}">${diag}</span><br>`;
+                             });
+                             
+                             message += `<br><strong>🎯 Expected Results:</strong><br>`;
+                             result.expectedResult.forEach(expected => {
+                                 message += `<span style="color: #007bff;">${expected}</span><br>`;
+                             });
+                             
+                             message += `<br><strong>🔗 Test URL (Click to test):</strong><br>`;
+                             message += `<a href="${result.testUrl}" target="_blank" style="color: #6f42c1; word-break: break-all; font-weight: bold;">${result.testUrl}</a><br><br>`;
+                             
+                             if (result.testDetails.isSimplified) {
+                                 message += `<span style="color: #28a745; font-weight: bold;">✅ SIMPLIFIED PAGE READY!</span><br>`;
+                                 message += `<span style="color: #007bff;">Now test the URL above - should work without serialization errors!</span>`;
+                             } else {
+                                 message += `<span style="color: #dc3545; font-weight: bold;">❌ STILL COMPLEX - Need to redeploy!</span>`;
+                             }
+                             
+                             showSuccessMessage(message);
+                         } else {
+                             showErrorMessage(`❌ Page Generation Test Failed: ${result.error || 'Unknown error'}`);
+                         }
+                     })
+                     .withFailureHandler(function(error) {
+                         console.error('❌ Page generation test failed:', error);
+                         showErrorMessage(`❌ CRITICAL: Page Generation Test Failed: ${error.message}`);
+                     })
+                     .testAcceptancePageGeneration();
              }
          </script>
      </body>

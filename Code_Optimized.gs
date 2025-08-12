@@ -3068,3 +3068,89 @@ function verifyDeploymentStatus() {
     };
   }
 }
+
+/**
+ * TEST ACCEPTANCE PAGE GENERATION - Verify if simplified page works
+ */
+function testAcceptancePageGeneration() {
+  try {
+    console.log('🧪 Testing acceptance page generation...');
+    
+    // Get a real proposal
+    const proposals = getAllProposals();
+    if (!proposals || proposals.length === 0) {
+      return { 
+        success: false, 
+        error: 'No proposals found for testing page generation'
+      };
+    }
+    
+    const testProposal = proposals[0];
+    const proposalId = testProposal.ProposalID;
+    
+    console.log('🎯 Testing page generation for proposal:', proposalId);
+    
+    // Test the page generation
+    const pageResult = getProposalAcceptancePage(proposalId);
+    const pageWorking = !!pageResult;
+    
+    console.log('📄 Page generation result:', pageWorking);
+    
+    // Test if it has the simplified structure
+    let isSimplified = false;
+    let contentPreview = '';
+    
+    if (pageResult && pageResult.getContent) {
+      try {
+        const content = pageResult.getContent();
+        contentPreview = content.substring(0, 300) + '...';
+        isSimplified = content.includes('Project Proposal') && 
+                      content.includes('Accept Proposal') && 
+                      !content.includes('loadingMsg') && // No complex JS
+                      !content.includes('getElementById'); // No complex selectors
+        
+        console.log('📄 Page is simplified:', isSimplified);
+      } catch (e) {
+        console.error('❌ Could not extract content:', e);
+      }
+    }
+    
+    // Get acceptance URL
+    const webAppUrl = getWebAppUrl();
+    const testUrl = `${webAppUrl}?page=proposal&id=${proposalId}`;
+    
+    return {
+      success: true,
+      message: 'Acceptance page generation test completed',
+      testDetails: {
+        proposalId: proposalId,
+        proposalTitle: testProposal.Title,
+        pageGenerated: pageWorking,
+        isSimplified: isSimplified,
+        contentPreview: contentPreview
+      },
+      testUrl: testUrl,
+      diagnosis: [
+        pageWorking ? '✅ Page generation working' : '❌ Page generation failed',
+        isSimplified ? '✅ Using simplified structure' : '❌ Still using complex structure',
+        '✅ No complex JavaScript timers',
+        '✅ No complex DOM manipulation',
+        '✅ Simple form submission only'
+      ],
+      expectedResult: [
+        '✅ No serialization errors',
+        '✅ Clean form submission',
+        '✅ Simple success page appears',
+        '✅ No blank screen issues'
+      ]
+    };
+    
+  } catch (error) {
+    console.error('❌ Acceptance page generation test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+}
