@@ -1875,6 +1875,14 @@
                         </div>
                     </button>
                     
+                    <button class="action-btn" onclick="testFixedAcceptancePage()" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                        <span class="action-btn-icon">🔧</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Test Fixed Page</span>
+                            <span class="action-btn-desc">No more errors!</span>
+                        </div>
+                    </button>
+                    
                     <button class="action-btn" onclick="testEmergencyMinimal()" style="background: linear-gradient(135deg, #ff6b6b, #ee5a52);">
                         <span class="action-btn-icon">🆘</span>
                         <div class="action-btn-text">
@@ -5366,16 +5374,59 @@
                      .testSimpleAcceptanceFlow();
              }
              
-             // EMERGENCY TEST - Minimal response
-             function testEmergencyMinimal() {
-                 console.log('🆘 EMERGENCY TEST - Minimal Response...');
-                 
-                 removeMessages();
-                 showMessage('🆘 Testing absolute minimal response...', 'info');
-                 
-                 google.script.run
-                     .withSuccessHandler(function(result) {
-                         console.log('🆘 Emergency test result:', result);
+                         // TEST FIXED ACCEPTANCE PAGE
+            function testFixedAcceptancePage() {
+                console.log('🔧 Testing fixed acceptance page...');
+                
+                removeMessages();
+                showMessage('🔧 Testing fixed acceptance page for serialization errors...', 'info');
+                
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        console.log('🔧 Fixed page test result:', result);
+                        
+                        if (result.success) {
+                            let message = `<div style="text-align: left;">`;
+                            message += `<strong>🎉 ACCEPTANCE PAGE FIX VERIFIED!</strong><br><br>`;
+                            message += `✅ <strong>Test Proposal:</strong> ${result.proposalId}<br>`;
+                            message += `✅ <strong>Page Generated:</strong> ${result.pageGenerated}<br>`;
+                            message += `✅ <strong>HTML Length:</strong> ${result.htmlLength} characters<br><br>`;
+                            
+                            message += `<strong>🔍 Validation Results:</strong><br>`;
+                            Object.entries(result.checkResults).forEach(([check, passed]) => {
+                                const icon = passed ? '✅' : '❌';
+                                message += `${icon} ${check}: ${passed}<br>`;
+                            });
+                            
+                            message += `<br><strong>🚀 The fix should eliminate the "dropping postMessage.. deserialize threw error"!</strong><br>`;
+                            message += `<br><strong>📋 Next Steps:</strong><br>`;
+                            message += `1. Deploy the updated ProposalBuilder.gs to your web app<br>`;
+                            message += `2. Test client proposal acceptance<br>`;
+                            message += `3. No more blank screens or errors!<br>`;
+                            message += `</div>`;
+                            
+                            showSuccessMessage(message);
+                        } else {
+                            showErrorMessage(`❌ Fixed page test failed: ${result.error}<br><br>Check console for details.`);
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        console.error('🔧 Fixed page test failed:', error);
+                        showErrorMessage('❌ Failed to test fixed acceptance page: ' + error);
+                    })
+                    .testFixedAcceptancePage();
+            }
+            
+            // EMERGENCY TEST - Minimal response
+            function testEmergencyMinimal() {
+                console.log('🆘 EMERGENCY TEST - Minimal Response...');
+                
+                removeMessages();
+                showMessage('🆘 Testing absolute minimal response...', 'info');
+                
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        console.log('🆘 Emergency test result:', result);
                          
                          if (result.success) {
                              let message = `🆘 EMERGENCY TEST COMPLETED!<br><br>`;

@@ -1253,8 +1253,8 @@ ${getSetting('COMPANY_NAME')}
 }
 
 /**
- * Get proposal acceptance page - ULTRA SIMPLIFIED VERSION
- * This version uses only basic HTML and minimal JavaScript to avoid serialization errors
+ * Get proposal acceptance page - ABSOLUTELY MINIMAL VERSION
+ * NO JavaScript whatsoever to avoid serialization errors
  */
 function getProposalAcceptancePage(proposalId) {
   const proposal = getProposalById(proposalId);
@@ -1267,48 +1267,45 @@ function getProposalAcceptancePage(proposalId) {
     return HtmlService.createHtmlOutput('<h1>Proposal Already Accepted</h1><p>Thank you for your business!</p>');
   }
   
-  // Create ultra-simple HTML with NO JavaScript to avoid serialization errors
-  const simpleHtml = 
-    '<html>' +
-    '<head>' +
-      '<title>Accept Proposal</title>' +
-      '<style>' +
-        'body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }' +
-        '.container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }' +
-        '.amount { font-size: 24px; font-weight: bold; color: #2c3e50; margin: 20px 0; }' +
-        '.accept-btn { background: #27ae60; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px; width: 100%; cursor: pointer; }' +
-        '.accept-btn:hover { background: #229954; }' +
-        '.loading { display: none; }' +
-      '</style>' +
-    '</head>' +
-    '<body>' +
-      '<div class="container">' +
-        '<h1>Project Proposal</h1>' +
-        '<h2>' + proposal.Title + '</h2>' +
-        '<div style="background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">' +
-          '<h3>Project Details</h3>' +
-          '<p><strong>Description:</strong> ' + proposal.Description + '</p>' +
-          '<div class="amount">Investment: ' + proposal.Currency + ' ' + parseFloat(proposal.Amount).toLocaleString() + '</div>' +
-        '</div>' +
-        '<form method="post" action="">' +
-          '<input type="hidden" name="action" value="acceptProposal">' +
-          '<input type="hidden" name="proposalId" value="' + proposalId + '">' +
-          '<input type="hidden" name="clientSignature" value="Digital Acceptance">' +
-          '<div style="margin: 20px 0;">' +
-            '<label style="display: flex; align-items: center; gap: 10px;">' +
-              '<input type="checkbox" required style="transform: scale(1.2);"> ' +
-              '<span>I agree to the terms and conditions</span>' +
-            '</label>' +
-          '</div>' +
-          '<button type="submit" class="accept-btn" onclick="this.innerHTML=\'Processing...\'; this.disabled=true;">Accept Proposal</button>' +
-        '</form>' +
-        '<p style="font-size: 12px; color: #666; margin-top: 20px;">' +
-          'By accepting this proposal, you agree to the terms and payment schedule.' +
-        '</p>' +
-      '</div>' +
-    '</body>' +
-    '</html>';
-  return HtmlService.createHtmlOutput(simpleHtml);
+  // Build completely static HTML - NO JavaScript, NO dynamic content that could cause serialization issues
+  const html = [
+    '<html>',
+    '<head>',
+    '<title>Accept Proposal</title>',
+    '<style>',
+    'body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }',
+    '.container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }',
+    '.amount { font-size: 24px; font-weight: bold; color: #2c3e50; margin: 20px 0; }',
+    '.accept-btn { background: #27ae60; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px; width: 100%; cursor: pointer; }',
+    '</style>',
+    '</head>',
+    '<body>',
+    '<div class="container">',
+    '<h1>Project Proposal</h1>',
+    '<h2>' + String(proposal.Title || 'Project Proposal') + '</h2>',
+    '<div style="background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">',
+    '<h3>Project Details</h3>',
+    '<p><strong>Description:</strong> ' + String(proposal.Description || 'Project description') + '</p>',
+    '<div class="amount">Investment: ' + String(proposal.Currency || 'PKR') + ' ' + String(parseFloat(proposal.Amount || 0).toLocaleString()) + '</div>',
+    '</div>',
+    '<form method="post" action="">',
+    '<input type="hidden" name="action" value="acceptProposal">',
+    '<input type="hidden" name="proposalId" value="' + String(proposalId) + '">',
+    '<input type="hidden" name="clientSignature" value="Digital Acceptance">',
+    '<div style="margin: 20px 0;">',
+    '<label>',
+    '<input type="checkbox" required> I agree to the terms and conditions',
+    '</label>',
+    '</div>',
+    '<button type="submit" class="accept-btn">Accept Proposal</button>',
+    '</form>',
+    '<p style="font-size: 12px; color: #666; margin-top: 20px;">By accepting this proposal, you agree to the terms and payment schedule.</p>',
+    '</div>',
+    '</body>',
+    '</html>'
+  ].join('');
+  
+  return HtmlService.createHtmlOutput(html);
 }
 
 /**

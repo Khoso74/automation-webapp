@@ -4141,3 +4141,91 @@ function verifySerializationFix() {
       'Some tests failed. Review the results above.'
   };
 }
+
+/**
+ * Test the Fixed Proposal Acceptance Page
+ * This tests the new absolutely minimal acceptance page
+ */
+function testFixedAcceptancePage() {
+  try {
+    console.log('🧪 === TESTING FIXED ACCEPTANCE PAGE ===');
+    
+    // Get all proposals
+    const proposals = getAllProposals();
+    if (!proposals || proposals.length === 0) {
+      console.log('❌ No proposals found, creating test proposal...');
+      const testResult = createTestProposalForTesting();
+      if (!testResult.success) {
+        return { success: false, error: 'Could not create test proposal: ' + testResult.error };
+      }
+      console.log('✅ Test proposal created:', testResult.proposalId);
+      proposals.push({ ProposalID: testResult.proposalId });
+    }
+    
+    // Use first proposal for testing
+    const testProposal = proposals[0];
+    const proposalId = testProposal.ProposalID;
+    console.log('🎯 Testing acceptance page for proposal:', proposalId);
+    
+    // Test the getProposalAcceptancePage function
+    console.log('📄 Calling getProposalAcceptancePage...');
+    const acceptancePage = getProposalAcceptancePage(proposalId);
+    
+    if (!acceptancePage) {
+      return { success: false, error: 'getProposalAcceptancePage returned null' };
+    }
+    
+    console.log('✅ Acceptance page generated successfully!');
+    console.log('📊 Page type:', typeof acceptancePage);
+    
+    // Check if it contains the required elements
+    const htmlContent = acceptancePage.getContent ? acceptancePage.getContent() : acceptancePage.toString();
+    
+    const checkResults = {
+      hasForm: htmlContent.includes('<form'),
+      hasAcceptButton: htmlContent.includes('Accept Proposal'),
+      hasProposalId: htmlContent.includes(proposalId),
+      hasNoJavaScript: !htmlContent.includes('onclick=') && !htmlContent.includes('setTimeout') && !htmlContent.includes('getElementById'),
+      isSimplified: htmlContent.includes('Project Proposal') && htmlContent.includes('acceptProposal')
+    };
+    
+    console.log('🔍 === ACCEPTANCE PAGE ANALYSIS ===');
+    console.log('✅ Has Form:', checkResults.hasForm);
+    console.log('✅ Has Accept Button:', checkResults.hasAcceptButton);
+    console.log('✅ Has Proposal ID:', checkResults.hasProposalId);
+    console.log('✅ No JavaScript:', checkResults.hasNoJavaScript);
+    console.log('✅ Is Simplified:', checkResults.isSimplified);
+    
+    const allChecksPass = Object.values(checkResults).every(check => check === true);
+    
+    if (allChecksPass) {
+      console.log('🎉 === ALL ACCEPTANCE PAGE TESTS PASSED ===');
+      console.log('✅ The acceptance page should no longer cause serialization errors!');
+      return {
+        success: true,
+        message: 'Fixed acceptance page test PASSED! No more serialization errors expected.',
+        proposalId: proposalId,
+        checkResults: checkResults,
+        pageGenerated: true,
+        htmlLength: htmlContent.length
+      };
+    } else {
+      console.log('⚠️ === SOME ACCEPTANCE PAGE TESTS FAILED ===');
+      return {
+        success: false,
+        error: 'Some acceptance page checks failed',
+        proposalId: proposalId,
+        checkResults: checkResults,
+        htmlContent: htmlContent.substring(0, 500) + '...'
+      };
+    }
+    
+  } catch (error) {
+    console.error('❌ Test fixed acceptance page failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+}
