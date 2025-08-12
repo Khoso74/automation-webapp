@@ -2742,6 +2742,18 @@ function testSimpleAcceptanceFlow() {
     }
     
     let testProposal = proposals.find(p => p.Status === 'Sent' || p.Status === 'Draft') || proposals[0];
+    
+    if (!testProposal) {
+      return { 
+        success: false, 
+        error: 'No proposals found. Please create a proposal first.',
+        instructions: [
+          '❌ No proposals in the sheet!',
+          '✅ Create a proposal from dashboard first',
+          '✅ Then test the acceptance flow'
+        ]
+      };
+    }
     console.log('🎯 Using proposal:', testProposal.ProposalID, '-', testProposal.Title);
     
     // Get the web app URL
@@ -2809,46 +2821,156 @@ function testMinimalResponse() {
   try {
     console.log('🧪 Testing minimal HTML response...');
     
+    // Get a REAL proposal ID from the sheet
+    const proposals = getAllProposals();
+    if (!proposals || proposals.length === 0) {
+      return { 
+        success: false, 
+        error: 'No proposals found in sheet. Please create a proposal first.',
+        instructions: [
+          '❌ No proposals found!',
+          '✅ First create a proposal from dashboard',
+          '✅ Then run this test again'
+        ]
+      };
+    }
+    
+    // Use a real proposal ID
+    const testProposal = proposals[0];
+    const realProposalId = testProposal.ProposalID;
+    
+    console.log('🎯 Using REAL proposal ID:', realProposalId);
+    
     // Test the absolute minimal response that cannot fail
     const mockRequest = {
       parameter: {
         action: 'acceptProposal',
-        proposalId: 'TEST123'
+        proposalId: realProposalId
       }
     };
     
-    console.log('📤 Testing doPost with minimal request...');
+    console.log('📤 Testing doPost with real proposal ID...');
     const response = doPost(mockRequest);
     console.log('📥 Response received:', !!response);
     
-    // Get a simple acceptance URL for testing
+    // Get a simple acceptance URL for testing with REAL proposal
     const webAppUrl = getWebAppUrl();
-    const testUrl = `${webAppUrl}?page=proposal&id=TEST123`;
+    const testUrl = `${webAppUrl}?page=proposal&id=${realProposalId}`;
     
     return {
       success: true,
-      message: 'Minimal response test completed',
+      message: 'Minimal response test completed with REAL proposal',
+      testProposal: {
+        id: realProposalId,
+        title: testProposal.Title,
+        status: testProposal.Status,
+        client: testProposal.ClientID
+      },
       testUrl: testUrl,
       webAppUrl: webAppUrl,
       responseWorking: !!response,
       instructions: [
-        '🧪 EMERGENCY TEST READY',
-        '🔗 Use the test URL below',
+        '🧪 REAL PROPOSAL TEST READY',
+        '🔗 Use the test URL below (with REAL proposal)',
         '📝 Fill the form with any data',
-        '✅ Should see simple success page',
-        '❌ If still blank = deployment issue'
+        '✅ Should see acceptance page properly',
+        '✅ No more "Proposal not found" error'
       ],
       diagnosis: [
-        '✅ Removed all complex variables',
-        '✅ Removed all template literals with variables',
-        '✅ Simple static HTML only',
-        '✅ No object serialization',
+        '✅ Using REAL proposal ID from sheet',
+        '✅ Proposal exists and can be found',
+        '✅ Simple static HTML response',
+        '✅ No serialization issues',
         '✅ Direct HtmlService.createHtmlOutput()'
       ]
     };
     
   } catch (error) {
     console.error('❌ Minimal test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+}
+
+/**
+ * Create a test proposal for testing acceptance flow
+ */
+function createTestProposalForTesting() {
+  try {
+    console.log('🧪 Creating test proposal for acceptance testing...');
+    
+    // Check if we have any clients first
+    const clients = getAllClients();
+    if (!clients || clients.length === 0) {
+      return {
+        success: false,
+        error: 'No clients found. Please add a client first.',
+        instructions: [
+          '❌ No clients in database!',
+          '✅ Add a client from dashboard first',
+          '✅ Then create test proposal'
+        ]
+      };
+    }
+    
+    // Use the first client
+    const testClient = clients[0];
+    
+    // Create a test proposal
+    const testProposalData = {
+      clientId: testClient.ClientID,
+      title: 'Test Proposal for Acceptance Flow',
+      description: 'This is a test proposal created automatically for testing the client acceptance workflow. It includes all necessary components to test the complete acceptance process.',
+      amount: 50000,
+      currency: 'PKR',
+      status: 'Draft'
+    };
+    
+    console.log('📝 Creating test proposal with data:', testProposalData);
+    const result = createProposal(testProposalData);
+    
+    if (result.success) {
+      console.log('✅ Test proposal created:', result.proposalId);
+      
+      // Get the created proposal details
+      const proposal = getProposalById(result.proposalId);
+      
+      return {
+        success: true,
+        message: 'Test proposal created successfully',
+        proposalId: result.proposalId,
+        proposal: {
+          id: proposal.ProposalID,
+          title: proposal.Title,
+          client: proposal.ClientID,
+          amount: proposal.Amount,
+          status: proposal.Status
+        },
+        client: {
+          id: testClient.ClientID,
+          name: testClient.ClientName,
+          company: testClient.CompanyName
+        },
+        nextSteps: [
+          '✅ Test proposal created successfully',
+          '✅ Now you can test the acceptance flow',
+          '✅ Use Emergency Test or Fixed Flow buttons',
+          '✅ The proposal will be found and acceptance will work'
+        ]
+      };
+    } else {
+      return {
+        success: false,
+        error: 'Failed to create test proposal: ' + (result.error || 'Unknown error'),
+        debug: result
+      };
+    }
+    
+  } catch (error) {
+    console.error('❌ Test proposal creation failed:', error);
     return {
       success: false,
       error: error.message,

@@ -1882,6 +1882,14 @@
                             <span class="action-btn-desc">Minimal response</span>
                         </div>
                     </button>
+                    
+                    <button class="action-btn" onclick="createTestProposal()" style="background: linear-gradient(135deg, #ffc107, #e0a800);">
+                        <span class="action-btn-icon">🧪</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Create Test Proposal</span>
+                            <span class="action-btn-desc">For testing acceptance</span>
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>
@@ -5340,6 +5348,56 @@
                          showErrorMessage(`❌ CRITICAL: Emergency Test Failed: ${error.message}`);
                      })
                      .testMinimalResponse();
+             }
+             
+             // Create test proposal for testing acceptance flow
+             function createTestProposal() {
+                 console.log('🧪 Creating test proposal...');
+                 
+                 removeMessages();
+                 showMessage('🧪 Creating test proposal for acceptance testing...', 'info');
+                 
+                 google.script.run
+                     .withSuccessHandler(function(result) {
+                         console.log('🧪 Test proposal creation result:', result);
+                         
+                         if (result.success) {
+                             let message = `🧪 TEST PROPOSAL CREATED!<br><br>`;
+                             
+                             message += `<strong>📋 Proposal Details:</strong><br>`;
+                             message += `🆔 ID: ${result.proposal.id}<br>`;
+                             message += `📄 Title: ${result.proposal.title}<br>`;
+                             message += `💰 Amount: Rs. ${result.proposal.amount}<br>`;
+                             message += `📊 Status: ${result.proposal.status}<br><br>`;
+                             
+                             message += `<strong>👤 Client Details:</strong><br>`;
+                             message += `🆔 Client ID: ${result.client.id}<br>`;
+                             message += `👤 Name: ${result.client.name}<br>`;
+                             message += `🏢 Company: ${result.client.company}<br><br>`;
+                             
+                             message += `<strong>✅ Next Steps:</strong><br>`;
+                             result.nextSteps.forEach(step => {
+                                 message += `${step}<br>`;
+                             });
+                             
+                             message += `<br><strong>🎯 Now you can:</strong><br>`;
+                             message += `✅ Click "🆘 EMERGENCY TEST" to test acceptance<br>`;
+                             message += `✅ Click "🚀 Test Fixed Flow" to test workflow<br>`;
+                             message += `✅ No more "Proposal not found" errors!<br>`;
+                             
+                             showSuccessMessage(message);
+                             
+                             // Refresh the dashboard data
+                             loadDashboardData();
+                         } else {
+                             showErrorMessage(`❌ Test Proposal Creation Failed: ${result.error || 'Unknown error'}`);
+                         }
+                     })
+                     .withFailureHandler(function(error) {
+                         console.error('❌ Test proposal creation failed:', error);
+                         showErrorMessage(`❌ CRITICAL: Test Proposal Creation Failed: ${error.message}`);
+                     })
+                     .createTestProposalForTesting();
              }
          </script>
      </body>
