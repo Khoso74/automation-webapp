@@ -756,6 +756,14 @@
                 0 12px 40px rgba(102, 126, 234, 0.25),
                 inset 0 2px 8px rgba(255, 255, 255, 0.9);
             transform: translateY(-4px) scale(1.02);
+            z-index: 5;
+            position: relative;
+        }
+
+        /* Ensure icons don't interfere with focused inputs */
+        .form-group.with-icon .form-input:focus ~ ::before,
+        .form-group.with-icon .form-textarea:focus ~ ::before {
+            opacity: 0.3;
         }
 
         .form-input:focus::placeholder, .form-textarea:focus::placeholder {
@@ -793,31 +801,70 @@
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23764ba2' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
         }
 
-        /* Input Icons */
+        /* Input Icons - Fixed Overlap Issue */
         .form-group.with-icon {
             position: relative;
         }
 
-        .form-group.with-icon .form-input {
-            padding-left: 55px;
+        .form-group.with-icon .form-input,
+        .form-group.with-icon .form-select,
+        .form-group.with-icon .form-textarea {
+            padding-left: 60px !important;
         }
 
         .form-group.with-icon::before {
             content: '💼';
             position: absolute;
-            left: 20px;
-            top: 50%;
+            left: 22px;
+            top: calc(50% + 10px);
             transform: translateY(-50%);
-            font-size: 1.2em;
-            z-index: 2;
+            font-size: 1.1em;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.7;
         }
 
-        .form-group.email-icon::before { content: '📧'; }
-        .form-group.phone-icon::before { content: '📱'; }
-        .form-group.address-icon::before { content: '📍'; }
-        .form-group.money-icon::before { content: '💰'; }
-        .form-group.calendar-icon::before { content: '📅'; }
-        .form-group.user-icon::before { content: '👤'; }
+        /* Specific icon positions for different field types */
+        .form-group.with-icon.email-icon::before { 
+            content: '📧'; 
+            top: calc(50% + 8px);
+        }
+        .form-group.with-icon.phone-icon::before { 
+            content: '📱'; 
+            top: calc(50% + 8px);
+        }
+        .form-group.with-icon.address-icon::before { 
+            content: '📍'; 
+            top: calc(40% + 8px);
+        }
+        .form-group.with-icon.money-icon::before { 
+            content: '💰'; 
+            top: calc(50% + 8px);
+        }
+        .form-group.with-icon.calendar-icon::before { 
+            content: '📅'; 
+            top: calc(50% + 8px);
+        }
+        .form-group.with-icon.user-icon::before { 
+            content: '👤'; 
+            top: calc(50% + 8px);
+        }
+
+        /* Remove icons from dropdowns to prevent overlap */
+        .form-group.with-icon .form-select {
+            padding-left: 24px !important;
+        }
+
+        /* Hide icons for dropdown containers - browser compatible */
+        .form-group.dropdown-field::before,
+        .form-group.select-field::before {
+            display: none !important;
+        }
+
+        /* Alternative for browsers that don't support :has() */
+        .form-group.with-icon .form-select ~ .form-icon {
+            display: none;
+        }
 
         /* Button Styles */
         .btn-group {
@@ -2306,13 +2353,13 @@
             <div class="modal-body">
                 <form id="proposalForm" onsubmit="submitProposalForm(event)">
                     <div class="form-row">
-                        <div class="form-group with-icon user-icon">
+                        <div class="form-group">
                             <label class="form-label" for="proposalClient">Select Client *</label>
                             <select class="form-select" id="proposalClient" name="clientId" required>
                                 <option value="">Choose your client...</option>
                             </select>
                         </div>
-                        <div class="form-group with-icon money-icon">
+                        <div class="form-group">
                             <label class="form-label" for="proposalCurrency">Currency *</label>
                             <select class="form-select" id="proposalCurrency" name="currency" required>
                                 <option value="PKR" selected>PKR - Pakistani Rupee</option>
@@ -2361,7 +2408,7 @@
             <div class="modal-body">
                 <form id="invoiceForm" onsubmit="submitInvoiceForm(event)">
                     <div class="form-row">
-                        <div class="form-group with-icon user-icon">
+                        <div class="form-group">
                             <label class="form-label" for="invoiceClient">Select Client *</label>
                             <select class="form-select" id="invoiceClient" name="clientId" required>
                                 <option value="">Choose your client...</option>
@@ -2380,7 +2427,7 @@
                             <input type="number" class="form-input" id="invoiceAmount" name="amount" 
                                    step="0.01" placeholder="Enter invoice amount..." required>
                         </div>
-                        <div class="form-group with-icon money-icon">
+                        <div class="form-group">
                             <label class="form-label" for="invoiceCurrency">Currency *</label>
                             <select class="form-select" id="invoiceCurrency" name="currency" required>
                                 <option value="PKR" selected>PKR - Pakistani Rupee</option>
@@ -2417,7 +2464,7 @@
             </div>
             <div class="modal-body">
                 <form id="projectForm" onsubmit="submitProjectForm(event)">
-                    <div class="form-group with-icon user-icon">
+                    <div class="form-group">
                         <label class="form-label" for="projectClient">Select Client *</label>
                         <select class="form-select" id="projectClient" name="clientId" required>
                             <option value="">Choose your client...</option>
@@ -3627,7 +3674,7 @@
                             
                             const option = document.createElement('option');
                             option.value = client.ClientID;
-                            option.textContent = `${client.CompanyName} - ${client.ContactName}`;
+                            option.textContent = `${client.CompanyName} (${client.ClientID})`;
                             select.appendChild(option);
                         });
                         console.log(`✅ Successfully populated ${selectId} with ${clients.length} clients`);
