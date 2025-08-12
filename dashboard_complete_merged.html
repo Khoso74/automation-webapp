@@ -2478,6 +2478,24 @@
             }
         }
         
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                const modalId = event.target.id;
+                closeModal(modalId);
+            }
+        });
+
+        // Handle escape key to close modals
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const openModals = document.querySelectorAll('.modal[style*="display: block"]');
+                openModals.forEach(modal => {
+                    closeModal(modal.id);
+                });
+            }
+        });
+
         // Initialize dashboard on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboardData();
@@ -2731,6 +2749,264 @@
             refreshActivity();
             refreshDeadlines();
         }, 300000); // 5 minutes
+
+        // Form submission handlers
+        function submitClientForm(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            const submitBtn = form.querySelector('.btn-premium');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            // Show loading state
+            submitBtn.innerHTML = '⏳ Creating...';
+            submitBtn.disabled = true;
+            
+            const clientData = {
+                companyName: formData.get('companyName'),
+                contactName: formData.get('contactName'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                address: formData.get('address')
+            };
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    // Reset form
+                    form.reset();
+                    
+                    // Close modal
+                    closeModal('clientModal');
+                    
+                    // Show success message
+                    showSuccessMessage('✅ Client created successfully!');
+                    
+                    // Refresh dashboard data
+                    loadDashboardData();
+                    
+                    // Reset button
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                })
+                .withFailureHandler(function(error) {
+                    // Show error message
+                    showErrorMessage('❌ Failed to create client: ' + error);
+                    
+                    // Reset button
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                })
+                .createClient(clientData);
+        }
+
+        function submitProposalForm(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            const submitBtn = form.querySelector('.btn-premium');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            // Show loading state
+            submitBtn.innerHTML = '⏳ Creating...';
+            submitBtn.disabled = true;
+            
+            const proposalData = {
+                clientId: formData.get('clientId'),
+                title: formData.get('title'),
+                description: formData.get('description'),
+                amount: parseFloat(formData.get('amount')),
+                currency: formData.get('currency')
+            };
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    // Reset form
+                    form.reset();
+                    
+                    // Close modal
+                    closeModal('proposalModal');
+                    
+                    // Show success message
+                    showSuccessMessage('🚀 Proposal created successfully!');
+                    
+                    // Refresh dashboard data
+                    loadDashboardData();
+                    
+                    // Reset button
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                })
+                .withFailureHandler(function(error) {
+                    // Show error message
+                    showErrorMessage('❌ Failed to create proposal: ' + error);
+                    
+                    // Reset button
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                })
+                .createProposal(proposalData);
+        }
+
+        function submitInvoiceForm(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            const submitBtn = form.querySelector('.btn-premium');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            // Show loading state
+            submitBtn.innerHTML = '⏳ Creating...';
+            submitBtn.disabled = true;
+            
+            const invoiceData = {
+                clientId: formData.get('clientId'),
+                projectId: formData.get('projectId'),
+                amount: parseFloat(formData.get('amount')),
+                currency: formData.get('currency'),
+                dueDate: formData.get('dueDate')
+            };
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    // Reset form
+                    form.reset();
+                    
+                    // Close modal
+                    closeModal('invoiceModal');
+                    
+                    // Show success message
+                    showSuccessMessage('💎 Invoice created successfully!');
+                    
+                    // Refresh dashboard data
+                    loadDashboardData();
+                    
+                    // Reset button
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                })
+                .withFailureHandler(function(error) {
+                    // Show error message
+                    showErrorMessage('❌ Failed to create invoice: ' + error);
+                    
+                    // Reset button
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                })
+                .createInvoice(invoiceData);
+        }
+
+        function submitProjectForm(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            const submitBtn = form.querySelector('.btn-premium');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            // Show loading state
+            submitBtn.innerHTML = '⏳ Creating...';
+            submitBtn.disabled = true;
+            
+            const projectData = {
+                clientId: formData.get('clientId'),
+                title: formData.get('title'),
+                description: formData.get('description'),
+                dueDate: formData.get('dueDate')
+            };
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    // Reset form
+                    form.reset();
+                    
+                    // Close modal
+                    closeModal('projectModal');
+                    
+                    // Show success message
+                    showSuccessMessage('⚡ Project created successfully!');
+                    
+                    // Refresh dashboard data
+                    loadDashboardData();
+                    
+                    // Reset button
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                })
+                .withFailureHandler(function(error) {
+                    // Show error message
+                    showErrorMessage('❌ Failed to create project: ' + error);
+                    
+                    // Reset button
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                })
+                .createProject(projectData);
+        }
+
+        // Success and error message functions
+        function showSuccessMessage(message) {
+            // Remove any existing messages
+            removeMessages();
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'success-message';
+            messageDiv.innerHTML = message;
+            messageDiv.style.position = 'fixed';
+            messageDiv.style.top = '20px';
+            messageDiv.style.right = '20px';
+            messageDiv.style.zIndex = '11000';
+            messageDiv.style.minWidth = '300px';
+            messageDiv.style.maxWidth = '500px';
+            
+            document.body.appendChild(messageDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 5000);
+        }
+
+        function showErrorMessage(message) {
+            // Remove any existing messages
+            removeMessages();
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'error-message';
+            messageDiv.innerHTML = message;
+            messageDiv.style.position = 'fixed';
+            messageDiv.style.top = '20px';
+            messageDiv.style.right = '20px';
+            messageDiv.style.zIndex = '11000';
+            messageDiv.style.minWidth = '300px';
+            messageDiv.style.maxWidth = '500px';
+            
+            document.body.appendChild(messageDiv);
+            
+            // Auto remove after 7 seconds for errors
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 7000);
+        }
+
+        function removeMessages() {
+            const successMessages = document.querySelectorAll('.success-message');
+            const errorMessages = document.querySelectorAll('.error-message');
+            
+            successMessages.forEach(msg => {
+                if (msg.parentNode) msg.parentNode.removeChild(msg);
+            });
+            
+            errorMessages.forEach(msg => {
+                if (msg.parentNode) msg.parentNode.removeChild(msg);
+            });
+        }
 
         // Premium Tools Dialog Management
         function openToolDialog(toolName) {
@@ -3156,17 +3432,48 @@
         
         // Modal and Utility Functions
         function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
-            if (modalId === 'proposalModal' || modalId === 'invoiceModal' || modalId === 'projectModal') {
-                loadClients();
-            }
-            if (modalId === 'invoiceModal') {
-                loadProjects();
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                
+                // Load data for specific modals
+                if (modalId === 'proposalModal' || modalId === 'invoiceModal' || modalId === 'projectModal') {
+                    loadClients();
+                }
+                if (modalId === 'invoiceModal') {
+                    loadProjects();
+                }
             }
         }
         
         function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+                
+                // Restore body scroll
+                document.body.style.overflow = 'auto';
+                
+                // Reset any form inside the modal
+                const form = modal.querySelector('form');
+                if (form) {
+                    form.reset();
+                    
+                    // Reset any disabled buttons
+                    const buttons = form.querySelectorAll('button[disabled]');
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        if (btn.classList.contains('btn-premium')) {
+                            // Reset button text based on modal type
+                            if (modalId === 'clientModal') btn.innerHTML = '✨ Create Client';
+                            else if (modalId === 'proposalModal') btn.innerHTML = '🚀 Create Proposal';
+                            else if (modalId === 'invoiceModal') btn.innerHTML = '💎 Create Invoice';
+                            else if (modalId === 'projectModal') btn.innerHTML = '⚡ Create Project';
+                        }
+                    });
+                }
+            }
         }
         
         function loadClients() {
@@ -3181,13 +3488,17 @@
             selects.forEach(selectId => {
                 const select = document.getElementById(selectId);
                 if (select) {
-                    select.innerHTML = '<option value="">Select a client...</option>';
-                    clients.forEach(client => {
-                        const option = document.createElement('option');
-                        option.value = client.ClientID;
-                        option.textContent = client.CompanyName;
-                        select.appendChild(option);
-                    });
+                    select.innerHTML = '<option value="">Choose your client...</option>';
+                    if (clients && clients.length > 0) {
+                        clients.forEach(client => {
+                            const option = document.createElement('option');
+                            option.value = client.ClientID;
+                            option.textContent = `${client.CompanyName} - ${client.ContactName}`;
+                            select.appendChild(option);
+                        });
+                    } else {
+                        select.innerHTML = '<option value="">No clients found - Add a client first</option>';
+                    }
                 }
             });
         }
@@ -3202,13 +3513,17 @@
         function populateProjectDropdown(projects) {
             const select = document.getElementById('invoiceProject');
             if (select) {
-                select.innerHTML = '<option value="">Select a project...</option>';
-                projects.forEach(project => {
-                    const option = document.createElement('option');
-                    option.value = project.ProjectID;
-                    option.textContent = project.Title;
-                    select.appendChild(option);
-                });
+                select.innerHTML = '<option value="">Link to project (optional)...</option>';
+                if (projects && projects.length > 0) {
+                    projects.forEach(project => {
+                        const option = document.createElement('option');
+                        option.value = project.ProjectID;
+                        option.textContent = project.Title;
+                        select.appendChild(option);
+                    });
+                } else {
+                    select.innerHTML = '<option value="">No projects found</option>';
+                }
             }
         }
         
