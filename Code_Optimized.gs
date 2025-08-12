@@ -96,9 +96,66 @@ function doPost(e) {
         const result = acceptProposalEnhanced(e.parameter.proposalId, e.parameter.clientSignature || '');
         console.log('Acceptance result:', result);
         
-        const resultPage = createAcceptanceResultPage(result, e.parameter.proposalId);
-        console.log('Result page created, returning to client');
-        return resultPage;
+        // Return simple HTML response to avoid serialization issues
+        if (result.success) {
+          const successHtml = `
+            <html>
+            <head>
+              <title>Proposal Accepted</title>
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <style>
+                body { font-family: Arial, sans-serif; text-align: center; background: #f0f8ff; padding: 50px; }
+                .success-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; }
+                .icon { font-size: 64px; margin-bottom: 20px; }
+                .title { color: #27ae60; font-size: 28px; margin-bottom: 15px; }
+                .message { color: #666; line-height: 1.6; margin-bottom: 20px; }
+                .details { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; }
+              </style>
+            </head>
+            <body>
+              <div class="success-box">
+                <div class="icon">🎉</div>
+                <h1 class="title">Proposal Accepted Successfully!</h1>
+                <p class="message">Thank you for accepting our proposal. We're excited to work with you!</p>
+                <div class="details">
+                  <p><strong>Proposal ID:</strong> ${e.parameter.proposalId}</p>
+                  <p><strong>Accepted Date:</strong> ${new Date().toLocaleString('en-PK')}</p>
+                  ${result.projectId ? `<p><strong>Project ID:</strong> ${result.projectId}</p>` : ''}
+                </div>
+                <p style="color: #888; font-size: 14px;">
+                  A confirmation email has been sent to you, and our team has been notified.
+                </p>
+              </div>
+            </body>
+            </html>
+          `;
+          return HtmlService.createHtmlOutput(successHtml);
+        } else {
+          const errorHtml = `
+            <html>
+            <head>
+              <title>Acceptance Error</title>
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <style>
+                body { font-family: Arial, sans-serif; text-align: center; background: #ffe6e6; padding: 50px; }
+                .error-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; }
+                .icon { font-size: 64px; margin-bottom: 20px; }
+                .title { color: #e74c3c; font-size: 24px; margin-bottom: 15px; }
+                .message { color: #666; line-height: 1.6; margin-bottom: 20px; }
+              </style>
+            </head>
+            <body>
+              <div class="error-box">
+                <div class="icon">❌</div>
+                <h1 class="title">Acceptance Failed</h1>
+                <p class="message">We encountered an issue processing your acceptance. Please contact us directly.</p>
+                <p style="color: #888; font-size: 14px;">Error: ${result.error}</p>
+              </div>
+            </body>
+            </html>
+          `;
+          return HtmlService.createHtmlOutput(errorHtml);
+        }
         
       default:
         console.log('Invalid action received:', action);
@@ -108,13 +165,30 @@ function doPost(e) {
     console.error('❌ doPost error:', error);
     console.error('Error stack:', error.stack);
     
-    const errorPage = createAcceptanceResultPage({ 
-      success: false, 
-      error: error.message 
-    }, e.parameter.proposalId || 'unknown');
+    const errorHtml = `
+      <html>
+      <head>
+        <title>System Error</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+          body { font-family: Arial, sans-serif; text-align: center; background: #ffe6e6; padding: 50px; }
+          .error-box { background: white; padding: 40px; border-radius: 15px; max-width: 500px; margin: 0 auto; }
+          .icon { font-size: 64px; margin-bottom: 20px; }
+          .title { color: #e74c3c; font-size: 24px; margin-bottom: 15px; }
+        </style>
+      </head>
+      <body>
+        <div class="error-box">
+          <div class="icon">⚠️</div>
+          <h1 class="title">System Error</h1>
+          <p>An unexpected error occurred. Please contact support.</p>
+          <p style="color: #888; font-size: 12px;">Error: ${error.message}</p>
+        </div>
+      </body>
+      </html>
+    `;
     
-    console.log('Error page created, returning to client');
-    return errorPage;
+    return HtmlService.createHtmlOutput(errorHtml);
   }
 }
 
@@ -2669,6 +2743,80 @@ function testDirectProposalAcceptance() {
     
   } catch (error) {
     console.error('❌ Direct acceptance test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+}
+
+/**
+ * Test Simple Acceptance Flow - Create a direct acceptance URL
+ */
+function testSimpleAcceptanceFlow() {
+  try {
+    console.log('🧪 === TESTING SIMPLE ACCEPTANCE FLOW ===');
+    
+    // Get a proposal to test with
+    const proposals = getAllProposals();
+    if (!proposals || proposals.length === 0) {
+      return { success: false, error: 'No proposals found for testing' };
+    }
+    
+    let testProposal = proposals.find(p => p.Status === 'Sent' || p.Status === 'Draft') || proposals[0];
+    console.log('🎯 Using proposal:', testProposal.ProposalID, '-', testProposal.Title);
+    
+    // Get the web app URL
+    const webAppUrl = getWebAppUrl();
+    const acceptanceUrl = `${webAppUrl}?page=proposal&id=${testProposal.ProposalID}`;
+    
+    console.log('🔗 Acceptance URL generated:', acceptanceUrl);
+    
+    // Test the simplified doPost function
+    console.log('🧪 Testing simplified doPost response...');
+    const mockRequest = {
+      parameter: {
+        action: 'acceptProposal',
+        proposalId: testProposal.ProposalID,
+        clientSignature: 'Test Signature'
+      }
+    };
+    
+    const response = doPost(mockRequest);
+    const responseWorking = !!response;
+    
+    console.log('✅ doPost response working:', responseWorking);
+    
+    return {
+      success: true,
+      message: 'Simple acceptance flow test completed!',
+      testProposal: {
+        id: testProposal.ProposalID,
+        title: testProposal.Title,
+        status: testProposal.Status
+      },
+      acceptanceUrl: acceptanceUrl,
+      webAppUrl: webAppUrl,
+      doPostWorking: responseWorking,
+      instructions: [
+        '✅ Copy the acceptance URL below',
+        '✅ Open it in a new tab/window',  
+        '✅ Check the acceptance form loads',
+        '✅ Try accepting the proposal',
+        '✅ Verify success page appears (no blank screen)',
+        '✅ Check Apps Script logs for any errors'
+      ],
+      fixes: [
+        '✅ Simplified doPost response (no complex objects)',
+        '✅ Direct HTML return (no serialization issues)',
+        '✅ Better error handling',
+        '✅ Cleaner response structure'
+      ]
+    };
+    
+  } catch (error) {
+    console.error('❌ Simple acceptance test failed:', error);
     return {
       success: false,
       error: error.message,

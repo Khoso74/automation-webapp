@@ -1866,6 +1866,14 @@
                             <span class="action-btn-desc">Backend testing</span>
                         </div>
                     </button>
+                    
+                    <button class="action-btn" onclick="testSimpleAcceptance()" style="background: linear-gradient(135deg, #6f42c1, #5a32a3);">
+                        <span class="action-btn-icon">🚀</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Test Fixed Flow</span>
+                            <span class="action-btn-desc">Simple acceptance</span>
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>
@@ -5225,8 +5233,58 @@
                         console.error('❌ Frontend direct acceptance test failed:', error);
                         showErrorMessage(`❌ Frontend Test Failed: ${error.message}`);
                     })
-                    .testDirectProposalAcceptance();
-            }
-        </script>
-    </body>
-    </html>
+                                        .testDirectProposalAcceptance();
+             }
+             
+             // Test simple fixed acceptance flow
+             function testSimpleAcceptance() {
+                 console.log('🚀 Testing Simple Fixed Acceptance Flow...');
+                 
+                 removeMessages();
+                 showMessage('🚀 Testing fixed acceptance flow...', 'info');
+                 
+                 google.script.run
+                     .withSuccessHandler(function(result) {
+                         console.log('🚀 Simple acceptance test result:', result);
+                         
+                         if (result.success) {
+                             let message = `✅ Fixed Acceptance Flow Ready!<br><br>`;
+                             
+                             message += `<strong>📋 Test Proposal:</strong><br>`;
+                             message += `🆔 ID: ${result.testProposal.id}<br>`;
+                             message += `📄 Title: ${result.testProposal.title}<br>`;
+                             message += `📊 Status: ${result.testProposal.status}<br><br>`;
+                             
+                             message += `<strong>🔗 Test URL (Click to test):</strong><br>`;
+                             message += `<a href="${result.acceptanceUrl}" target="_blank" style="color: #007bff; word-break: break-all; font-weight: bold;">${result.acceptanceUrl}</a><br><br>`;
+                             
+                             message += `<strong>🔧 Applied Fixes:</strong><br>`;
+                             result.fixes.forEach(fix => {
+                                 message += `${fix}<br>`;
+                             });
+                             
+                             message += `<br><strong>📋 Testing Instructions:</strong><br>`;
+                             result.instructions.forEach(instruction => {
+                                 message += `${instruction}<br>`;
+                             });
+                             
+                             message += `<br><strong>💡 Expected Result:</strong><br>`;
+                             message += `✅ No blank screen<br>`;
+                             message += `✅ Beautiful success page appears<br>`;
+                             message += `✅ Sheet updates automatically<br>`;
+                             message += `✅ Owner notification email sent<br>`;
+                             
+                             showSuccessMessage(message);
+                         } else {
+                             showErrorMessage(`❌ Simple Acceptance Test Failed: ${result.error || 'Unknown error'}`);
+                         }
+                     })
+                     .withFailureHandler(function(error) {
+                         console.error('❌ Frontend simple acceptance test failed:', error);
+                         showErrorMessage(`❌ Frontend Test Failed: ${error.message}`);
+                     })
+                     .testSimpleAcceptanceFlow();
+             }
+         </script>
+     </body>
+     </html>
