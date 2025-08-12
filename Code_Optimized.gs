@@ -941,6 +941,326 @@ function addSampleClientData() {
 }
 
 /**
+ * Test 6: Detailed Dropdown Data Analysis
+ * Specifically for debugging why dropdown is not showing client data
+ */
+function testDropdownDataIssue() {
+  try {
+    console.log('🔍 DETAILED DROPDOWN DATA ANALYSIS...');
+    console.log('=========================================');
+    
+    const results = {
+      step1_sheetAccess: null,
+      step2_rawData: null,
+      step3_headerAnalysis: null,
+      step4_dataValidation: null,
+      step5_functionResults: null,
+      step6_dropdownFormat: null,
+      issues: [],
+      solutions: []
+    };
+    
+    // STEP 1: Basic Sheet Access
+    console.log('\n🔍 STEP 1: Testing Sheet Access...');
+    try {
+      const spreadsheet = getSpreadsheet();
+      const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
+      
+      if (!clientsSheet) {
+        results.issues.push('Clients sheet does not exist');
+        results.solutions.push('Run setupApplicationOptimized() or create Clients sheet manually');
+        throw new Error('Clients sheet not found');
+      }
+      
+      results.step1_sheetAccess = {
+        success: true,
+        sheetName: clientsSheet.getName(),
+        lastRow: clientsSheet.getLastRow(),
+        lastColumn: clientsSheet.getLastColumn()
+      };
+      
+      console.log(`✅ Sheet found: ${clientsSheet.getName()}`);
+      console.log(`✅ Dimensions: ${clientsSheet.getLastRow()} rows x ${clientsSheet.getLastColumn()} columns`);
+      
+    } catch (error) {
+      results.step1_sheetAccess = { success: false, error: error.message };
+      console.error('❌ Sheet access failed:', error.message);
+      return results;
+    }
+    
+    // STEP 2: Raw Data Analysis
+    console.log('\n🔍 STEP 2: Analyzing Raw Sheet Data...');
+    try {
+      const spreadsheet = getSpreadsheet();
+      const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
+      const data = clientsSheet.getDataRange().getValues();
+      
+      results.step2_rawData = {
+        totalRows: data.length,
+        headers: data[0] || [],
+        dataRows: data.length - 1,
+        sampleDataRow: data[1] || null,
+        allData: data
+      };
+      
+      console.log(`✅ Total rows: ${data.length} (including header)`);
+      console.log(`✅ Headers: [${data[0] ? data[0].join(', ') : 'No headers'}]`);
+      console.log(`✅ Data rows: ${data.length - 1}`);
+      
+      if (data.length <= 1) {
+        results.issues.push('No data rows found (only headers or empty sheet)');
+        results.solutions.push('Add client data manually or run addSampleClientData()');
+      }
+      
+      if (data[1]) {
+        console.log(`✅ Sample data row: [${data[1].join(', ')}]`);
+      } else {
+        console.log('❌ No sample data row found');
+      }
+      
+    } catch (error) {
+      results.step2_rawData = { success: false, error: error.message };
+      console.error('❌ Raw data analysis failed:', error.message);
+    }
+    
+    // STEP 3: Header Analysis
+    console.log('\n🔍 STEP 3: Analyzing Headers...');
+    try {
+      const headers = results.step2_rawData.headers;
+      const headerAnalysis = {
+        foundHeaders: headers,
+        clientIdColumn: -1,
+        companyNameColumn: -1,
+        statusColumn: -1,
+        headerMapping: {}
+      };
+      
+      // Find column indices for important fields
+      const clientIdVariations = ['Client ID', 'ClientID', 'ID', 'client_id'];
+      const companyNameVariations = ['Company Name', 'CompanyName', 'Company', 'Name', 'company_name'];
+      const statusVariations = ['Status', 'status'];
+      
+      headers.forEach((header, index) => {
+        const cleanHeader = header.toString().toLowerCase().replace(/\s+/g, '');
+        
+        // Check for Client ID
+        clientIdVariations.forEach(variation => {
+          if (cleanHeader === variation.toLowerCase().replace(/\s+/g, '')) {
+            headerAnalysis.clientIdColumn = index;
+            headerAnalysis.headerMapping['ClientID'] = header;
+          }
+        });
+        
+        // Check for Company Name
+        companyNameVariations.forEach(variation => {
+          if (cleanHeader === variation.toLowerCase().replace(/\s+/g, '')) {
+            headerAnalysis.companyNameColumn = index;
+            headerAnalysis.headerMapping['CompanyName'] = header;
+          }
+        });
+        
+        // Check for Status
+        statusVariations.forEach(variation => {
+          if (cleanHeader === variation.toLowerCase().replace(/\s+/g, '')) {
+            headerAnalysis.statusColumn = index;
+            headerAnalysis.headerMapping['Status'] = header;
+          }
+        });
+      });
+      
+      results.step3_headerAnalysis = headerAnalysis;
+      
+      console.log(`✅ Client ID found at column: ${headerAnalysis.clientIdColumn} (${headerAnalysis.headerMapping['ClientID'] || 'Not found'})`);
+      console.log(`✅ Company Name found at column: ${headerAnalysis.companyNameColumn} (${headerAnalysis.headerMapping['CompanyName'] || 'Not found'})`);
+      console.log(`✅ Status found at column: ${headerAnalysis.statusColumn} (${headerAnalysis.headerMapping['Status'] || 'Not found'})`);
+      
+      if (headerAnalysis.clientIdColumn === -1) {
+        results.issues.push('Client ID column not found');
+        results.solutions.push('Add "Client ID" or "ClientID" column header');
+      }
+      
+      if (headerAnalysis.companyNameColumn === -1) {
+        results.issues.push('Company Name column not found');
+        results.solutions.push('Add "Company Name" or "CompanyName" column header');
+      }
+      
+    } catch (error) {
+      results.step3_headerAnalysis = { success: false, error: error.message };
+      console.error('❌ Header analysis failed:', error.message);
+    }
+    
+    // STEP 4: Data Validation
+    console.log('\n🔍 STEP 4: Validating Data Rows...');
+    try {
+      const data = results.step2_rawData.allData;
+      const headerAnalysis = results.step3_headerAnalysis;
+      const validation = {
+        totalDataRows: data.length - 1,
+        validRows: 0,
+        emptyRows: 0,
+        activeClients: 0,
+        inactiveClients: 0,
+        rowDetails: []
+      };
+      
+      for (let i = 1; i < data.length; i++) {
+        const row = data[i];
+        const rowDetail = {
+          rowNumber: i,
+          clientId: row[headerAnalysis.clientIdColumn] || '',
+          companyName: row[headerAnalysis.companyNameColumn] || '',
+          status: row[headerAnalysis.statusColumn] || '',
+          isEmpty: !row[headerAnalysis.clientIdColumn] && !row[headerAnalysis.companyNameColumn],
+          isActive: row[headerAnalysis.statusColumn] ? row[headerAnalysis.statusColumn].toString().toLowerCase() !== 'inactive' : true
+        };
+        
+        validation.rowDetails.push(rowDetail);
+        
+        if (rowDetail.isEmpty) {
+          validation.emptyRows++;
+        } else {
+          validation.validRows++;
+          if (rowDetail.isActive) {
+            validation.activeClients++;
+          } else {
+            validation.inactiveClients++;
+          }
+        }
+        
+        console.log(`Row ${i}: ID="${rowDetail.clientId}", Company="${rowDetail.companyName}", Status="${rowDetail.status}", Active=${rowDetail.isActive}`);
+      }
+      
+      results.step4_dataValidation = validation;
+      
+      console.log(`✅ Total data rows: ${validation.totalDataRows}`);
+      console.log(`✅ Valid rows: ${validation.validRows}`);
+      console.log(`✅ Empty rows: ${validation.emptyRows}`);
+      console.log(`✅ Active clients: ${validation.activeClients}`);
+      console.log(`✅ Inactive clients: ${validation.inactiveClients}`);
+      
+      if (validation.activeClients === 0) {
+        results.issues.push('No active clients found');
+        results.solutions.push('Add client data with Status="Active" or leave Status blank');
+      }
+      
+    } catch (error) {
+      results.step4_dataValidation = { success: false, error: error.message };
+      console.error('❌ Data validation failed:', error.message);
+    }
+    
+    // STEP 5: Function Results Testing
+    console.log('\n🔍 STEP 5: Testing All Client Functions...');
+    try {
+      const functionResults = {};
+      
+      // Test getClientsForDropdown
+      try {
+        functionResults.getClientsForDropdown = getClientsForDropdown();
+        console.log(`✅ getClientsForDropdown(): ${functionResults.getClientsForDropdown ? functionResults.getClientsForDropdown.length : 0} clients`);
+      } catch (error) {
+        functionResults.getClientsForDropdown = { error: error.message };
+        console.log(`❌ getClientsForDropdown() failed: ${error.message}`);
+      }
+      
+      // Test getAllClients
+      try {
+        functionResults.getAllClients = getAllClients();
+        console.log(`✅ getAllClients(): ${functionResults.getAllClients ? functionResults.getAllClients.length : 0} clients`);
+      } catch (error) {
+        functionResults.getAllClients = { error: error.message };
+        console.log(`❌ getAllClients() failed: ${error.message}`);
+      }
+      
+      // Test getAllClientsSimple
+      try {
+        functionResults.getAllClientsSimple = getAllClientsSimple();
+        console.log(`✅ getAllClientsSimple(): ${functionResults.getAllClientsSimple ? functionResults.getAllClientsSimple.length : 0} clients`);
+      } catch (error) {
+        functionResults.getAllClientsSimple = { error: error.message };
+        console.log(`❌ getAllClientsSimple() failed: ${error.message}`);
+      }
+      
+      results.step5_functionResults = functionResults;
+      
+      // Check if any function returned data
+      const hasData = Object.values(functionResults).some(result => result && Array.isArray(result) && result.length > 0);
+      if (!hasData) {
+        results.issues.push('All client functions returned empty or null');
+        results.solutions.push('Check sheet data and column headers');
+      }
+      
+    } catch (error) {
+      results.step5_functionResults = { success: false, error: error.message };
+      console.error('❌ Function testing failed:', error.message);
+    }
+    
+    // STEP 6: Dropdown Format Testing
+    console.log('\n🔍 STEP 6: Testing Dropdown Format...');
+    try {
+      const clients = results.step5_functionResults.getClientsForDropdown;
+      
+      if (clients && Array.isArray(clients) && clients.length > 0) {
+        const dropdownOptions = clients.map((client, index) => {
+          const companyName = client.CompanyName || client.companyName || client['Company Name'] || `Company ${index + 1}`;
+          const clientId = client.ClientID || client.clientId || client['Client ID'] || `CLI-${index + 1}`;
+          
+          return {
+            value: clientId,
+            text: `${companyName} (${clientId})`,
+            originalClient: client
+          };
+        });
+        
+        results.step6_dropdownFormat = dropdownOptions;
+        
+        console.log('✅ Dropdown options generated:');
+        dropdownOptions.forEach((option, index) => {
+          console.log(`   ${index + 1}. Value: "${option.value}", Text: "${option.text}"`);
+        });
+        
+      } else {
+        results.step6_dropdownFormat = [];
+        results.issues.push('No clients available for dropdown formatting');
+        console.log('❌ No clients available for dropdown formatting');
+      }
+      
+    } catch (error) {
+      results.step6_dropdownFormat = { success: false, error: error.message };
+      console.error('❌ Dropdown format testing failed:', error.message);
+    }
+    
+    // FINAL SUMMARY
+    console.log('\n=========================================');
+    console.log('🏁 DROPDOWN ANALYSIS COMPLETE');
+    console.log('=========================================');
+    
+    if (results.issues.length === 0) {
+      console.log('🎉 NO ISSUES FOUND - Dropdown should work correctly!');
+    } else {
+      console.log(`⚠️  FOUND ${results.issues.length} ISSUES:`);
+      results.issues.forEach((issue, index) => {
+        console.log(`   ${index + 1}. ${issue}`);
+      });
+      
+      console.log('\n💡 SUGGESTED SOLUTIONS:');
+      results.solutions.forEach((solution, index) => {
+        console.log(`   ${index + 1}. ${solution}`);
+      });
+    }
+    
+    return results;
+    
+  } catch (error) {
+    console.error('❌ Dropdown analysis failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      message: 'Dropdown analysis failed'
+    };
+  }
+}
+
+/**
  * Master Test Function - Run All Tests
  */
 function runAllTests() {
@@ -965,12 +1285,16 @@ function runAllTests() {
   console.log('\n4. Testing Sheet Structure...');
   results.sheetStructure = testSheetStructure();
   
+  // Test 5: Detailed Dropdown Analysis
+  console.log('\n5. Testing Dropdown Data Issue...');
+  results.dropdownAnalysis = testDropdownDataIssue();
+  
   console.log('\n==========================================');
   console.log('🏁 ALL TESTS COMPLETED');
   console.log('==========================================');
   
   // Summary
-  const passedTests = Object.values(results).filter(result => result.success).length;
+  const passedTests = Object.values(results).filter(result => result && result.success !== false).length;
   const totalTests = Object.keys(results).length;
   
   console.log(`✅ Passed: ${passedTests}/${totalTests} tests`);
