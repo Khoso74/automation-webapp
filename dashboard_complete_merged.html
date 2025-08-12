@@ -2496,6 +2496,22 @@
             }
         });
 
+        // Missing function - add it
+        function loadActiveSession() {
+            // Check if there's an active time tracking session
+            const activeSessionData = localStorage.getItem('activeTimeSession');
+            if (activeSessionData) {
+                try {
+                    const session = JSON.parse(activeSessionData);
+                    console.log('Found active time tracking session:', session);
+                    // Update UI if needed
+                } catch (error) {
+                    console.log('No valid active session found');
+                    localStorage.removeItem('activeTimeSession');
+                }
+            }
+        }
+
         // Initialize dashboard on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboardData();
@@ -2749,6 +2765,38 @@
             refreshActivity();
             refreshDeadlines();
         }, 300000); // 5 minutes
+
+        // Manual test function for debugging
+        function testBackendConnection() {
+            console.log('=== MANUAL BACKEND TEST ===');
+            
+            // Test 1: Basic connection
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    console.log('✅ Test 1 - Basic connection:', result);
+                    
+                    // Test 2: Client retrieval
+                    google.script.run
+                        .withSuccessHandler(function(clients) {
+                            console.log('✅ Test 2 - Client retrieval:', clients);
+                            console.log('Client count:', clients ? clients.length : 0);
+                            alert(`Backend test successful! Found ${clients ? clients.length : 0} clients.`);
+                        })
+                        .withFailureHandler(function(error) {
+                            console.error('❌ Test 2 failed:', error);
+                            alert('Client retrieval failed: ' + error);
+                        })
+                        .testClientRetrieval();
+                })
+                .withFailureHandler(function(error) {
+                    console.error('❌ Test 1 failed:', error);
+                    alert('Backend connection failed: ' + error);
+                })
+                .testConnections();
+        }
+
+        // Make test function globally available
+        window.testBackendConnection = testBackendConnection;
 
         // Form submission handlers
         function submitClientForm(event) {
@@ -3486,20 +3534,75 @@
         
         function loadClients() {
             console.log('=== LOADING CLIENTS FOR DROPDOWN ===');
+            
+            // First test if we can call backend functions at all
             google.script.run
-                .withSuccessHandler(function(clients) {
-                    console.log('Clients received from backend:', clients);
-                    console.log('Number of clients:', clients ? clients.length : 0);
-                    if (clients && clients.length > 0) {
-                        console.log('First client sample:', clients[0]);
-                    }
-                    populateClientDropdowns(clients);
+                .withSuccessHandler(function(result) {
+                    console.log('✅ Backend connection test successful:', result);
+                    
+                    // Try simple client retrieval first
+                    google.script.run
+                        .withSuccessHandler(function(clients) {
+                            console.log('✅ Clients received from getAllClientsSimple:', clients);
+                            console.log('Number of clients:', clients ? clients.length : 0);
+                            if (clients && clients.length > 0) {
+                                console.log('First client sample:', clients[0]);
+                                populateClientDropdowns(clients);
+                            } else {
+                                console.log('No clients from simple method, trying complex method...');
+                                
+                                // Fallback to complex method
+                                google.script.run
+                                    .withSuccessHandler(function(complexClients) {
+                                        console.log('✅ Clients from getAllClients:', complexClients);
+                                        populateClientDropdowns(complexClients || []);
+                                    })
+                                    .withFailureHandler(function(error) {
+                                        console.error('❌ Both methods failed:', error);
+                                        
+                                        // Show user-friendly message
+                                        const selects = ['proposalClient', 'invoiceClient', 'projectClient'];
+                                        selects.forEach(selectId => {
+                                            const select = document.getElementById(selectId);
+                                            if (select) {
+                                                select.innerHTML = '<option value="">Error loading clients - Check console</option>';
+                                            }
+                                        });
+                                    })
+                                    .getAllClients();
+                            }
+                        })
+                        .withFailureHandler(function(error) {
+                            console.error('❌ Simple client method failed:', error);
+                            console.error('Error details:', error.message || error);
+                            
+                            // Try the complex method as fallback
+                            google.script.run
+                                .withSuccessHandler(function(clients) {
+                                    console.log('✅ Fallback method worked:', clients);
+                                    populateClientDropdowns(clients || []);
+                                })
+                                .withFailureHandler(function(fallbackError) {
+                                    console.error('❌ All methods failed:', fallbackError);
+                                    
+                                    // Show user-friendly message
+                                    const selects = ['proposalClient', 'invoiceClient', 'projectClient'];
+                                    selects.forEach(selectId => {
+                                        const select = document.getElementById(selectId);
+                                        if (select) {
+                                            select.innerHTML = '<option value="">Cannot load clients - Contact support</option>';
+                                        }
+                                    });
+                                })
+                                .getAllClients();
+                        })
+                        .getAllClientsSimple();
                 })
                 .withFailureHandler(function(error) {
-                    console.error('Failed to load clients:', error);
-                    showError(error);
+                    console.error('❌ Backend connection failed:', error);
+                    alert('Cannot connect to backend. Please refresh the page.');
                 })
-                .getAllClients();
+                .testConnections();
         }
         
         function populateClientDropdowns(clients) {

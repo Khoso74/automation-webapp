@@ -4,6 +4,14 @@
  */
 
 /**
+ * Simple test function to verify if this file is loaded
+ */
+function testClientCRMLoaded() {
+  console.log('✅ ClientCRM_Optimized.gs is loaded and accessible');
+  return 'ClientCRM_Optimized.gs is working';
+}
+
+/**
  * Test function to verify client creation setup
  */
 function testClientCreation() {
@@ -80,6 +88,49 @@ function testClientRetrieval() {
       success: false,
       error: error.message
     };
+  }
+}
+
+/**
+ * Simple backup version of getAllClients for debugging
+ */
+function getAllClientsSimple() {
+  try {
+    console.log('=== SIMPLE CLIENT RETRIEVAL ===');
+    const spreadsheet = getSpreadsheet();
+    const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
+    const data = clientsSheet.getDataRange().getValues();
+    
+    console.log('Raw sheet data:', data);
+    
+    if (data.length <= 1) {
+      console.log('No client data found');
+      return [];
+    }
+    
+    const headers = data[0];
+    console.log('Headers:', headers);
+    
+    const clients = data.slice(1).map(row => {
+      const client = {
+        ClientID: row[0],
+        CompanyName: row[1],
+        ContactName: row[2],
+        Email: row[3],
+        Phone: row[4],
+        Address: row[5],
+        CreatedDate: row[6],
+        Status: row[7]
+      };
+      return client;
+    });
+    
+    console.log('Processed clients:', clients);
+    return clients;
+    
+  } catch (error) {
+    console.error('Simple client retrieval failed:', error);
+    return [];
   }
 }
 
