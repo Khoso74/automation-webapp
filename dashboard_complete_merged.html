@@ -3485,30 +3485,56 @@
         }
         
         function loadClients() {
+            console.log('=== LOADING CLIENTS FOR DROPDOWN ===');
             google.script.run
-                .withSuccessHandler(populateClientDropdowns)
-                .withFailureHandler(showError)
+                .withSuccessHandler(function(clients) {
+                    console.log('Clients received from backend:', clients);
+                    console.log('Number of clients:', clients ? clients.length : 0);
+                    if (clients && clients.length > 0) {
+                        console.log('First client sample:', clients[0]);
+                    }
+                    populateClientDropdowns(clients);
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Failed to load clients:', error);
+                    showError(error);
+                })
                 .getAllClients();
         }
         
         function populateClientDropdowns(clients) {
+            console.log('=== POPULATING CLIENT DROPDOWNS ===');
+            console.log('Received clients for dropdown:', clients);
+            
             const selects = ['proposalClient', 'invoiceClient', 'projectClient'];
             selects.forEach(selectId => {
                 const select = document.getElementById(selectId);
+                console.log(`Processing dropdown: ${selectId}`, select ? 'Found' : 'Not Found');
+                
                 if (select) {
                     select.innerHTML = '<option value="">Choose your client...</option>';
                     if (clients && clients.length > 0) {
-                        clients.forEach(client => {
+                        console.log(`Adding ${clients.length} clients to ${selectId}`);
+                        clients.forEach((client, index) => {
+                            console.log(`Client ${index}:`, {
+                                ClientID: client.ClientID,
+                                CompanyName: client.CompanyName,
+                                ContactName: client.ContactName
+                            });
+                            
                             const option = document.createElement('option');
                             option.value = client.ClientID;
                             option.textContent = `${client.CompanyName} - ${client.ContactName}`;
                             select.appendChild(option);
                         });
+                        console.log(`✅ Successfully populated ${selectId} with ${clients.length} clients`);
                     } else {
+                        console.log(`❌ No clients found for ${selectId}`);
                         select.innerHTML = '<option value="">No clients found - Add a client first</option>';
                     }
                 }
             });
+            console.log('=== DROPDOWN POPULATION COMPLETED ===');
         }
         
         function loadProjects() {

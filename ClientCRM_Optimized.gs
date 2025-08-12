@@ -50,26 +50,94 @@ function testClientCreation() {
 }
 
 /**
+ * Test function to debug client retrieval specifically
+ */
+function testClientRetrieval() {
+  try {
+    console.log('=== TESTING CLIENT RETRIEVAL ===');
+    
+    // Get all clients with debugging
+    const clients = getAllClients();
+    
+    console.log('Retrieved clients:', clients);
+    console.log('Client count:', clients.length);
+    
+    if (clients.length > 0) {
+      console.log('Sample client structure:', clients[0]);
+      console.log('Client keys:', Object.keys(clients[0]));
+    }
+    
+    return {
+      success: true,
+      clientCount: clients.length,
+      clients: clients
+    };
+    
+  } catch (error) {
+    console.error('=== CLIENT RETRIEVAL TEST FAILED ===');
+    console.error('Error:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
+/**
  * OPTIMIZED: Get all clients with better performance
  */
 function getAllClients() {
   try {
+    console.log('=== GETTING ALL CLIENTS DEBUG ===');
     const spreadsheet = getSpreadsheet();
     const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
     const data = clientsSheet.getDataRange().getValues();
     
-    if (data.length <= 1) return [];
+    console.log('Total rows in clients sheet:', data.length);
+    
+    if (data.length <= 1) {
+      console.log('No client data found (only headers or empty sheet)');
+      return [];
+    }
     
     const headers = data[0];
-    return data.slice(1).map(row => {
+    console.log('Sheet headers:', headers);
+    
+    const clients = data.slice(1).map((row, index) => {
       const client = {};
-      headers.forEach((header, index) => {
-        client[header.replace(/\s+/g, '')] = row[index];
+      headers.forEach((header, headerIndex) => {
+        // Create both original and cleaned key versions for compatibility
+        const cleanKey = header.replace(/\s+/g, '');
+        client[cleanKey] = row[headerIndex];
+        client[header] = row[headerIndex];
       });
+      
+      // Ensure standard keys exist for frontend compatibility
+      client.ClientID = client.ClientID || client['Client ID'] || client.clientId;
+      client.CompanyName = client.CompanyName || client['Company Name'] || client.companyName;
+      client.ContactName = client.ContactName || client['Contact Name'] || client.contactName;
+      client.Email = client.Email || client.email;
+      client.Phone = client.Phone || client.phone;
+      client.Address = client.Address || client.address;
+      
+      console.log(`Client ${index + 1}:`, {
+        ClientID: client.ClientID,
+        CompanyName: client.CompanyName,
+        ContactName: client.ContactName,
+        Email: client.Email
+      });
+      
       return client;
     });
+    
+    console.log('Total clients processed:', clients.length);
+    console.log('=== CLIENTS RETRIEVAL SUCCESS ===');
+    return clients;
+    
   } catch (error) {
+    console.error('=== CLIENTS RETRIEVAL ERROR ===');
     console.error('Error getting all clients:', error);
+    console.error('Error stack:', error.stack);
     return [];
   }
 }
