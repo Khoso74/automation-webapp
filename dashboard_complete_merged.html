@@ -2937,6 +2937,47 @@
         }
         
         window.emergencyTest = emergencyTest;
+        
+        // Simple dropdown test
+        function testDropdownNow() {
+            console.log('=== TESTING DROPDOWN NOW ===');
+            
+            // Test on proposal modal
+            const proposalSelect = document.getElementById('proposalClient');
+            
+            if (proposalSelect) {
+                proposalSelect.innerHTML = '<option value="">🔄 Testing...</option>';
+                
+                google.script.run
+                    .withSuccessHandler(function(clients) {
+                        console.log('Test result:', clients);
+                        
+                        if (clients && clients.length > 0) {
+                            let options = '<option value="">Choose client...</option>';
+                            clients.forEach(client => {
+                                const name = client.CompanyName || client.companyName || 'Unknown';
+                                const id = client.ClientID || client.clientId || 'No-ID';
+                                options += `<option value="${id}">${name} (${id})</option>`;
+                            });
+                            proposalSelect.innerHTML = options;
+                            alert(`✅ Success! Loaded ${clients.length} clients`);
+                        } else {
+                            proposalSelect.innerHTML = '<option value="">No data found</option>';
+                            alert('❌ No clients found');
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        console.error('Test failed:', error);
+                        proposalSelect.innerHTML = '<option value="">Error occurred</option>';
+                        alert('❌ Test failed: ' + error);
+                    })
+                    .getAllClients();
+            } else {
+                alert('❌ Proposal select element not found');
+            }
+        }
+        
+        window.testDropdownNow = testDropdownNow;
 
         // Form submission handlers
         function submitClientForm(event) {
@@ -3635,10 +3676,10 @@
                 
                 console.log(`Opening modal: ${modalId}`);
                 
-                // Load data for specific modals with immediate debugging
+                // Load data for specific modals - FIXED VERSION
                 if (modalId === 'proposalModal' || modalId === 'invoiceModal' || modalId === 'projectModal') {
                     console.log('Loading clients for modal:', modalId);
-                    loadClientsDirectly(modalId);
+                    loadClientsDirectlyFixed(modalId);
                 }
                 if (modalId === 'invoiceModal') {
                     console.log('Loading projects for invoice modal');
@@ -3647,9 +3688,10 @@
             }
         }
 
-        // Direct client loading with immediate feedback - SIMPLIFIED
-        function loadClientsDirectly(modalId) {
-            console.log('=== DIRECT CLIENT LOADING (SIMPLIFIED) ===');
+        // BRAND NEW CLIENT LOADING FUNCTION - NO CACHE ISSUES
+        function loadClientsDirectlyFixed(modalId) {
+            console.log('=== NEW CLIENT LOADING SYSTEM ===');
+            console.log('Modal ID:', modalId);
             
             // Show loading in dropdowns immediately
             const clientSelects = {
@@ -3661,76 +3703,55 @@
             const selectId = clientSelects[modalId];
             const selectElement = document.getElementById(selectId);
             
+            console.log('Target select element:', selectId, selectElement);
+            
             if (selectElement) {
                 selectElement.innerHTML = '<option value="">🔄 Loading clients...</option>';
                 
-                // Try multiple methods in sequence
-                console.log('Trying getAllClients method...');
+                // Single method approach - direct call
+                console.log('Calling getAllClients...');
                 
                 google.script.run
                     .withSuccessHandler(function(clients) {
-                        console.log('✅ getAllClients result:', clients);
+                        console.log('=== CLIENT LOADING SUCCESS ===');
+                        console.log('Received clients:', clients);
+                        console.log('Clients type:', typeof clients);
+                        console.log('Is array:', Array.isArray(clients));
+                        console.log('Length:', clients ? clients.length : 'null');
                         
                         if (clients && Array.isArray(clients) && clients.length > 0) {
-                            populateDropdownWithClients(selectElement, clients, selectId);
-                        } else {
-                            console.log('getAllClients empty, trying getAllClientsSimple...');
+                            console.log('Processing clients for dropdown...');
                             
-                            google.script.run
-                                .withSuccessHandler(function(simpleClients) {
-                                    console.log('✅ getAllClientsSimple result:', simpleClients);
-                                    
-                                    if (simpleClients && Array.isArray(simpleClients) && simpleClients.length > 0) {
-                                        populateDropdownWithClients(selectElement, simpleClients, selectId);
-                                    } else {
-                                        console.log('Simple method empty, trying getClientsTest...');
-                                        
-                                        google.script.run
-                                            .withSuccessHandler(function(testClients) {
-                                                console.log('✅ getClientsTest result:', testClients);
-                                                
-                                                if (testClients && Array.isArray(testClients) && testClients.length > 0) {
-                                                    populateDropdownWithClients(selectElement, testClients, selectId);
-                                                } else {
-                                                    selectElement.innerHTML = '<option value="">No clients found - Add clients first</option>';
-                                                    console.error('❌ All methods returned empty data');
-                                                }
-                                            })
-                                            .withFailureHandler(function(error) {
-                                                console.error('❌ getClientsTest failed:', error);
-                                                selectElement.innerHTML = '<option value="">Error: Test method failed</option>';
-                                            })
-                                            .getClientsTest();
-                                    }
-                                })
-                                .withFailureHandler(function(error) {
-                                    console.error('❌ getAllClientsSimple failed:', error);
-                                    selectElement.innerHTML = '<option value="">Error: Simple method failed</option>';
-                                })
-                                .getAllClientsSimple();
+                            let options = '<option value="">Select a client...</option>';
+                            
+                            clients.forEach((client, index) => {
+                                console.log(`Client ${index}:`, client);
+                                
+                                const companyName = client.CompanyName || client.companyName || client.Company || 'Unknown Company';
+                                const clientId = client.ClientID || client.clientId || client.ID || `CL-${index+1}`;
+                                const displayName = `${companyName} (${clientId})`;
+                                
+                                options += `<option value="${clientId}">${displayName}</option>`;
+                                console.log(`Added option: ${displayName}`);
+                            });
+                            
+                            selectElement.innerHTML = options;
+                            console.log(`✅ SUCCESS: Loaded ${clients.length} clients in ${selectId}`);
+                            
+                        } else {
+                            console.log('No clients found or invalid data');
+                            selectElement.innerHTML = '<option value="">No clients found - Add clients first</option>';
                         }
                     })
                     .withFailureHandler(function(error) {
-                        console.error('❌ getAllClients failed:', error);
-                        console.log('Main method failed, trying simple method...');
-                        
-                        google.script.run
-                            .withSuccessHandler(function(simpleClients) {
-                                if (simpleClients && Array.isArray(simpleClients) && simpleClients.length > 0) {
-                                    populateDropdownWithClients(selectElement, simpleClients, selectId);
-                                } else {
-                                    selectElement.innerHTML = '<option value="">No clients - Add clients first</option>';
-                                }
-                            })
-                            .withFailureHandler(function(simpleError) {
-                                console.error('❌ Fallback also failed:', simpleError);
-                                selectElement.innerHTML = '<option value="">Connection error - Reload page</option>';
-                            })
-                            .getAllClientsSimple();
+                        console.error('=== CLIENT LOADING FAILED ===');
+                        console.error('Error:', error);
+                        console.error('Error type:', typeof error);
+                        selectElement.innerHTML = '<option value="">Error loading clients - Try refreshing page</option>';
                     })
                     .getAllClients();
             } else {
-                console.error('Select element not found:', selectId);
+                console.error('❌ Select element not found:', selectId);
             }
         }
         
