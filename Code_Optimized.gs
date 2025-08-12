@@ -1401,6 +1401,14 @@ function runAllTests() {
   console.log('\n5. Testing Dropdown Data Issue...');
   results.dropdownAnalysis = testDropdownDataIssue();
   
+  // Test 6: Client Folder Structure Debug
+  console.log('\n6. Debugging Client Folder Structure...');
+  results.folderStructure = debugClientFolderStructure();
+  
+  // Test 7: Specific Client Folder Finding
+  console.log('\n7. Testing Specific Client Folder Finding...');
+  results.clientFolderFinding = testSpecificClientFolder();
+  
   console.log('\n==========================================');
   console.log('🏁 ALL TESTS COMPLETED');
   console.log('==========================================');
@@ -1425,4 +1433,202 @@ function runAllTests() {
       allPassed: passedTests === totalTests
     }
   };
+}
+
+/**
+ * Debug Client Folder Structure - Check what exists in Drive
+ */
+function debugClientFolderStructure() {
+  try {
+    console.log('🔍 DEBUGGING CLIENT FOLDER STRUCTURE...');
+    console.log('==========================================');
+    
+    const rootFolder = getRootFolder();
+    console.log(`✅ Root folder: ${rootFolder.getName()} (ID: ${rootFolder.getId()})`);
+    console.log(`✅ Root folder URL: ${rootFolder.getUrl()}`);
+    
+    // Check if Clients folder exists
+    const clientsFolders = rootFolder.getFoldersByName('Clients');
+    if (!clientsFolders.hasNext()) {
+      console.log('❌ No "Clients" folder found in root directory');
+      
+      // List all folders in root to see what's there
+      console.log('\n📁 Folders in root directory:');
+      const rootSubfolders = rootFolder.getFolders();
+      let count = 0;
+      while (rootSubfolders.hasNext() && count < 20) {
+        const folder = rootSubfolders.next();
+        console.log(`   📁 ${folder.getName()} (ID: ${folder.getId()})`);
+        count++;
+      }
+      
+      return {
+        success: false,
+        error: 'Clients folder not found',
+        rootFolderId: rootFolder.getId(),
+        rootFolderName: rootFolder.getName()
+      };
+    }
+    
+    const clientsFolder = clientsFolders.next();
+    console.log(`✅ Clients folder found: ${clientsFolder.getName()} (ID: ${clientsFolder.getId()})`);
+    
+    // List all client folders
+    console.log('\n👥 Client folders found:');
+    const clientSubfolders = clientsFolder.getFolders();
+    const clientFolders = [];
+    let count = 0;
+    
+    while (clientSubfolders.hasNext() && count < 50) {
+      const folder = clientSubfolders.next();
+      const folderInfo = {
+        name: folder.getName(),
+        id: folder.getId(),
+        url: folder.getUrl()
+      };
+      
+      console.log(`   📁 ${folderInfo.name} (ID: ${folderInfo.id})`);
+      
+      // Check subfolders in each client folder
+      const subfolders = folder.getFolders();
+      const subfolderNames = [];
+      while (subfolders.hasNext()) {
+        subfolderNames.push(subfolders.next().getName());
+      }
+      
+      if (subfolderNames.length > 0) {
+        console.log(`      📂 Subfolders: ${subfolderNames.join(', ')}`);
+        folderInfo.subfolders = subfolderNames;
+      } else {
+        console.log(`      📂 No subfolders found`);
+        folderInfo.subfolders = [];
+      }
+      
+      clientFolders.push(folderInfo);
+      count++;
+    }
+    
+    return {
+      success: true,
+      rootFolder: {
+        name: rootFolder.getName(),
+        id: rootFolder.getId(),
+        url: rootFolder.getUrl()
+      },
+      clientsFolder: {
+        name: clientsFolder.getName(),
+        id: clientsFolder.getId(),
+        url: clientsFolder.getUrl()
+      },
+      clientFolders: clientFolders,
+      totalClientFolders: clientFolders.length
+    };
+    
+  } catch (error) {
+    console.error('❌ Error debugging client folder structure:', error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+}
+
+/**
+ * Test Specific Client Folder Finding
+ */
+function testSpecificClientFolder() {
+  try {
+    console.log('🧪 TESTING SPECIFIC CLIENT FOLDER FINDING...');
+    
+    // Get a real client from the database
+    const clients = getAllClients();
+    console.log(`Found ${clients.length} clients in database`);
+    
+    if (clients.length === 0) {
+      return {
+        success: false,
+        error: 'No clients found in database'
+      };
+    }
+    
+    // Test with first client
+    const testClient = clients[0];
+    console.log(`Testing with client: ${testClient.CompanyName} (${testClient.ClientID})`);
+    
+    // Test the actual function that's being used
+    const result = getClientProposalsFolder(testClient.ClientID, testClient.CompanyName);
+    
+    console.log('Folder finding result:', result);
+    
+    return {
+      success: true,
+      testClient: testClient,
+      folderResult: result
+    };
+    
+  } catch (error) {
+    console.error('❌ Error testing specific client folder:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
+/**
+ * Force Create Missing Client Folders
+ */
+function forceCreateClientFolders() {
+  try {
+    console.log('🔧 FORCE CREATING CLIENT FOLDERS...');
+    
+    const clients = getAllClients();
+    console.log(`Found ${clients.length} clients to process`);
+    
+    if (clients.length === 0) {
+      return {
+        success: false,
+        error: 'No clients found'
+      };
+    }
+    
+    const results = [];
+    
+    for (let client of clients) {
+      console.log(`\n🔄 Processing client: ${client.CompanyName} (${client.ClientID})`);
+      
+      try {
+        const folderResult = createClientFolderOptimized(client.ClientID, client.CompanyName);
+        console.log(`✅ Folder result for ${client.CompanyName}:`, folderResult);
+        
+        results.push({
+          client: client,
+          folder: folderResult,
+          success: true
+        });
+        
+      } catch (error) {
+        console.error(`❌ Failed to create folder for ${client.CompanyName}:`, error);
+        results.push({
+          client: client,
+          error: error.message,
+          success: false
+        });
+      }
+    }
+    
+    return {
+      success: true,
+      processed: results.length,
+      results: results
+    };
+    
+  } catch (error) {
+    console.error('❌ Error force creating client folders:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
 }

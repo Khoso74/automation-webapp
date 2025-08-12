@@ -1831,6 +1831,15 @@
                             <span class="action-btn-desc">Business analytics</span>
                         </div>
                     </button>
+                    
+                    <!-- TEMPORARY DEBUG BUTTON -->
+                    <button class="action-btn" onclick="showTab('debug')" style="background: linear-gradient(135deg, #dc3545, #c82333); border: 2px solid #dc3545;">
+                        <span class="action-btn-icon">🔧</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Debug Tools</span>
+                            <span class="action-btn-desc">Fix PDF saving</span>
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>
@@ -2008,6 +2017,50 @@
                 <div id="fullAnalytics">
                     <div class="loading-spinner"></div> Loading comprehensive analytics...
                 </div>
+            </div>
+        </div>
+        
+        <!-- DEBUG TAB (TEMPORARY) -->
+        <div id="debug" class="tab-content">
+            <div class="panel" style="background: #f8f9fa; border-left: 4px solid #dc3545;">
+                <h3 style="color: #dc3545;">🔧 Debug Tools (Temporary)</h3>
+                <p style="margin-bottom: 20px; color: #666;">Use these tools to debug the proposal PDF saving issue:</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <button onclick="debugClientFolders()" 
+                            style="padding: 15px 20px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                        🔍 Debug Folder Structure
+                    </button>
+                    
+                    <button onclick="testProposalPDFSaving()" 
+                            style="padding: 15px 20px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                        🧪 Test PDF Saving
+                    </button>
+                    
+                    <button onclick="forceCreateClientFolders()" 
+                            style="padding: 15px 20px; background: #ffc107; color: #212529; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                        🔧 Force Create Folders
+                    </button>
+                    
+                    <button onclick="google.script.run.runAllTests(); showMessage('Running all backend tests...', 'info');" 
+                            style="padding: 15px 20px; background: #6f42c1; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                        🚀 Run All Backend Tests
+                    </button>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px;">
+                    <strong>📋 Debug Instructions:</strong>
+                    <ol style="margin: 10px 0; padding-left: 20px;">
+                        <li>First click "Debug Folder Structure" to see what folders exist</li>
+                        <li>If no client folders found, click "Force Create Folders"</li>
+                        <li>Test PDF saving with "Test PDF Saving"</li>
+                        <li>Create a proposal and check if PDF saves to client folder</li>
+                    </ol>
+                </div>
+                
+                <p style="margin-top: 15px; font-size: 12px; color: #999;">
+                    Note: These debug tools will be removed once the issue is resolved.
+                </p>
             </div>
         </div>
     </div>
@@ -4541,6 +4594,126 @@
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
             }
+        }
+
+        // Test proposal PDF integration
+        function testProposalPDFSaving() {
+            console.log('🧪 Testing Proposal PDF Saving from Frontend...');
+            
+            removeMessages();
+            showMessage('🔄 Testing proposal PDF saving...', 'info');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    console.log('✅ Proposal PDF test result:', result);
+                    
+                    if (result.success) {
+                        showSuccessMessage(`✅ Test Passed! Client folder structure working correctly.<br>
+                                         📁 Client Folder: ${result.clientFolder.clientFolderName}<br>
+                                         📁 Proposals Folder: ${result.clientFolder.proposalsFolderName}`);
+                    } else {
+                        showErrorMessage(`❌ Test Failed: ${result.error || 'Unknown error'}`);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('❌ Frontend test failed:', error);
+                    showErrorMessage(`❌ Frontend Test Failed: ${error.message}`);
+                })
+                .testProposalPDFIntegration();
+        }
+        
+        // Debug client folders
+        function debugClientFolders() {
+            console.log('🔍 Debugging Client Folders from Frontend...');
+            
+            removeMessages();
+            showMessage('🔄 Debugging client folder structure...', 'info');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    console.log('✅ Client folder debug result:', result);
+                    
+                    if (result.success) {
+                        let message = `✅ Debug Complete!<br>📁 Root: ${result.rootFolder.name}<br>👥 Clients: ${result.totalClientFolders} folders found`;
+                        
+                        if (result.clientFolders && result.clientFolders.length > 0) {
+                            message += '<br><br>📂 Client Folders:';
+                            result.clientFolders.forEach(folder => {
+                                message += `<br>&nbsp;&nbsp;• ${folder.name}`;
+                                if (folder.subfolders && folder.subfolders.length > 0) {
+                                    message += ` (${folder.subfolders.join(', ')})`;
+                                }
+                            });
+                        }
+                        
+                        showSuccessMessage(message);
+                    } else {
+                        showErrorMessage(`❌ Debug Failed: ${result.error || 'Unknown error'}`);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('❌ Frontend debug failed:', error);
+                    showErrorMessage(`❌ Frontend Debug Failed: ${error.message}`);
+                })
+                .debugClientFolderStructure();
+        }
+        
+        // Force create client folders
+        function forceCreateClientFolders() {
+            console.log('🔧 Force Creating Client Folders...');
+            
+            removeMessages();
+            showMessage('🔄 Creating missing client folders...', 'info');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    console.log('✅ Force create result:', result);
+                    
+                    if (result.success) {
+                        let message = `✅ Processing Complete! ${result.processed} clients processed`;
+                        
+                        const successCount = result.results.filter(r => r.success).length;
+                        const failCount = result.results.filter(r => !r.success).length;
+                        
+                        message += `<br>✅ Success: ${successCount}<br>❌ Failed: ${failCount}`;
+                        
+                        showSuccessMessage(message);
+                    } else {
+                        showErrorMessage(`❌ Force Create Failed: ${result.error || 'Unknown error'}`);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('❌ Frontend force create failed:', error);
+                    showErrorMessage(`❌ Frontend Force Create Failed: ${error.message}`);
+                })
+                .forceCreateClientFolders();
+        }
+        
+        // Show Tab Function (for debug tab)
+        function showTab(tabId) {
+            console.log('🔄 Switching to tab:', tabId);
+            
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            const selectedTab = document.getElementById(tabId);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+                console.log('✅ Switched to tab:', tabId);
+            } else {
+                console.error('❌ Tab not found:', tabId);
+            }
+            
+            // Update active button (optional)
+            const buttons = document.querySelectorAll('.action-btn');
+            buttons.forEach(btn => {
+                btn.style.opacity = '0.7';
+            });
+            event.target.closest('.action-btn').style.opacity = '1';
         }
     </script>
 </body>

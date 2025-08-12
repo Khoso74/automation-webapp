@@ -126,90 +126,138 @@ function generateProposalPDF(proposalId) {
 
 /**
  * Get client's proposals folder for saving PDF
- * Enhanced version that works with current folder structure
+ * ENHANCED version with better error handling and debugging
  */
 function getClientProposalsFolder(clientId, clientName) {
   try {
-    console.log('🔍 Finding client proposals folder:', clientId, clientName);
+    console.log('🔍 === FINDING CLIENT PROPOSALS FOLDER ===');
+    console.log(`🔍 Client ID: ${clientId}`);
+    console.log(`🔍 Client Name: ${clientName}`);
     
+    // Step 1: Get root folder
+    console.log('\n📁 Step 1: Accessing root folder...');
     const rootFolder = getRootFolder();
-    console.log('✅ Root folder accessed');
+    console.log(`✅ Root folder: ${rootFolder.getName()} (ID: ${rootFolder.getId()})`);
     
-    // Find Clients folder
+    // Step 2: Find or create Clients folder
+    console.log('\n📁 Step 2: Finding Clients folder...');
+    let clientsFolder;
     const clientsFolders = rootFolder.getFoldersByName('Clients');
+    
     if (!clientsFolders.hasNext()) {
-      console.log('❌ Clients folder not found');
-      return { success: false, error: 'Clients folder not found' };
+      console.log('❌ Clients folder not found, creating it...');
+      clientsFolder = rootFolder.createFolder('Clients');
+      console.log(`✅ Created Clients folder: ${clientsFolder.getName()}`);
+    } else {
+      clientsFolder = clientsFolders.next();
+      console.log(`✅ Clients folder found: ${clientsFolder.getName()}`);
     }
     
-    const clientsFolder = clientsFolders.next();
-    console.log('✅ Clients folder found');
+    // Step 3: Find or create client-specific folder
+    console.log('\n📁 Step 3: Finding client-specific folder...');
     
-    // Find client-specific folder (search by multiple patterns)
+    // Clean the client name for safe folder creation
+    const safeClientName = clientName ? clientName.replace(/[^a-zA-Z0-9\s-_]/g, '').trim() : 'Unknown';
+    
+    // Try different folder name patterns that might exist
     const possibleClientFolderNames = [
-      `${clientId} - ${clientName}`,
-      `${clientName} (${clientId})`,
-      clientId,
-      clientName
+      `${clientId} - ${safeClientName}`,  // Current standard
+      `${safeClientName} (${clientId})`,  // Alternative format
+      `${clientId}`,                      // Just ID
+      `${safeClientName}`,                // Just name
+      clientId,                           // Direct ID match
+      clientName                          // Direct name match
     ];
     
-    let clientFolder = null;
+    console.log('🔍 Searching for client folder with patterns:', possibleClientFolderNames);
     
-    for (let folderName of possibleClientFolderNames) {
-      const safeName = folderName.replace(/[^a-zA-Z0-9\s-_()]/g, '').trim();
-      console.log(`🔍 Searching for client folder: "${safeName}"`);
+    let clientFolder = null;
+    let foundPattern = null;
+    
+    // Search for existing folder
+    for (let pattern of possibleClientFolderNames) {
+      if (!pattern) continue; // Skip empty patterns
       
-      const clientFolders = clientsFolder.getFoldersByName(safeName);
+      console.log(`🔍 Checking pattern: "${pattern}"`);
+      const clientFolders = clientsFolder.getFoldersByName(pattern);
+      
       if (clientFolders.hasNext()) {
         clientFolder = clientFolders.next();
-        console.log(`✅ Client folder found: ${clientFolder.getName()}`);
+        foundPattern = pattern;
+        console.log(`✅ Found client folder: "${clientFolder.getName()}" using pattern: "${pattern}"`);
         break;
       }
     }
     
+    // If not found, create new folder
     if (!clientFolder) {
-      console.log('❌ Client folder not found, creating new one...');
-      // Create client folder if not found
-      const safeName = clientName.replace(/[^a-zA-Z0-9\s-_]/g, '').trim();
-      const newFolderName = `${clientId} - ${safeName}`;
+      console.log('❌ Client folder not found in any pattern, creating new one...');
+      const newFolderName = `${clientId} - ${safeClientName}`;
+      console.log(`🔧 Creating folder: "${newFolderName}"`);
+      
       clientFolder = clientsFolder.createFolder(newFolderName);
-      console.log(`✅ Created client folder: ${newFolderName}`);
+      console.log(`✅ Created client folder: ${clientFolder.getName()}`);
       
       // Create standard subfolders
       const subfolders = ['Proposals', 'Contracts', 'Projects', 'Invoices', 'Communications'];
+      console.log('🔧 Creating subfolders:', subfolders);
+      
       subfolders.forEach(subfolder => {
-        clientFolder.createFolder(subfolder);
-        console.log(`✅ Created subfolder: ${subfolder}`);
+        try {
+          const createdSubfolder = clientFolder.createFolder(subfolder);
+          console.log(`✅ Created subfolder: ${subfolder} (ID: ${createdSubfolder.getId()})`);
+        } catch (subError) {
+          console.error(`❌ Failed to create subfolder ${subfolder}:`, subError.message);
+        }
       });
     }
     
-    // Find or create Proposals subfolder
+    // Step 4: Find or create Proposals subfolder
+    console.log('\n📁 Step 4: Finding Proposals subfolder...');
     let proposalsFolder;
     const proposalsFolders = clientFolder.getFoldersByName('Proposals');
     
     if (proposalsFolders.hasNext()) {
       proposalsFolder = proposalsFolders.next();
-      console.log('✅ Proposals subfolder found');
+      console.log(`✅ Proposals subfolder found: ${proposalsFolder.getName()}`);
     } else {
+      console.log('❌ Proposals subfolder not found, creating it...');
       proposalsFolder = clientFolder.createFolder('Proposals');
-      console.log('✅ Proposals subfolder created');
+      console.log(`✅ Created Proposals subfolder: ${proposalsFolder.getName()}`);
     }
     
-    return {
+    // Final result
+    const result = {
       success: true,
       clientFolderId: clientFolder.getId(),
       proposalsFolderId: proposalsFolder.getId(),
       clientFolderName: clientFolder.getName(),
       proposalsFolderName: proposalsFolder.getName(),
       clientFolderUrl: clientFolder.getUrl(),
-      proposalsFolderUrl: proposalsFolder.getUrl()
+      proposalsFolderUrl: proposalsFolder.getUrl(),
+      foundPattern: foundPattern,
+      wasCreated: !foundPattern
     };
     
+    console.log('\n✅ === CLIENT PROPOSALS FOLDER SUCCESS ===');
+    console.log(`✅ Client Folder: ${result.clientFolderName} (${result.clientFolderId})`);
+    console.log(`✅ Proposals Folder: ${result.proposalsFolderName} (${result.proposalsFolderId})`);
+    console.log(`✅ Client URL: ${result.clientFolderUrl}`);
+    console.log(`✅ Proposals URL: ${result.proposalsFolderUrl}`);
+    
+    return result;
+    
   } catch (error) {
+    console.error('❌ === CLIENT PROPOSALS FOLDER ERROR ===');
     console.error('❌ Error finding client proposals folder:', error);
+    console.error('❌ Error stack:', error.stack);
+    
     return {
       success: false,
-      error: error.message
+      error: error.message,
+      stack: error.stack,
+      clientId: clientId,
+      clientName: clientName
     };
   }
 }
