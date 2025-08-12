@@ -702,6 +702,241 @@
         
         const defaultProjectDue = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
         document.getElementById('projectDueDate').value = defaultProjectDue.toISOString().split('T')[0];
+
+        // Format currency for Pakistani market
+        function formatCurrency(amount, currency) {
+          const currencySymbol = currency === 'PKR' || currency === 'Rs.' || !currency ? 'Rs.' : currency;
+          const formattedAmount = parseFloat(amount || 0).toLocaleString('en-PK');
+          return `${currencySymbol} ${formattedAmount}`;
+        }
+
+        // Load dashboard data
+        function loadDashboard() {
+          showLoading();
+          
+          Promise.all([
+            google.script.run.withSuccessHandler(function(stats) {
+              displayStats(stats);
+            }).withFailureHandler(handleError).getDashboardStats(),
+            
+            google.script.run.withSuccessHandler(function(activity) {
+              displayRecentActivity(activity);
+            }).withFailureHandler(handleError).getRecentActivity(),
+            
+            google.script.run.withSuccessHandler(function(deadlines) {
+              displayUpcomingDeadlines(deadlines);
+            }).withFailureHandler(handleError).getUpcomingDeadlines()
+          ]).finally(() => {
+            hideLoading();
+          });
+        }
+
+        // Display statistics
+        function displayStats(stats) {
+          document.getElementById('totalClients').textContent = stats.totalClients || 0;
+          document.getElementById('activeProjects').textContent = stats.activeProjects || 0;
+          document.getElementById('pendingProposals').textContent = stats.pendingProposals || 0;
+          document.getElementById('monthlyRevenue').textContent = formatCurrency(stats.monthlyRevenue, 'PKR');
+        }
+
+        // Display recent activity
+        function displayRecentActivity(activities) {
+          const container = document.getElementById('recentActivityList');
+          container.innerHTML = '';
+          
+          if (!activities || activities.length === 0) {
+            container.innerHTML = '<div class="activity-item">No recent activity</div>';
+            return;
+          }
+          
+          activities.forEach(activity => {
+            const item = document.createElement('div');
+            item.className = 'activity-item';
+            
+            // Format date for Pakistani locale
+            const date = new Date(activity.timestamp).toLocaleDateString('en-PK', {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            
+            item.innerHTML = `
+              <div class="activity-content">
+                <span class="activity-type">${activity.type}</span>
+                <span class="activity-description">${activity.description}</span>
+              </div>
+              <span class="activity-time">${date}</span>
+            `;
+            container.appendChild(item);
+          });
+        }
+
+        // Display upcoming deadlines
+        function displayUpcomingDeadlines(deadlines) {
+          const container = document.getElementById('upcomingDeadlinesList');
+          container.innerHTML = '';
+          
+          if (!deadlines || deadlines.length === 0) {
+            container.innerHTML = '<div class="deadline-item">No upcoming deadlines</div>';
+            return;
+          }
+          
+          deadlines.forEach(deadline => {
+            const item = document.createElement('div');
+            item.className = 'deadline-item';
+            
+            // Calculate days remaining
+            const dueDate = new Date(deadline.dueDate);
+            const today = new Date();
+            const diffTime = dueDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            let statusClass = 'deadline-upcoming';
+            let statusText = `${diffDays} days`;
+            
+            if (diffDays < 0) {
+              statusClass = 'deadline-overdue';
+              statusText = `${Math.abs(diffDays)} days overdue`;
+            } else if (diffDays === 0) {
+              statusClass = 'deadline-today';
+              statusText = 'Due today';
+            } else if (diffDays <= 3) {
+              statusClass = 'deadline-urgent';
+              statusText = `${diffDays} days`;
+            }
+            
+            item.innerHTML = `
+              <div class="deadline-content">
+                <span class="deadline-title">${deadline.title}</span>
+                <span class="deadline-type">${deadline.type}</span>
+              </div>
+              <span class="deadline-status ${statusClass}">${statusText}</span>
+            `;
+            container.appendChild(item);
+          });
+        }
+
+        // Create client form submission
+        function submitClientForm() {
+          const form = document.getElementById('clientForm');
+          const formData = new FormData(form);
+          
+          // Pakistani phone number validation
+          const phone = formData.get('phone');
+          if (phone && !phone.match(/^\+92|^03|^92/)) {
+            alert('Please enter a valid Pakistani phone number (e.g., +92-300-1234567 or 0300-1234567)');
+            return;
+          }
+          
+          const clientData = {
+            companyName: formData.get('companyName'),
+            contactName: formData.get('contactName'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            address: formData.get('address'),
+            status: formData.get('status') || 'Active'
+          };
+          
+          showLoading();
+          google.script.run
+            .withSuccessHandler(function(result) {
+              hideLoading();
+              if (result.success) {
+                alert('Client created successfully!');
+                closeModal('clientModal');
+                form.reset();
+                loadDashboard();
+              } else {
+                alert('Error: ' + result.message);
+              }
+            })
+            .withFailureHandler(function(error) {
+              hideLoading();
+              handleError(error);
+            })
+            .createClient(clientData);
+        }
+
+        // Create proposal form submission
+        function submitProposalForm() {
+          const form = document.getElementById('proposalForm');
+          const formData = new FormData(form);
+          
+          // Set PKR as default currency if not specified
+          let currency = formData.get('currency');
+          if (!currency || currency === '') {
+            currency = 'PKR';
+          }
+          
+          const proposalData = {
+            clientId: formData.get('clientId'),
+            title: formData.get('title'),
+            description: formData.get('description'),
+            amount: parseFloat(formData.get('amount')),
+            currency: currency,
+            deadline: formData.get('deadline')
+          };
+          
+          showLoading();
+          google.script.run
+            .withSuccessHandler(function(result) {
+              hideLoading();
+              if (result.success) {
+                alert('Proposal created successfully!');
+                closeModal('proposalModal');
+                form.reset();
+                loadDashboard();
+              } else {
+                alert('Error: ' + result.message);
+              }
+            })
+            .withFailureHandler(function(error) {
+              hideLoading();
+              handleError(error);
+            })
+            .createProposal(proposalData);
+        }
+
+        // Create invoice form submission
+        function submitInvoiceForm() {
+          const form = document.getElementById('invoiceForm');
+          const formData = new FormData(form);
+          
+          // Set PKR as default currency if not specified
+          let currency = formData.get('currency');
+          if (!currency || currency === '') {
+            currency = 'PKR';
+          }
+          
+          const invoiceData = {
+            clientId: formData.get('clientId'),
+            projectId: formData.get('projectId'),
+            amount: parseFloat(formData.get('amount')),
+            currency: currency,
+            dueDate: formData.get('dueDate'),
+            description: formData.get('description')
+          };
+          
+          showLoading();
+          google.script.run
+            .withSuccessHandler(function(result) {
+              hideLoading();
+              if (result.success) {
+                alert('Invoice created successfully!');
+                closeModal('invoiceModal');
+                form.reset();
+                loadDashboard();
+              } else {
+                alert('Error: ' + result.message);
+              }
+            })
+            .withFailureHandler(function(error) {
+              hideLoading();
+              handleError(error);
+            })
+            .createInvoice(invoiceData);
+        }
     </script>
 </body>
 </html>

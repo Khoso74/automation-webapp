@@ -69,7 +69,7 @@ function generateProposalPDF(proposalId) {
     }
     
     // Create HTML content for PDF
-    const htmlContent = createProposalHTML(proposal, client);
+    const htmlContent = createProposalHTML(proposal);
     
     // Convert HTML to PDF using Google Docs
     const pdfBlob = Utilities.newBlob(htmlContent, 'text/html')
@@ -116,114 +116,168 @@ function generateProposalPDF(proposalId) {
 /**
  * Create HTML content for proposal PDF
  */
-function createProposalHTML(proposal, client) {
-  const companyName = getSetting('COMPANY_NAME') || 'Your Business';
-  const companyEmail = getSetting('COMPANY_EMAIL') || 'your-email@gmail.com';
-  const companyPhone = getSetting('COMPANY_PHONE') || '+1-234-567-8900';
-  const companyAddress = getSetting('COMPANY_ADDRESS') || 'Your Business Address';
+function createProposalHTML(proposal) {
+  const companyName = getSetting('COMPANY_NAME');
+  const companyEmail = getSetting('COMPANY_EMAIL');
+  const companyPhone = getSetting('COMPANY_PHONE');
+  const companyAddress = getSetting('COMPANY_ADDRESS');
+  const currencySymbol = getSetting('CURRENCY_SYMBOL') || 'Rs.';
   
-  const proposalDate = new Date(proposal.CreatedDate).toLocaleDateString();
-  const validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString(); // 30 days from now
+  // Format amount with Pakistani number formatting
+  const formattedAmount = parseFloat(proposal.Amount).toLocaleString('en-PK');
   
+  // Get client information
+  const client = getClientById(proposal.ClientID);
+  const clientName = client ? client.ContactName : proposal.ClientName || 'Valued Client';
+  const companyClientName = client ? client.CompanyName : 'Client Company';
+
   return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <title>Proposal - ${proposal.Title}</title>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; color: #333; }
-        .header { text-align: center; margin-bottom: 40px; }
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Proposal ${proposal.ProposalID}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #333; line-height: 1.6; }
+        .proposal-header { background: linear-gradient(135deg, #2c5aa0, #1e4080); color: white; padding: 30px; margin-bottom: 30px; border-radius: 10px; }
+        .proposal-title { font-size: 32px; margin: 0; font-weight: 300; }
+        .proposal-subtitle { font-size: 16px; margin: 10px 0 0 0; opacity: 0.9; }
         .company-info { margin-bottom: 30px; }
-        .client-info { margin-bottom: 30px; }
-        .proposal-details { margin-bottom: 30px; }
-        .amount { font-size: 24px; font-weight: bold; color: #2c3e50; }
-        .section { margin-bottom: 30px; }
-        .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #7f8c8d; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #f8f9fa; font-weight: bold; }
-        .terms { background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0; }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>PROJECT PROPOSAL</h1>
-        <p>Proposal ID: ${proposal.ProposalID}</p>
-      </div>
-      
-      <div class="company-info">
-        <h3>From:</h3>
-        <strong>${companyName}</strong><br>
-        ${companyAddress}<br>
-        Email: ${companyEmail}<br>
-        Phone: ${companyPhone}
-      </div>
-      
-      <div class="client-info">
-        <h3>To:</h3>
-        <strong>${client.CompanyName}</strong><br>
-        Attention: ${client.ContactName}<br>
-        Email: ${client.Email}<br>
-        ${client.Address}
-      </div>
-      
-      <div class="proposal-details">
-        <table>
-          <tr>
-            <th>Proposal Date</th>
-            <td>${proposalDate}</td>
-          </tr>
-          <tr>
-            <th>Valid Until</th>
-            <td>${validUntil}</td>
-          </tr>
-          <tr>
-            <th>Project Title</th>
-            <td><strong>${proposal.Title}</strong></td>
-          </tr>
-        </table>
-      </div>
-      
-      <div class="section">
-        <h3>Project Description</h3>
-        <p>${proposal.Description.replace(/\n/g, '<br>')}</p>
-      </div>
-      
-      <div class="section">
-        <h3>Investment</h3>
-        <div class="amount">${proposal.Currency} ${parseFloat(proposal.Amount).toLocaleString()}</div>
-      </div>
-      
-      <div class="terms">
-        <h3>Terms & Conditions</h3>
+        .company-name { font-size: 24px; color: #2c5aa0; margin-bottom: 10px; font-weight: bold; }
+        .section { margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #2c5aa0; }
+        .section h3 { color: #2c5aa0; margin-top: 0; margin-bottom: 15px; }
+        .client-info { background: #e8f4fd; border-left-color: #007bff; }
+        .project-scope { background: #f0f8e8; border-left-color: #28a745; }
+        .pricing-section { background: #fff3cd; border-left-color: #ffc107; }
+        .amount-highlight { font-size: 28px; font-weight: bold; color: #2c5aa0; text-align: center; 
+                           background: white; padding: 20px; margin: 20px 0; border-radius: 8px; 
+                           border: 2px solid #2c5aa0; }
+        .timeline { background: #f8d7da; border-left-color: #dc3545; }
+        .payment-terms { background: #d4edda; border-left-color: #28a745; }
+        .cta-section { text-align: center; margin: 40px 0; }
+        .accept-button { background: #28a745; color: white; padding: 15px 30px; font-size: 18px; 
+                        text-decoration: none; border-radius: 5px; display: inline-block; 
+                        transition: background 0.3s; }
+        .accept-button:hover { background: #218838; }
+        .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #666; 
+                 border-top: 1px solid #ddd; padding-top: 20px; }
+        .contact-info { display: flex; justify-content: space-around; flex-wrap: wrap; margin: 20px 0; }
+        .contact-item { margin: 10px; }
+        ul { margin: 0; padding-left: 20px; }
+        li { margin: 8px 0; }
+    </style>
+</head>
+<body>
+    <div class="proposal-header">
+        <h1 class="proposal-title">BUSINESS PROPOSAL</h1>
+        <div class="proposal-subtitle">Proposal #${proposal.ProposalID} | ${new Date(proposal.CreatedDate).toLocaleDateString('en-PK')}</div>
+    </div>
+
+    <div class="company-info">
+        <h2 class="company-name">${companyName}</h2>
+        <div class="contact-info">
+            <div class="contact-item">📍 ${companyAddress}</div>
+            <div class="contact-item">📧 ${companyEmail}</div>
+            <div class="contact-item">📞 ${companyPhone}</div>
+        </div>
+    </div>
+
+    <div class="section client-info">
+        <h3>👤 Prepared For</h3>
+        <p><strong>${companyClientName}</strong></p>
+        <p>Attention: ${clientName}</p>
+    </div>
+
+    <div class="section project-scope">
+        <h3>🎯 Project Overview</h3>
+        <h4>${proposal.Title}</h4>
+        <div>${proposal.Description.replace(/\n/g, '<br>')}</div>
+    </div>
+
+    <div class="section pricing-section">
+        <h3>💰 Investment Required</h3>
+        <div class="amount-highlight">
+            Total Project Cost: ${currencySymbol} ${formattedAmount}
+        </div>
+        <p><strong>What's Included:</strong></p>
         <ul>
-          <li>This proposal is valid for 30 days from the date above</li>
-          <li>Payment terms: ${getSetting('PAYMENT_TERMS_DAYS') || '30'} days net</li>
-          <li>50% deposit required to commence work</li>
-          <li>Final payment due upon project completion</li>
-          <li>Revisions beyond the agreed scope may incur additional charges</li>
+            <li>Complete project development as specified</li>
+            <li>Regular progress updates and communication</li>
+            <li>Quality assurance and testing</li>
+            <li>Post-delivery support (${getSetting('PAYMENT_TERMS_DAYS')} days)</li>
+            <li>Source files and documentation</li>
         </ul>
-      </div>
-      
-      <div class="section">
-        <h3>Next Steps</h3>
-        <p>To accept this proposal and begin the project:</p>
-        <ol>
-          <li>Review the proposal details above</li>
-          <li>Click the acceptance link provided in the email</li>
-          <li>We'll send you an invoice for the deposit</li>
-          <li>Project work begins upon receipt of deposit</li>
-        </ol>
-      </div>
-      
-      <div class="footer">
-        <p>Thank you for considering ${companyName} for your project needs.</p>
-        <p>We look forward to working with you!</p>
-      </div>
-    </body>
-    </html>
-  `;
+    </div>
+
+    <div class="section timeline">
+        <h3>⏰ Project Timeline</h3>
+        <p><strong>Estimated Completion:</strong> ${new Date(proposal.Deadline).toLocaleDateString('en-PK')}</p>
+        <p>We understand the importance of timely delivery and commit to completing your project within the agreed timeframe.</p>
+        
+        <p><strong>Project Phases:</strong></p>
+        <ul>
+            <li>Requirements gathering and planning (1-2 days)</li>
+            <li>Development and implementation</li>
+            <li>Testing and quality assurance</li>
+            <li>Final delivery and documentation</li>
+        </ul>
+    </div>
+
+    <div class="section payment-terms">
+        <h3>💳 Payment Terms</h3>
+        <p><strong>Currency:</strong> Pakistani Rupees (PKR)</p>
+        <p><strong>Payment Structure:</strong></p>
+        <ul>
+            <li>50% advance payment to start the project</li>
+            <li>50% upon completion and delivery</li>
+        </ul>
+        
+        <p><strong>Accepted Payment Methods:</strong></p>
+        <ul>
+            <li>💳 JazzCash</li>
+            <li>💳 EasyPaisa</li>
+            <li>🏦 Bank Transfer</li>
+            <li>🌐 PayPal (for international clients)</li>
+        </ul>
+        
+        <p><strong>Payment Terms:</strong> ${getSetting('PAYMENT_TERMS_DAYS')} days from invoice date</p>
+    </div>
+
+    <div class="section">
+        <h3>✅ Why Choose Us?</h3>
+        <ul>
+            <li><strong>Quality Assured:</strong> We deliver high-quality work that meets your expectations</li>
+            <li><strong>Timely Delivery:</strong> We respect deadlines and deliver on time</li>
+            <li><strong>Clear Communication:</strong> Regular updates throughout the project</li>
+            <li><strong>Local Expertise:</strong> Understanding of Pakistani market and business needs</li>
+            <li><strong>Ongoing Support:</strong> Post-delivery support to ensure smooth operation</li>
+        </ul>
+    </div>
+
+    <div class="cta-section">
+        <h3 style="color: #2c5aa0; margin-bottom: 20px;">Ready to Get Started?</h3>
+        <p>Click the button below to accept this proposal and begin your project!</p>
+        <a href="${getWebAppUrl()}?action=accept&proposalId=${proposal.ProposalID}" class="accept-button">
+            ✅ Accept Proposal & Start Project
+        </a>
+        <p style="margin-top: 20px; font-size: 14px; color: #666;">
+            Or contact us at ${companyEmail} for any questions or modifications.
+        </p>
+    </div>
+
+    <div class="footer">
+        <p><strong>Thank you for considering our services!</strong></p>
+        <p>This proposal is valid for 30 days from the date of issue.</p>
+        <p>Generated on ${new Date().toLocaleDateString('en-PK')} at ${new Date().toLocaleTimeString('en-PK')}</p>
+        
+        <div style="margin-top: 20px;">
+            <strong>${companyName}</strong><br>
+            ${companyEmail} | ${companyPhone}<br>
+            ${companyAddress}
+        </div>
+    </div>
+</body>
+</html>`;
 }
 
 /**

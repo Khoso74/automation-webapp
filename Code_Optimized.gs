@@ -246,35 +246,63 @@ function createSubfolderIfNeeded(parentFolder, path) {
 }
 
 /**
- * Initialize application settings
+ * Initialize default settings - Updated for Pakistani market
  */
 function initializeSettings() {
-  const spreadsheet = getSpreadsheet();
-  const settingsSheet = spreadsheet.getSheetByName(SHEETS.SETTINGS);
-  
-  const defaultSettings = [
-    ['COMPANY_NAME', 'Your Freelance Business', 'Your company/business name'],
-    ['COMPANY_EMAIL', 'your-email@gmail.com', 'Your business email address'],
-    ['COMPANY_PHONE', '+1-234-567-8900', 'Your business phone number'],
-    ['COMPANY_ADDRESS', '123 Business St, City, State 12345', 'Your business address'],
-    ['DEFAULT_CURRENCY', 'USD', 'Default currency for proposals and invoices'],
-    ['PAYPAL_ME_LINK', 'https://paypal.me/yourusername', 'Your PayPal.me payment link'],
-    ['PAYMENT_TERMS_DAYS', '30', 'Default payment terms in days'],
-    ['FOLLOW_UP_DAYS', '7', 'Days before sending follow-up emails'],
-    ['REMINDER_DAYS', '3', 'Days before due date to send reminders']
-  ];
-  
-  // Get existing settings
-  const existingData = settingsSheet.getDataRange().getValues();
-  const existingSettings = existingData.length > 1 ? existingData.slice(1).map(row => row[0]) : [];
-  
-  // Add only missing settings
-  defaultSettings.forEach(setting => {
-    if (!existingSettings.includes(setting[0])) {
-      settingsSheet.appendRow(setting);
-      console.log(`Added setting: ${setting[0]}`);
+  try {
+    const sheet = getSpreadsheet();
+    const settingsSheet = sheet.getSheetByName('Settings');
+    
+    if (!settingsSheet) {
+      throw new Error('Settings sheet not found');
     }
-  });
+    
+    const defaultSettings = [
+      ['COMPANY_NAME', 'Your Freelance Business', 'Your company/business name'],
+      ['COMPANY_EMAIL', 'your-email@gmail.com', 'Your business email address'],
+      ['COMPANY_PHONE', '+92-300-1234567', 'Your business phone number (Pakistani format)'],
+      ['COMPANY_ADDRESS', 'Your City, Pakistan', 'Your business address'],
+      ['DEFAULT_CURRENCY', 'PKR', 'Default currency for proposals and invoices'],
+      ['PAYPAL_ME_LINK', 'https://paypal.me/yourusername', 'Your PayPal.me payment link (optional)'],
+      ['PAYMENT_TERMS_DAYS', '30', 'Default payment terms in days'],
+      ['FOLLOW_UP_DAYS', '7', 'Days before sending follow-up emails'],
+      ['REMINDER_DAYS', '3', 'Days before due date to send reminders'],
+      ['JAZZCASH_NUMBER', '03XX-XXXXXXX', 'Your JazzCash mobile wallet number'],
+      ['EASYPAISA_NUMBER', '03XX-XXXXXXX', 'Your EasyPaisa mobile wallet number'],
+      ['BANK_DETAILS', 'Bank Name: Your Bank | Account Title: Your Name | Account Number: XXXXX', 'Your bank account details for direct transfer'],
+      ['CURRENCY_SYMBOL', 'Rs.', 'Currency symbol for PKR'],
+      ['TAX_RATE', '0', 'Default tax rate percentage (0 for no tax)'],
+      ['BUSINESS_REGISTRATION', 'Your NTN/CNIC', 'Your business registration number']
+    ];
+    
+    // Check existing settings to avoid duplicates
+    const existingData = settingsSheet.getDataRange();
+    let existingSettings = [];
+    
+    if (existingData && existingData.getNumRows() > 1) {
+      const values = existingData.getValues();
+      existingSettings = values.slice(1).map(row => row[0]); // Skip header, get setting names
+    }
+    
+    // Add only new settings
+    const newSettings = defaultSettings.filter(setting => !existingSettings.includes(setting[0]));
+    
+    if (newSettings.length > 0) {
+      const lastRow = settingsSheet.getLastRow();
+      const range = settingsSheet.getRange(lastRow + 1, 1, newSettings.length, 3);
+      range.setValues(newSettings);
+      
+      console.log(`✅ Added ${newSettings.length} new settings for Pakistani market`);
+    } else {
+      console.log('✅ All Pakistani settings already exist');
+    }
+    
+    logActivity('Settings', 'Initialized with Pakistani payment methods');
+    
+  } catch (error) {
+    console.error('❌ Error initializing settings:', error);
+    throw new Error('Failed to initialize settings: ' + error.message);
+  }
 }
 
 /**

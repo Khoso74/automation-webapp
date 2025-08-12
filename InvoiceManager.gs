@@ -78,7 +78,7 @@ function generateInvoicePDF(invoiceId) {
     }
     
     // Create HTML content for PDF
-    const htmlContent = createInvoiceHTML(invoice, client, project);
+    const htmlContent = createInvoiceHTML(invoice);
     
     // Convert HTML to PDF
     const pdfBlob = Utilities.newBlob(htmlContent, 'text/html')
@@ -123,144 +123,149 @@ function generateInvoicePDF(invoiceId) {
 }
 
 /**
- * Create HTML content for invoice PDF
+ * Create invoice HTML template - Updated for Pakistani market
  */
-function createInvoiceHTML(invoice, client, project) {
-  const companyName = getSetting('COMPANY_NAME') || 'Your Business';
-  const companyEmail = getSetting('COMPANY_EMAIL') || 'your-email@gmail.com';
-  const companyPhone = getSetting('COMPANY_PHONE') || '+1-234-567-8900';
-  const companyAddress = getSetting('COMPANY_ADDRESS') || 'Your Business Address';
+function createInvoiceHTML(invoice) {
+  const companyName = getSetting('COMPANY_NAME');
+  const companyEmail = getSetting('COMPANY_EMAIL');
+  const companyPhone = getSetting('COMPANY_PHONE');
+  const companyAddress = getSetting('COMPANY_ADDRESS');
+  const currencySymbol = getSetting('CURRENCY_SYMBOL') || 'Rs.';
+  const jazzCash = getSetting('JAZZCASH_NUMBER');
+  const easyPaisa = getSetting('EASYPAISA_NUMBER');
+  const bankDetails = getSetting('BANK_DETAILS');
   
-  const issueDate = new Date(invoice.IssueDate).toLocaleDateString();
-  const dueDate = new Date(invoice.DueDate).toLocaleDateString();
+  // Format amount with Pakistani number formatting
+  const formattedAmount = parseFloat(invoice.Amount).toLocaleString('en-PK');
   
-  // Calculate tax (if applicable) - set to 0 for now, can be configured
-  const subtotal = parseFloat(invoice.Amount);
-  const taxRate = 0; // Could be a setting
-  const taxAmount = subtotal * taxRate;
-  const total = subtotal + taxAmount;
-  
+  // Build payment methods section
+  let paymentMethods = '';
+  if (invoice.Currency === 'PKR' || invoice.Currency === 'Rs.' || !invoice.Currency) {
+    paymentMethods = '<h3 style="color: #2c5aa0; margin-top: 30px;">Payment Methods</h3>';
+    
+    if (jazzCash && jazzCash !== '03XX-XXXXXXX') {
+      paymentMethods += `
+        <div style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid #dc3545;">
+          <strong>💳 JazzCash:</strong> ${jazzCash}<br>
+          <small>Send via JazzCash app or dial *786#</small>
+        </div>`;
+    }
+    
+    if (easyPaisa && easyPaisa !== '03XX-XXXXXXX') {
+      paymentMethods += `
+        <div style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid #28a745;">
+          <strong>💳 EasyPaisa:</strong> ${easyPaisa}<br>
+          <small>Send via EasyPaisa app or visit agent</small>
+        </div>`;
+    }
+    
+    if (bankDetails && !bankDetails.includes('Your Bank')) {
+      paymentMethods += `
+        <div style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid #007bff;">
+          <strong>🏦 Bank Transfer:</strong><br>
+          ${bankDetails.replace(/\|/g, '<br>')}<br>
+          <small>Transfer via mobile banking or visit branch</small>
+        </div>`;
+    }
+    
+    const paypalLink = getSetting('PAYPAL_ME_LINK');
+    if (paypalLink && paypalLink.includes('paypal.me')) {
+      paymentMethods += `
+        <div style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid #ffc107;">
+          <strong>🌐 PayPal (International):</strong><br>
+          <a href="${paypalLink}/${invoice.Amount}PKR" target="_blank">${paypalLink}</a><br>
+          <small>For international clients only</small>
+        </div>`;
+    }
+    
+    paymentMethods += `
+      <div style="margin-top: 15px; padding: 10px; background: #e8f4fd; border: 1px solid #bee5eb; border-radius: 5px;">
+        <strong>📧 Payment Confirmation:</strong><br>
+        Please send payment screenshot to: <strong>${companyEmail}</strong>
+      </div>`;
+  }
+
   return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <title>Invoice - ${invoice.InvoiceID}</title>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; color: #333; }
-        .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
-        .invoice-title { font-size: 36px; font-weight: bold; color: #2c3e50; }
-        .invoice-number { font-size: 18px; color: #7f8c8d; margin-top: 10px; }
-        .company-info { text-align: right; }
-        .company-name { font-size: 24px; font-weight: bold; color: #2c3e50; margin-bottom: 10px; }
-        .bill-to { margin-bottom: 30px; }
-        .bill-to h3 { color: #2c3e50; margin-bottom: 10px; }
-        .invoice-details { margin-bottom: 30px; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #f8f9fa; font-weight: bold; }
-        .amount-column { text-align: right; }
-        .total-section { margin-top: 30px; text-align: right; }
-        .total-row { display: flex; justify-content: space-between; margin: 10px 0; }
-        .total-label { font-weight: bold; }
-        .grand-total { font-size: 20px; font-weight: bold; color: #2c3e50; border-top: 2px solid #2c3e50; padding-top: 10px; }
-        .payment-info { background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 30px 0; }
-        .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #7f8c8d; }
-        .status { display: inline-block; padding: 5px 15px; border-radius: 15px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
-        .status-draft { background-color: #f8d7da; color: #721c24; }
-        .status-sent { background-color: #fff3cd; color: #856404; }
-        .status-paid { background-color: #d4edda; color: #155724; }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <div>
-          <div class="invoice-title">INVOICE</div>
-          <div class="invoice-number"># ${invoice.InvoiceID}</div>
-          <div class="status status-${invoice.Status.toLowerCase()}">${invoice.Status}</div>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Invoice ${invoice.InvoiceID}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #333; }
+        .invoice-header { background: #2c5aa0; color: white; padding: 20px; margin-bottom: 30px; }
+        .invoice-title { font-size: 28px; margin: 0; }
+        .invoice-subtitle { font-size: 14px; margin: 5px 0 0 0; opacity: 0.9; }
+        .company-info { margin-bottom: 20px; }
+        .invoice-details { background: #f8f9fa; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .detail-row { display: flex; justify-content: space-between; margin: 8px 0; }
+        .amount-total { font-size: 24px; font-weight: bold; color: #2c5aa0; text-align: center; 
+                       background: #e8f4fd; padding: 20px; margin: 30px 0; border-radius: 5px; }
+        .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
+        .terms { margin-top: 30px; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="invoice-header">
+        <h1 class="invoice-title">INVOICE</h1>
+        <div class="invoice-subtitle">Invoice #${invoice.InvoiceID}</div>
+    </div>
+
+    <div class="company-info">
+        <h2 style="color: #2c5aa0; margin-bottom: 10px;">${companyName}</h2>
+        <div>${companyAddress}</div>
+        <div>📧 ${companyEmail}</div>
+        <div>📞 ${companyPhone}</div>
+    </div>
+
+    <div class="invoice-details">
+        <div class="detail-row">
+            <strong>Bill To:</strong>
+            <span>${invoice.ClientName}</span>
         </div>
-        <div class="company-info">
-          <div class="company-name">${companyName}</div>
-          <div>${companyAddress}</div>
-          <div>Email: ${companyEmail}</div>
-          <div>Phone: ${companyPhone}</div>
+        <div class="detail-row">
+            <strong>Project:</strong>
+            <span>${invoice.ProjectTitle}</span>
         </div>
-      </div>
-      
-      <div class="bill-to">
-        <h3>Bill To:</h3>
-        <strong>${client.CompanyName}</strong><br>
-        Attention: ${client.ContactName}<br>
-        Email: ${client.Email}<br>
-        ${client.Address || ''}
-      </div>
-      
-      <div class="invoice-details">
-        <table>
-          <tr>
-            <th>Invoice Date</th>
-            <td>${issueDate}</td>
-            <th>Due Date</th>
-            <td>${dueDate}</td>
-          </tr>
-          ${project ? `<tr><th>Project</th><td colspan="3">${project.Title}</td></tr>` : ''}
-        </table>
-      </div>
-      
-      <table>
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th>Quantity</th>
-            <th>Rate</th>
-            <th class="amount-column">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>${project ? `${project.Title} - Project Work` : 'Professional Services'}</td>
-            <td>1</td>
-            <td>${invoice.Currency} ${parseFloat(invoice.Amount).toLocaleString()}</td>
-            <td class="amount-column">${invoice.Currency} ${parseFloat(invoice.Amount).toLocaleString()}</td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <div class="total-section">
-        <div class="total-row">
-          <span>Subtotal:</span>
-          <span>${invoice.Currency} ${subtotal.toLocaleString()}</span>
+        <div class="detail-row">
+            <strong>Invoice Date:</strong>
+            <span>${new Date(invoice.CreatedDate).toLocaleDateString('en-PK')}</span>
         </div>
-        ${taxRate > 0 ? `
-        <div class="total-row">
-          <span>Tax (${(taxRate * 100).toFixed(1)}%):</span>
-          <span>${invoice.Currency} ${taxAmount.toLocaleString()}</span>
-        </div>` : ''}
-        <div class="total-row grand-total">
-          <span>Total Amount Due:</span>
-          <span>${invoice.Currency} ${total.toLocaleString()}</span>
+        <div class="detail-row">
+            <strong>Due Date:</strong>
+            <span>${new Date(invoice.DueDate).toLocaleDateString('en-PK')}</span>
         </div>
-      </div>
-      
-      <div class="payment-info">
-        <h3>Payment Information</h3>
-        <p><strong>Payment Terms:</strong> Net ${getSetting('PAYMENT_TERMS_DAYS') || '30'} days</p>
-        <p><strong>Payment Methods:</strong></p>
-        <ul>
-          <li>Bank Transfer: [Your bank details here]</li>
-          <li>PayPal: ${getSetting('PAYPAL_ME_LINK') || 'your-paypal-link'}</li>
-          <li>Online Payment: Use the payment link provided in the email</li>
+        <div class="detail-row">
+            <strong>Payment Terms:</strong>
+            <span>${getSetting('PAYMENT_TERMS_DAYS')} days</span>
+        </div>
+    </div>
+
+    <div class="amount-total">
+        <div>Total Amount Due</div>
+        <div style="font-size: 32px; margin-top: 10px;">
+            ${currencySymbol} ${formattedAmount}
+        </div>
+    </div>
+
+    ${paymentMethods}
+
+    <div class="terms">
+        <h3 style="color: #2c5aa0;">Terms & Conditions</h3>
+        <ul style="margin: 0; padding-left: 20px;">
+            <li>Payment is due within ${getSetting('PAYMENT_TERMS_DAYS')} days of invoice date</li>
+            <li>Late payment charges may apply after due date</li>
+            <li>Please include invoice number in payment reference</li>
+            <li>For queries, contact us at ${companyEmail}</li>
         </ul>
-        <p><strong>Late Fee:</strong> 1.5% per month on overdue amounts</p>
-      </div>
-      
-      <div class="footer">
+    </div>
+
+    <div class="footer">
         <p>Thank you for your business!</p>
-        <p>Questions about this invoice? Contact us at ${companyEmail}</p>
-      </div>
-    </body>
-    </html>
-  `;
+        <p style="margin-top: 20px;">This invoice was generated on ${new Date().toLocaleDateString('en-PK')} at ${new Date().toLocaleTimeString('en-PK')}</p>
+    </div>
+</body>
+</html>`;
 }
 
 /**
@@ -292,7 +297,7 @@ function sendInvoice(invoiceId) {
     
     // Create email content
     const subject = `Invoice ${invoice.InvoiceID} - ${getSetting('COMPANY_NAME')}`;
-    const body = createInvoiceEmailBody(invoice, client);
+    const body = createInvoiceEmailBody(invoice);
     
     // Send email with PDF attachment
     GmailApp.sendEmail(
@@ -320,41 +325,78 @@ function sendInvoice(invoiceId) {
 }
 
 /**
- * Create invoice email body
+ * Create invoice email body - Updated for Pakistani market
  */
-function createInvoiceEmailBody(invoice, client) {
-  const companyName = getSetting('COMPANY_NAME') || 'Your Business';
-  const dueDate = new Date(invoice.DueDate).toLocaleDateString();
+function createInvoiceEmailBody(invoice) {
+  const companyName = getSetting('COMPANY_NAME');
+  const companyEmail = getSetting('COMPANY_EMAIL');
+  const paymentTerms = getSetting('PAYMENT_TERMS_DAYS');
+  const jazzCash = getSetting('JAZZCASH_NUMBER');
+  const easyPaisa = getSetting('EASYPAISA_NUMBER');
+  const bankDetails = getSetting('BANK_DETAILS');
+  const currencySymbol = getSetting('CURRENCY_SYMBOL') || 'Rs.';
   
-  return `
-Dear ${client.ContactName},
+  let paymentOptions = '';
+  
+  // Build Pakistani payment options
+  if (invoice.Currency === 'PKR' || invoice.Currency === 'Rs.' || !invoice.Currency) {
+    paymentOptions = 'PAYMENT OPTIONS:\n';
+    
+    if (jazzCash && jazzCash !== '03XX-XXXXXXX') {
+      paymentOptions += `💳 JazzCash: ${jazzCash}\n   (Send via JazzCash app or dial *786#)\n\n`;
+    }
+    
+    if (easyPaisa && easyPaisa !== '03XX-XXXXXXX') {
+      paymentOptions += `💳 EasyPaisa: ${easyPaisa}\n   (Send via EasyPaisa app or visit agent)\n\n`;
+    }
+    
+    if (bankDetails && !bankDetails.includes('Your Bank')) {
+      paymentOptions += `🏦 Bank Transfer: ${bankDetails}\n   (Transfer via mobile banking or branch)\n\n`;
+    }
+    
+    const paypalLink = getSetting('PAYPAL_ME_LINK');
+    if (paypalLink && paypalLink.includes('paypal.me')) {
+      paymentOptions += `🌐 PayPal (International): ${paypalLink}/${invoice.Amount}PKR\n\n`;
+    }
+    
+    paymentOptions += `📧 Send payment confirmation screenshot to: ${companyEmail}`;
+  } else {
+    // For non-PKR currencies
+    paymentOptions = `PAYMENT OPTIONS:
+1. Online Payment: ${invoice.PaymentLink}
+2. PayPal: ${getSetting('PAYPAL_ME_LINK') || 'Contact us for PayPal details'}
+3. Contact us for other payment methods`;
+  }
+  
+  return `Subject: Invoice ${invoice.InvoiceID} from ${companyName}
 
-Please find attached invoice ${invoice.InvoiceID} for our recent work.
+Dear ${invoice.ClientName},
+
+I hope this email finds you well. Please find attached your invoice for the services provided.
 
 INVOICE DETAILS:
 - Invoice Number: ${invoice.InvoiceID}
-- Amount Due: ${invoice.Currency} ${parseFloat(invoice.Amount).toLocaleString()}
-- Due Date: ${dueDate}
+- Project: ${invoice.ProjectTitle}
+- Amount: ${currencySymbol} ${invoice.Amount}
+- Due Date: ${invoice.DueDate}
+- Payment Terms: ${paymentTerms} days
 
-PAYMENT OPTIONS:
-1. Online Payment: ${invoice.PaymentLink}
-2. PayPal: ${getSetting('PAYPAL_ME_LINK') || 'Contact us for PayPal details'}
-3. Bank Transfer: Contact us for banking details
+${paymentOptions}
 
-Payment terms are Net ${getSetting('PAYMENT_TERMS_DAYS') || '30'} days. Please remit payment by the due date to avoid any late fees.
+IMPORTANT NOTES:
+• Payment is due within ${paymentTerms} days of invoice date
+• Late payment charges may apply after due date
+• Please include invoice number in payment reference
+• Contact us immediately if you have any questions
 
-If you have any questions about this invoice, please don't hesitate to contact us.
-
-Thank you for your business!
+Thank you for your business. We appreciate the opportunity to work with you.
 
 Best regards,
 ${companyName}
-${getSetting('COMPANY_EMAIL')}
-${getSetting('COMPANY_PHONE')}
+${companyEmail}
 
 ---
-This invoice was generated automatically from our billing system.
-  `.trim();
+This is an automated email. Please do not reply to this message.`;
 }
 
 /**
@@ -521,18 +563,57 @@ function sendAutomaticPaymentReminders() {
 }
 
 /**
- * Generate payment link
+ * Generate payment link - Updated for Pakistani market
  */
 function generatePaymentLink(invoiceId, amount, currency) {
-  const paypalLink = getSetting('PAYPAL_ME_LINK');
-  
-  if (paypalLink && paypalLink.includes('paypal.me')) {
-    // Create PayPal.me link with amount
-    return `${paypalLink}/${amount}${currency}`;
+  try {
+    const paypalLink = getSetting('PAYPAL_ME_LINK');
+    const jazzCash = getSetting('JAZZCASH_NUMBER');
+    const easyPaisa = getSetting('EASYPAISA_NUMBER');
+    const bankDetails = getSetting('BANK_DETAILS');
+    const currencySymbol = getSetting('CURRENCY_SYMBOL') || 'Rs.';
+    
+    // For Pakistani Rupees, create comprehensive payment info
+    if (currency === 'PKR' || currency === 'Rs.' || !currency) {
+      let paymentInfo = `Payment Options for Invoice ${invoiceId} - Amount: ${currencySymbol} ${amount}\n\n`;
+      
+      if (jazzCash && jazzCash !== '03XX-XXXXXXX') {
+        paymentInfo += `💳 JazzCash: ${jazzCash}\n`;
+        paymentInfo += `   Send money via JazzCash app or dial *786#\n\n`;
+      }
+      
+      if (easyPaisa && easyPaisa !== '03XX-XXXXXXX') {
+        paymentInfo += `💳 EasyPaisa: ${easyPaisa}\n`;
+        paymentInfo += `   Send money via EasyPaisa app or visit agent\n\n`;
+      }
+      
+      if (bankDetails && !bankDetails.includes('Your Bank')) {
+        paymentInfo += `🏦 Bank Transfer: ${bankDetails}\n`;
+        paymentInfo += `   Transfer via mobile banking or visit branch\n\n`;
+      }
+      
+      if (paypalLink && paypalLink.includes('paypal.me')) {
+        paymentInfo += `🌐 PayPal (International): ${paypalLink}/${amount}PKR\n`;
+        paymentInfo += `   For international clients only\n\n`;
+      }
+      
+      paymentInfo += `Please send payment confirmation screenshot to: ${getSetting('COMPANY_EMAIL')}`;
+      
+      // Return as mailto link for easy sharing
+      return `mailto:${getSetting('COMPANY_EMAIL')}?subject=Payment for Invoice ${invoiceId}&body=${encodeURIComponent(paymentInfo)}`;
+    }
+    
+    // Fallback for other currencies (USD, EUR, etc.)
+    if (paypalLink && paypalLink.includes('paypal.me')) {
+      return `${paypalLink}/${amount}${currency}`;
+    }
+    
+    return paypalLink || `mailto:${getSetting('COMPANY_EMAIL')}?subject=Payment for Invoice ${invoiceId}`;
+    
+  } catch (error) {
+    console.error('Error generating payment link:', error);
+    return `mailto:${getSetting('COMPANY_EMAIL')}?subject=Payment for Invoice ${invoiceId}`;
   }
-  
-  // Fallback to basic PayPal link or custom payment page
-  return paypalLink || `mailto:${getSetting('COMPANY_EMAIL')}?subject=Payment for Invoice ${invoiceId}`;
 }
 
 /**
