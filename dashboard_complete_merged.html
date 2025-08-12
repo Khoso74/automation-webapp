@@ -1,0 +1,2102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Freelancer Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-content h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header-content p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .nav-tab {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .nav-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .clients .stat-number { color: #3498db; }
+        .projects .stat-number { color: #27ae60; }
+        .invoices .stat-number { color: #e74c3c; }
+        .revenue .stat-number { color: #f39c12; }
+        .pending .stat-number { color: #9b59b6; }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .panel h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            font-weight: 500;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Premium Tools Grid Styles */
+        .premium-tools-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .tools-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .tools-title {
+            font-size: 2.2em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .tools-subtitle {
+            color: #6c757d;
+            font-size: 1.1em;
+        }
+
+        .premium-tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .premium-tool-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .premium-tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .premium-tool-card:hover::before {
+            left: 100%;
+        }
+
+        .premium-tool-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .tool-icon {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .premium-tool-card:hover .tool-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .tool-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .tool-description {
+            color: #6c757d;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        /* Color variations for different tools */
+        .time-tracker { border-left: 5px solid #28a745; }
+        .time-tracker:hover { box-shadow: 0 20px 40px rgba(40, 167, 69, 0.2); }
+
+        .expense-manager { border-left: 5px solid #fd7e14; }
+        .expense-manager:hover { box-shadow: 0 20px 40px rgba(253, 126, 20, 0.2); }
+
+        .currency-converter { border-left: 5px solid #20c997; }
+        .currency-converter:hover { box-shadow: 0 20px 40px rgba(32, 201, 151, 0.2); }
+
+        .analytics-tool { border-left: 5px solid #6f42c1; }
+        .analytics-tool:hover { box-shadow: 0 20px 40px rgba(111, 66, 193, 0.2); }
+
+        .contract-generator { border-left: 5px solid #dc3545; }
+        .contract-generator:hover { box-shadow: 0 20px 40px rgba(220, 53, 69, 0.2); }
+
+        .backup-tool { border-left: 5px solid #17a2b8; }
+        .backup-tool:hover { box-shadow: 0 20px 40px rgba(23, 162, 184, 0.2); }
+
+        /* Modern Glassmorphism Dialog Styles */
+        .premium-dialog-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .premium-dialog {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.7);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 0;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            min-width: 400px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+            animation: dialogSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .dialog-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dialog-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        .dialog-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dialog-subtitle {
+            opacity: 0.9;
+            margin-top: 5px;
+            font-size: 0.9em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dialog-close {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .dialog-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .dialog-content {
+            padding: 30px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .dialog-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dialog-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .dialog-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 10px;
+        }
+
+        /* Form Elements Styling */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.95em;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Button Styles */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+            border: 2px solid rgba(108, 117, 125, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(108, 117, 125, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Special Elements */
+        .time-display {
+            font-family: 'Courier New', monospace;
+            font-size: 3em;
+            font-weight: bold;
+            text-align: center;
+            color: #28a745;
+            background: rgba(40, 167, 69, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px solid rgba(40, 167, 69, 0.2);
+        }
+
+        .currency-converter-widget {
+            background: rgba(32, 201, 151, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px solid rgba(32, 201, 151, 0.2);
+        }
+
+        .conversion-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 15px;
+            align-items: end;
+            margin-bottom: 20px;
+        }
+
+        .conversion-arrow {
+            font-size: 1.5em;
+            color: #20c997;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .conversion-result {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+
+        .analytics-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .metric-card {
+            background: rgba(111, 66, 193, 0.1);
+            padding: 20px 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid rgba(111, 66, 193, 0.2);
+        }
+
+        .metric-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #6f42c1;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 0.8em;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        /* Activity and Deadline Styles */
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-type {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .activity-description {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        
+        .activity-time {
+            color: #95a5a6;
+            font-size: 0.8em;
+        }
+        
+        .deadline-item {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        
+        .deadline-item.urgent {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        
+        .deadline-title {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .deadline-date {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .no-data {
+            text-align: center;
+            color: #95a5a6;
+            font-style: italic;
+            padding: 20px;
+        }
+        
+        /* Status Indicators */
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-active { background: #28a745; }
+        .status-inactive { background: #6c757d; }
+        .status-warning { background: #ffc107; }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes dialogSlideIn {
+            to {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Success/Error Messages */
+        .message {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+
+        .message-success {
+            background: rgba(40, 167, 69, 0.1);
+            color: #155724;
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+
+        .message-error {
+            background: rgba(220, 53, 69, 0.1);
+            color: #721c24;
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+
+            .premium-tools-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 15px;
+            }
+
+            .premium-dialog {
+                min-width: 90%;
+                margin: 20px;
+            }
+
+            .dialog-content {
+                padding: 20px;
+            }
+
+            .conversion-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .analytics-preview {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <h1>🚀 Professional Freelancer Dashboard</h1>
+                <p>Complete business management solution with premium tools</p>
+            </div>
+            <div class="header-actions">
+                <button class="nav-tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+                <button class="nav-tab" onclick="switchTab('tools')">🛠️ Premium Tools</button>
+                <button class="nav-tab" onclick="switchTab('analytics')">📈 Analytics</button>
+            </div>
+        </div>
+        
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card clients">
+                    <div class="stat-number" id="totalClients">0</div>
+                    <div class="stat-label">Total Clients</div>
+                </div>
+                <div class="stat-card pending">
+                    <div class="stat-number" id="pendingProposals">0</div>
+                    <div class="stat-label">Pending Proposals</div>
+                </div>
+                <div class="stat-card projects">
+                    <div class="stat-number" id="activeProjects">0</div>
+                    <div class="stat-label">Active Projects</div>
+                </div>
+                <div class="stat-card invoices">
+                    <div class="stat-number" id="overdueInvoices">0</div>
+                    <div class="stat-label">Overdue Invoices</div>
+                </div>
+                <div class="stat-card revenue">
+                    <div class="stat-number" id="monthlyRevenue">Rs. 0</div>
+                    <div class="stat-label">Monthly Revenue (PKR)</div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button class="action-btn" onclick="openModal('clientModal')">➕ Add Client</button>
+                <button class="action-btn" onclick="openModal('proposalModal')">📄 Create Proposal</button>
+                <button class="action-btn" onclick="openModal('invoiceModal')">💰 Create Invoice</button>
+                <button class="action-btn" onclick="openModal('projectModal')">🎯 Add Project</button>
+                <button class="action-btn" onclick="sendFollowUps()">📧 Send Follow-ups</button>
+                <button class="action-btn" onclick="generateReports()">📊 Generate Reports</button>
+            </div>
+            
+            <!-- Main Content Grid -->
+            <div class="main-grid">
+                <!-- Recent Activity -->
+                <div class="panel">
+                    <h3>📈 Recent Activity</h3>
+                    <div id="recentActivity">
+                        <div class="no-data">Loading recent activity...</div>
+                    </div>
+                </div>
+                
+                <!-- Upcoming Deadlines -->
+                <div class="panel">
+                    <h3>⏰ Upcoming Deadlines</h3>
+                    <div id="upcomingDeadlines">
+                        <div class="no-data">Loading upcoming deadlines...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Premium Tools Tab -->
+        <div id="tools" class="tab-content">
+            <div class="premium-tools-section">
+                <div class="tools-header">
+                    <h2 class="tools-title">🛠️ Premium Tools</h2>
+                    <p class="tools-subtitle">Professional tools for modern freelancers</p>
+                </div>
+                
+                <div class="premium-tools-grid">
+                    <!-- Time Tracker -->
+                    <div class="premium-tool-card time-tracker" onclick="openToolDialog('timeTracker')">
+                        <div class="tool-icon">⏱️</div>
+                        <div class="tool-name">Time Tracker</div>
+                        <div class="tool-description">Track project time & earnings</div>
+                    </div>
+                    
+                    <!-- Expense Manager -->
+                    <div class="premium-tool-card expense-manager" onclick="openToolDialog('expenseManager')">
+                        <div class="tool-icon">💰</div>
+                        <div class="tool-name">Expense Manager</div>
+                        <div class="tool-description">Manage business expenses</div>
+                    </div>
+                    
+                    <!-- Currency Converter -->
+                    <div class="premium-tool-card currency-converter" onclick="openToolDialog('currencyConverter')">
+                        <div class="tool-icon">💱</div>
+                        <div class="tool-name">Currency Converter</div>
+                        <div class="tool-description">PKR to global currencies</div>
+                    </div>
+                    
+                    <!-- Business Analytics -->
+                    <div class="premium-tool-card analytics-tool" onclick="openToolDialog('analytics')">
+                        <div class="tool-icon">📊</div>
+                        <div class="tool-name">Business Analytics</div>
+                        <div class="tool-description">Revenue & performance insights</div>
+                    </div>
+                    
+                    <!-- Contract Generator -->
+                    <div class="premium-tool-card contract-generator" onclick="openToolDialog('contractGenerator')">
+                        <div class="tool-icon">📋</div>
+                        <div class="tool-name">Contract Generator</div>
+                        <div class="tool-description">Professional agreements</div>
+                    </div>
+                    
+                    <!-- Data Backup -->
+                    <div class="premium-tool-card backup-tool" onclick="openToolDialog('backupTool')">
+                        <div class="tool-icon">💾</div>
+                        <div class="tool-name">Data Backup</div>
+                        <div class="tool-description">Secure data protection</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Analytics Tab -->
+        <div id="analytics" class="tab-content">
+            <div class="panel">
+                <h3>📈 Comprehensive Business Analytics</h3>
+                <div id="fullAnalytics">
+                    <div class="loading-spinner"></div> Loading comprehensive analytics...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Premium Tools Dialogs -->
+    
+    <!-- Time Tracker Dialog -->
+    <div id="timeTrackerDialog" class="premium-dialog-overlay">
+        <div class="premium-dialog">
+            <div class="dialog-header">
+                <h3 class="dialog-title">⏱️ Time Tracker</h3>
+                <p class="dialog-subtitle">Track your project time and earnings</p>
+                <button class="dialog-close" onclick="closeDialog('timeTrackerDialog')">&times;</button>
+            </div>
+            <div class="dialog-content">
+                <div class="time-display" id="timeDisplay">00:00:00</div>
+                
+                <div class="form-group">
+                    <label class="form-label">Project ID</label>
+                    <input type="text" class="form-input" id="projectId" placeholder="Enter project ID (optional)">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Task Description</label>
+                    <textarea class="form-textarea" id="taskDescription" placeholder="What are you working on?"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Hourly Rate (PKR)</label>
+                    <input type="number" class="form-input" id="hourlyRate" value="50" placeholder="50">
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="startStopBtn" onclick="toggleTimer()">▶️ Start Timer</button>
+                    <button class="btn btn-secondary" onclick="viewTimeHistory()">📊 History</button>
+                </div>
+                
+                <div id="timeMessage"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Manager Dialog -->
+    <div id="expenseManagerDialog" class="premium-dialog-overlay">
+        <div class="premium-dialog">
+            <div class="dialog-header">
+                <h3 class="dialog-title">💰 Expense Manager</h3>
+                <p class="dialog-subtitle">Track and categorize your business expenses</p>
+                <button class="dialog-close" onclick="closeDialog('expenseManagerDialog')">&times;</button>
+            </div>
+            <div class="dialog-content">
+                <form id="expenseForm">
+                    <div class="form-group">
+                        <label class="form-label">Amount</label>
+                        <input type="number" class="form-input" id="expenseAmount" placeholder="Enter amount" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Currency</label>
+                        <select class="form-select" id="expenseCurrency">
+                            <option value="PKR">PKR - Pakistani Rupee</option>
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select class="form-select" id="expenseCategory" required>
+                            <option value="">Select category</option>
+                            <option value="Office Supplies">Office Supplies</option>
+                            <option value="Software">Software & Tools</option>
+                            <option value="Marketing">Marketing & Advertising</option>
+                            <option value="Travel">Travel & Transport</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Equipment">Equipment</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-textarea" id="expenseDescription" placeholder="Expense description" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-input" id="expenseDate" required>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">💾 Add Expense</button>
+                        <button type="button" class="btn btn-secondary" onclick="viewExpenseReport()">📄 View Report</button>
+                    </div>
+                </form>
+                
+                <div id="expenseMessage"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Currency Converter Dialog -->
+    <div id="currencyConverterDialog" class="premium-dialog-overlay">
+        <div class="premium-dialog">
+            <div class="dialog-header">
+                <h3 class="dialog-title">💱 Currency Converter</h3>
+                <p class="dialog-subtitle">Convert PKR to international currencies</p>
+                <button class="dialog-close" onclick="closeDialog('currencyConverterDialog')">&times;</button>
+            </div>
+            <div class="dialog-content">
+                <div class="currency-converter-widget">
+                    <div class="conversion-row">
+                        <div>
+                            <label class="form-label">From</label>
+                            <input type="number" class="form-input" id="fromAmount" placeholder="Amount">
+                            <select class="form-select" id="fromCurrency" style="margin-top: 10px;">
+                                <option value="PKR">PKR</option>
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="CAD">CAD</option>
+                            </select>
+                        </div>
+                        
+                        <div class="conversion-arrow">
+                            ⇄
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">To</label>
+                            <div class="form-input" style="height: 50px; display: flex; align-items: center; background: rgba(32, 201, 151, 0.1);">
+                                <span id="convertedAmount">0.00</span>
+                            </div>
+                            <select class="form-select" id="toCurrency" style="margin-top: 10px;">
+                                <option value="USD">USD</option>
+                                <option value="PKR">PKR</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="CAD">CAD</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="conversion-result" id="conversionResult">
+                        Enter amount to convert
+                    </div>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="performConversion()">🔄 Convert</button>
+                    <button class="btn btn-secondary" onclick="updateExchangeRates()">📈 Update Rates</button>
+                </div>
+                
+                <div id="currencyMessage"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Dialog -->
+    <div id="analyticsDialog" class="premium-dialog-overlay">
+        <div class="premium-dialog">
+            <div class="dialog-header">
+                <h3 class="dialog-title">📊 Business Analytics</h3>
+                <p class="dialog-subtitle">Comprehensive business insights</p>
+                <button class="dialog-close" onclick="closeDialog('analyticsDialog')">&times;</button>
+            </div>
+            <div class="dialog-content">
+                <div class="analytics-preview" id="analyticsMetrics">
+                    <div class="metric-card">
+                        <div class="metric-value" id="monthlyRevenueMetric">Rs. 0</div>
+                        <div class="metric-label">Monthly Revenue</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="proposalRate">0%</div>
+                        <div class="metric-label">Conversion Rate</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="totalHours">0h</div>
+                        <div class="metric-label">Hours Tracked</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="totalExpenses">Rs. 0</div>
+                        <div class="metric-label">Monthly Expenses</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Analytics Period</label>
+                    <select class="form-select" id="analyticsPeriod">
+                        <option value="month">This Month</option>
+                        <option value="quarter">This Quarter</option>
+                        <option value="year">This Year</option>
+                        <option value="all">All Time</option>
+                    </select>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="refreshAnalytics()">🔄 Refresh</button>
+                    <button class="btn btn-secondary" onclick="exportAnalytics()">📤 Export</button>
+                </div>
+                
+                <div id="analyticsMessage"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contract Generator Dialog -->
+    <div id="contractGeneratorDialog" class="premium-dialog-overlay">
+        <div class="premium-dialog">
+            <div class="dialog-header">
+                <h3 class="dialog-title">📋 Contract Generator</h3>
+                <p class="dialog-subtitle">Generate professional service agreements</p>
+                <button class="dialog-close" onclick="closeDialog('contractGeneratorDialog')">&times;</button>
+            </div>
+            <div class="dialog-content">
+                <form id="contractForm">
+                    <div class="form-group">
+                        <label class="form-label">Client Name</label>
+                        <input type="text" class="form-input" id="clientName" placeholder="Client full name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Client Company</label>
+                        <input type="text" class="form-input" id="clientCompany" placeholder="Company name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Project Title</label>
+                        <input type="text" class="form-input" id="projectTitle" placeholder="Project title" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Project Description</label>
+                        <textarea class="form-textarea" id="projectDescription" placeholder="Detailed project description" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Amount</label>
+                        <input type="number" class="form-input" id="contractAmount" placeholder="Project amount" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Currency</label>
+                        <select class="form-select" id="contractCurrency">
+                            <option value="PKR">PKR - Pakistani Rupee</option>
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" class="form-input" id="startDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">End Date</label>
+                        <input type="date" class="form-input" id="endDate" required>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">📄 Generate Contract</button>
+                        <button type="button" class="btn btn-secondary" onclick="previewContract()">👁️ Preview</button>
+                    </div>
+                </form>
+                
+                <div id="contractMessage"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backup Tool Dialog -->
+    <div id="backupToolDialog" class="premium-dialog-overlay">
+        <div class="premium-dialog">
+            <div class="dialog-header">
+                <h3 class="dialog-title">💾 Data Backup</h3>
+                <p class="dialog-subtitle">Secure backup of your business data</p>
+                <button class="dialog-close" onclick="closeDialog('backupToolDialog')">&times;</button>
+            </div>
+            <div class="dialog-content">
+                <div class="form-group">
+                    <label class="form-label">Backup Type</label>
+                    <select class="form-select" id="backupType">
+                        <option value="full">Full Backup (All Data)</option>
+                        <option value="clients">Clients Only</option>
+                        <option value="proposals">Proposals Only</option>
+                        <option value="invoices">Invoices Only</option>
+                        <option value="projects">Projects Only</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Backup Format</label>
+                    <select class="form-select" id="backupFormat">
+                        <option value="json">JSON (Recommended)</option>
+                        <option value="csv">CSV (Excel Compatible)</option>
+                        <option value="xlsx">Excel Workbook</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Include</label>
+                    <div style="margin-top: 10px;">
+                        <label style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="includeAttachments" checked style="margin-right: 10px;">
+                            Include file attachments
+                        </label>
+                        <label style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="includeHistory" checked style="margin-right: 10px;">
+                            Include activity history
+                        </label>
+                        <label style="display: flex; align-items: center;">
+                            <input type="checkbox" id="includeSettings" checked style="margin-right: 10px;">
+                            Include settings & preferences
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="createBackup()">💾 Create Backup</button>
+                    <button class="btn btn-secondary" onclick="scheduleBackup()">🔄 Schedule</button>
+                </div>
+                
+                <div id="backupMessage"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Original Dashboard Modals -->
+    
+    <!-- Client Modal -->
+    <div id="clientModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('clientModal')">&times;</span>
+            <h2>Add New Client</h2>
+            <form id="clientForm">
+                <div class="form-group">
+                    <label for="companyName">Company Name *</label>
+                    <input type="text" id="companyName" name="companyName" required>
+                </div>
+                <div class="form-group">
+                    <label for="contactName">Contact Name *</label>
+                    <input type="text" id="contactName" name="contactName" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input type="tel" id="phone" name="phone" placeholder="+92-300-1234567">
+                </div>
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <textarea id="address" name="address"></textarea>
+                </div>
+                <button type="submit" class="action-btn">Create Client</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('clientModal')">Cancel</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Proposal Modal -->
+    <div id="proposalModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('proposalModal')">&times;</span>
+            <h2>Create New Proposal</h2>
+            <form id="proposalForm">
+                <div class="form-group">
+                    <label for="proposalClient">Client *</label>
+                    <select id="proposalClient" name="clientId" required>
+                        <option value="">Select a client...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="proposalTitle">Project Title *</label>
+                    <input type="text" id="proposalTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="proposalDescription">Description *</label>
+                    <textarea id="proposalDescription" name="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="proposalAmount">Amount *</label>
+                    <input type="number" id="proposalAmount" name="amount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="proposalCurrency">Currency</label>
+                    <select id="proposalCurrency" name="currency">
+                        <option value="PKR" selected>PKR - Pakistani Rupee</option>
+                        <option value="USD">USD - US Dollar</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="GBP">GBP - British Pound</option>
+                        <option value="CAD">CAD - Canadian Dollar</option>
+                    </select>
+                </div>
+                <button type="submit" class="action-btn">Create Proposal</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('proposalModal')">Cancel</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Invoice Modal -->
+    <div id="invoiceModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('invoiceModal')">&times;</span>
+            <h2>Create New Invoice</h2>
+            <form id="invoiceForm">
+                <div class="form-group">
+                    <label for="invoiceProject">Project</label>
+                    <select id="invoiceProject" name="projectId">
+                        <option value="">Select a project...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="invoiceClient">Client *</label>
+                    <select id="invoiceClient" name="clientId" required>
+                        <option value="">Select a client...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="invoiceAmount">Amount *</label>
+                    <input type="number" id="invoiceAmount" name="amount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="invoiceCurrency">Currency</label>
+                    <select id="invoiceCurrency" name="currency">
+                        <option value="PKR" selected>PKR - Pakistani Rupee</option>
+                        <option value="USD">USD - US Dollar</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="GBP">GBP - British Pound</option>
+                        <option value="CAD">CAD - Canadian Dollar</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="invoiceDueDate">Due Date *</label>
+                    <input type="date" id="invoiceDueDate" name="dueDate" required>
+                </div>
+                <button type="submit" class="action-btn">Create Invoice</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('invoiceModal')">Cancel</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Project Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('projectModal')">&times;</span>
+            <h2>Add New Project</h2>
+            <form id="projectForm">
+                <div class="form-group">
+                    <label for="projectClient">Client *</label>
+                    <select id="projectClient" name="clientId" required>
+                        <option value="">Select a client...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="projectTitle">Project Title *</label>
+                    <input type="text" id="projectTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="projectDescription">Description</label>
+                    <textarea id="projectDescription" name="description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="projectDueDate">Due Date</label>
+                    <input type="date" id="projectDueDate" name="dueDate">
+                </div>
+                <button type="submit" class="action-btn">Create Project</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('projectModal')">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let activeTimerSession = null;
+        let timerInterval = null;
+        let timerStartTime = null;
+
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked nav tab
+            event.target.classList.add('active');
+            
+            // Load specific data based on tab
+            if (tabName === 'tools') {
+                loadToolsData();
+            } else if (tabName === 'analytics') {
+                loadFullAnalytics();
+            }
+        }
+        
+        // Initialize dashboard on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            loadActiveSession();
+            setDefaultDates();
+        });
+        
+        // Format currency for Pakistani market
+        function formatCurrency(amount, currency) {
+            const currencySymbol = currency === 'PKR' || currency === 'Rs.' || !currency ? 'Rs.' : currency;
+            const formattedAmount = parseFloat(amount || 0).toLocaleString('en-PK');
+            return `${currencySymbol} ${formattedAmount}`;
+        }
+        
+        // Load main dashboard data
+        function loadDashboardData() {
+            google.script.run
+                .withSuccessHandler(function(stats) {
+                    displayStats(stats);
+                })
+                .withFailureHandler(handleError)
+                .getDashboardStats();
+                
+            google.script.run
+                .withSuccessHandler(function(activity) {
+                    displayRecentActivity(activity);
+                })
+                .withFailureHandler(handleError)
+                .getRecentActivity();
+                
+            google.script.run
+                .withSuccessHandler(function(deadlines) {
+                    displayUpcomingDeadlines(deadlines);
+                })
+                .withFailureHandler(handleError)
+                .getUpcomingDeadlines();
+        }
+        
+        // Display statistics
+        function displayStats(stats) {
+            document.getElementById('totalClients').textContent = stats.totalClients || 0;
+            document.getElementById('activeProjects').textContent = stats.activeProjects || 0;
+            document.getElementById('pendingProposals').textContent = stats.pendingProposals || 0;
+            document.getElementById('overdueInvoices').textContent = stats.overdueInvoices || 0;
+            document.getElementById('monthlyRevenue').textContent = formatCurrency(stats.monthlyRevenue || 0, 'PKR');
+        }
+        
+        // Display recent activity
+        function displayRecentActivity(activities) {
+            const container = document.getElementById('recentActivity');
+            container.innerHTML = '';
+            
+            if (!activities || activities.length === 0) {
+                container.innerHTML = '<div class="no-data">No recent activity</div>';
+                return;
+            }
+            
+            activities.forEach(activity => {
+                const item = document.createElement('div');
+                item.className = 'activity-item';
+                
+                const date = new Date(activity[0]).toLocaleDateString('en-PK', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                item.innerHTML = `
+                    <div>
+                        <div class="activity-type">${activity[1]}</div>
+                        <div class="activity-description">${activity[2]}</div>
+                    </div>
+                    <div class="activity-time">${date}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+        
+        // Display upcoming deadlines
+        function displayUpcomingDeadlines(deadlines) {
+            const container = document.getElementById('upcomingDeadlines');
+            container.innerHTML = '';
+            
+            if (!deadlines || deadlines.length === 0) {
+                container.innerHTML = '<div class="no-data">No upcoming deadlines</div>';
+                return;
+            }
+            
+            deadlines.forEach(deadline => {
+                const item = document.createElement('div');
+                item.className = 'deadline-item';
+                
+                const dueDate = new Date(deadline.dueDate);
+                const today = new Date();
+                const diffDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+                
+                if (diffDays <= 1) {
+                    item.classList.add('urgent');
+                }
+                
+                item.innerHTML = `
+                    <div class="deadline-title">${deadline.type}: ${deadline.title}</div>
+                    <div class="deadline-date">
+                        Due in ${diffDays} day${diffDays !== 1 ? 's' : ''} (${dueDate.toLocaleDateString('en-PK')})
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Premium Tools Dialog Management
+        function openToolDialog(toolName) {
+            const dialogId = toolName + 'Dialog';
+            const dialog = document.getElementById(dialogId);
+            if (dialog) {
+                dialog.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                
+                // Load initial data based on tool
+                switch(toolName) {
+                    case 'timeTracker':
+                        loadActiveTimeSession();
+                        break;
+                    case 'expenseManager':
+                        setDefaultExpenseDate();
+                        break;
+                    case 'currencyConverter':
+                        loadCurrencyRates();
+                        break;
+                    case 'analytics':
+                        loadAnalyticsData();
+                        break;
+                    case 'contractGenerator':
+                        setDefaultContractDates();
+                        break;
+                    case 'backupTool':
+                        break;
+                }
+            }
+        }
+
+        function closeDialog(dialogId) {
+            const dialog = document.getElementById(dialogId);
+            if (dialog) {
+                dialog.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Close dialog when clicking overlay
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('premium-dialog-overlay')) {
+                closeDialog(e.target.id);
+            }
+        });
+
+        // Time Tracker Functions
+        function loadActiveTimeSession() {
+            google.script.run
+                .withSuccessHandler(function(session) {
+                    if (session) {
+                        activeTimerSession = session.sessionId;
+                        timerStartTime = new Date(session.startTime);
+                        document.getElementById('projectId').value = session.projectId || '';
+                        document.getElementById('taskDescription').value = session.taskDescription || '';
+                        startTimerDisplay();
+                        updateTimerButton(true);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.log('No active session');
+                })
+                .getActiveTimeSession();
+        }
+
+        function toggleTimer() {
+            if (activeTimerSession) {
+                stopTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            const projectId = document.getElementById('projectId').value || 'GENERAL';
+            const taskDescription = document.getElementById('taskDescription').value || 'General Work';
+            const hourlyRate = document.getElementById('hourlyRate').value || 50;
+            
+            showMessage('timeMessage', 'Starting timer...', 'info');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        activeTimerSession = result.sessionId;
+                        timerStartTime = new Date(result.startTime);
+                        startTimerDisplay();
+                        updateTimerButton(true);
+                        showMessage('timeMessage', 'Timer started successfully!', 'success');
+                    } else {
+                        showMessage('timeMessage', result.error, 'error');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showMessage('timeMessage', 'Failed to start timer: ' + error, 'error');
+                })
+                .startTimeTracking(projectId, taskDescription);
+        }
+
+        function stopTimer() {
+            if (!activeTimerSession) return;
+            
+            showMessage('timeMessage', 'Stopping timer...', 'info');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        stopTimerDisplay();
+                        activeTimerSession = null;
+                        timerStartTime = null;
+                        updateTimerButton(false);
+                        showMessage('timeMessage', `Session completed: ${result.duration} hours, Rs. ${result.amount}`, 'success');
+                    } else {
+                        showMessage('timeMessage', result.error, 'error');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showMessage('timeMessage', 'Failed to stop timer: ' + error, 'error');
+                })
+                .stopTimeTracking(activeTimerSession);
+        }
+
+        function startTimerDisplay() {
+            timerInterval = setInterval(updateTimerDisplay, 1000);
+        }
+
+        function stopTimerDisplay() {
+            clearInterval(timerInterval);
+            document.getElementById('timeDisplay').textContent = '00:00:00';
+        }
+
+        function updateTimerDisplay() {
+            if (timerStartTime) {
+                const now = new Date();
+                const elapsed = now - timerStartTime;
+                const hours = Math.floor(elapsed / 3600000);
+                const minutes = Math.floor((elapsed % 3600000) / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                
+                document.getElementById('timeDisplay').textContent = 
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+        }
+
+        function updateTimerButton(isRunning) {
+            const btn = document.getElementById('startStopBtn');
+            if (btn) {
+                if (isRunning) {
+                    btn.textContent = '⏸️ Stop Timer';
+                    btn.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+                } else {
+                    btn.textContent = '▶️ Start Timer';
+                    btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                }
+            }
+        }
+
+        function viewTimeHistory() {
+            showMessage('timeMessage', 'Loading time history...', 'info');
+            // Implementation for time history
+        }
+
+        // Expense Manager Functions
+        function setDefaultExpenseDate() {
+            const expenseDateInput = document.getElementById('expenseDate');
+            if (expenseDateInput) {
+                expenseDateInput.value = new Date().toISOString().split('T')[0];
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const expenseForm = document.getElementById('expenseForm');
+            if (expenseForm) {
+                expenseForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const expenseData = {
+                        amount: parseFloat(document.getElementById('expenseAmount').value),
+                        currency: document.getElementById('expenseCurrency').value,
+                        category: document.getElementById('expenseCategory').value,
+                        description: document.getElementById('expenseDescription').value,
+                        date: document.getElementById('expenseDate').value
+                    };
+                    
+                    showMessage('expenseMessage', 'Adding expense...', 'info');
+                    
+                    google.script.run
+                        .withSuccessHandler(function(result) {
+                            if (result.success) {
+                                showMessage('expenseMessage', 'Expense added successfully!', 'success');
+                                document.getElementById('expenseForm').reset();
+                                setDefaultExpenseDate();
+                            } else {
+                                showMessage('expenseMessage', result.error, 'error');
+                            }
+                        })
+                        .withFailureHandler(function(error) {
+                            showMessage('expenseMessage', 'Failed to add expense: ' + error, 'error');
+                        })
+                        .addExpense(expenseData);
+                });
+            }
+        });
+
+        function viewExpenseReport() {
+            showMessage('expenseMessage', 'Generating expense report...', 'info');
+            // Implementation for expense report
+        }
+
+        // Currency Converter Functions
+        function loadCurrencyRates() {
+            updateExchangeRates();
+        }
+
+        function performConversion() {
+            const amount = parseFloat(document.getElementById('fromAmount').value);
+            const fromCurrency = document.getElementById('fromCurrency').value;
+            const toCurrency = document.getElementById('toCurrency').value;
+            
+            if (!amount || amount <= 0) {
+                showMessage('currencyMessage', 'Please enter a valid amount', 'error');
+                return;
+            }
+            
+            showMessage('currencyMessage', 'Converting...', 'info');
+            document.getElementById('conversionResult').innerHTML = '<div class="loading-spinner"></div> Converting...';
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        document.getElementById('convertedAmount').textContent = 
+                            `${result.convertedAmount.toLocaleString()} ${toCurrency}`;
+                        document.getElementById('conversionResult').innerHTML = 
+                            `<strong>${amount.toLocaleString()} ${fromCurrency}</strong> = <strong>${result.convertedAmount.toLocaleString()} ${toCurrency}</strong><br><small>Rate: ${result.rate}</small>`;
+                        showMessage('currencyMessage', 'Conversion completed!', 'success');
+                    } else {
+                        showMessage('currencyMessage', result.error, 'error');
+                        document.getElementById('conversionResult').textContent = 'Conversion failed';
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showMessage('currencyMessage', 'Conversion failed: ' + error, 'error');
+                    document.getElementById('conversionResult').textContent = 'Conversion failed';
+                })
+                .convertCurrency(amount, fromCurrency, toCurrency);
+        }
+
+        function updateExchangeRates() {
+            showMessage('currencyMessage', 'Updating exchange rates...', 'info');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        showMessage('currencyMessage', 'Exchange rates updated!', 'success');
+                    } else {
+                        showMessage('currencyMessage', 'Failed to update rates', 'error');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showMessage('currencyMessage', 'Failed to update rates: ' + error, 'error');
+                })
+                .getCurrencyRates();
+        }
+
+        // Auto-convert when inputs change
+        document.addEventListener('DOMContentLoaded', function() {
+            const fromAmountInput = document.getElementById('fromAmount');
+            const fromCurrencySelect = document.getElementById('fromCurrency');
+            const toCurrencySelect = document.getElementById('toCurrency');
+            
+            if (fromAmountInput) {
+                fromAmountInput.addEventListener('input', function() {
+                    if (this.value) {
+                        setTimeout(performConversion, 500);
+                    }
+                });
+            }
+
+            if (fromCurrencySelect) {
+                fromCurrencySelect.addEventListener('change', performConversion);
+            }
+
+            if (toCurrencySelect) {
+                toCurrencySelect.addEventListener('change', performConversion);
+            }
+        });
+
+        // Analytics Functions
+        function loadAnalyticsData() {
+            showMessage('analyticsMessage', 'Loading analytics...', 'info');
+            
+            google.script.run
+                .withSuccessHandler(function(analytics) {
+                    if (analytics) {
+                        document.getElementById('monthlyRevenueMetric').textContent = 
+                            `Rs. ${analytics.revenue.currentMonth.toLocaleString()}`;
+                        document.getElementById('proposalRate').textContent = 
+                            `${analytics.proposals.conversionRate}%`;
+                        document.getElementById('totalHours').textContent = 
+                            `${analytics.timeTracking.thisWeekHours}h`;
+                        document.getElementById('totalExpenses').textContent = 
+                            `Rs. ${analytics.expenses.monthlyExpenses.toLocaleString()}`;
+                        showMessage('analyticsMessage', 'Analytics loaded successfully!', 'success');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showMessage('analyticsMessage', 'Failed to load analytics: ' + error, 'error');
+                })
+                .getBusinessAnalytics();
+        }
+
+        function refreshAnalytics() {
+            loadAnalyticsData();
+        }
+
+        function exportAnalytics() {
+            showMessage('analyticsMessage', 'Exporting analytics...', 'info');
+            // Implementation for analytics export
+        }
+
+        // Contract Generator Functions
+        function setDefaultContractDates() {
+            const today = new Date();
+            const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+            
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            
+            if (startDateInput) {
+                startDateInput.value = today.toISOString().split('T')[0];
+            }
+            
+            if (endDateInput) {
+                endDateInput.value = nextWeek.toISOString().split('T')[0];
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const contractForm = document.getElementById('contractForm');
+            if (contractForm) {
+                contractForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const contractData = {
+                        clientName: document.getElementById('clientName').value,
+                        clientCompany: document.getElementById('clientCompany').value,
+                        projectTitle: document.getElementById('projectTitle').value,
+                        projectDescription: document.getElementById('projectDescription').value,
+                        amount: parseFloat(document.getElementById('contractAmount').value),
+                        currency: document.getElementById('contractCurrency').value,
+                        startDate: document.getElementById('startDate').value,
+                        endDate: document.getElementById('endDate').value
+                    };
+                    
+                    showMessage('contractMessage', 'Generating contract...', 'info');
+                    
+                    google.script.run
+                        .withSuccessHandler(function(result) {
+                            if (result.success) {
+                                showMessage('contractMessage', `Contract generated: ${result.fileName}`, 'success');
+                                document.getElementById('contractForm').reset();
+                                setDefaultContractDates();
+                            } else {
+                                showMessage('contractMessage', result.error, 'error');
+                            }
+                        })
+                        .withFailureHandler(function(error) {
+                            showMessage('contractMessage', 'Failed to generate contract: ' + error, 'error');
+                        })
+                        .generateContract(contractData);
+                });
+            }
+        });
+
+        function previewContract() {
+            showMessage('contractMessage', 'Generating preview...', 'info');
+            // Implementation for contract preview
+        }
+
+        // Backup Tool Functions
+        function createBackup() {
+            const backupType = document.getElementById('backupType').value;
+            const backupFormat = document.getElementById('backupFormat').value;
+            const includeAttachments = document.getElementById('includeAttachments').checked;
+            const includeHistory = document.getElementById('includeHistory').checked;
+            const includeSettings = document.getElementById('includeSettings').checked;
+            
+            showMessage('backupMessage', 'Creating backup...', 'info');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        showMessage('backupMessage', `Backup created: ${result.fileName}`, 'success');
+                    } else {
+                        showMessage('backupMessage', result.error, 'error');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showMessage('backupMessage', 'Backup failed: ' + error, 'error');
+                })
+                .createDataBackup();
+        }
+
+        function scheduleBackup() {
+            showMessage('backupMessage', 'Backup scheduling feature coming soon!', 'info');
+        }
+
+        // Utility Functions
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = `<div class="message message-${type}">${message}</div>`;
+                
+                if (type === 'success' || type === 'error') {
+                    setTimeout(() => {
+                        element.innerHTML = '';
+                    }, 5000);
+                }
+            }
+        }
+        
+        // Modal and Utility Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            if (modalId === 'proposalModal' || modalId === 'invoiceModal' || modalId === 'projectModal') {
+                loadClients();
+            }
+            if (modalId === 'invoiceModal') {
+                loadProjects();
+            }
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        function loadClients() {
+            google.script.run
+                .withSuccessHandler(populateClientDropdowns)
+                .withFailureHandler(showError)
+                .getAllClients();
+        }
+        
+        function populateClientDropdowns(clients) {
+            const selects = ['proposalClient', 'invoiceClient', 'projectClient'];
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    select.innerHTML = '<option value="">Select a client...</option>';
+                    clients.forEach(client => {
+                        const option = document.createElement('option');
+                        option.value = client.ClientID;
+                        option.textContent = client.CompanyName;
+                        select.appendChild(option);
+                    });
+                }
+            });
+        }
+        
+        function loadProjects() {
+            google.script.run
+                .withSuccessHandler(populateProjectDropdown)
+                .withFailureHandler(showError)
+                .getAllProjects();
+        }
+        
+        function populateProjectDropdown(projects) {
+            const select = document.getElementById('invoiceProject');
+            if (select) {
+                select.innerHTML = '<option value="">Select a project...</option>';
+                projects.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.ProjectID;
+                    option.textContent = project.Title;
+                    select.appendChild(option);
+                });
+            }
+        }
+        
+        function setDefaultDates() {
+            const today = new Date().toISOString().split('T')[0];
+            const defaultDueDate = new Date();
+            defaultDueDate.setDate(defaultDueDate.getDate() + 30);
+            
+            const dueDateInput = document.getElementById('invoiceDueDate');
+            if (dueDateInput) {
+                dueDateInput.value = defaultDueDate.toISOString().split('T')[0];
+            }
+            
+            const projectDueInput = document.getElementById('projectDueDate');
+            if (projectDueInput) {
+                const projectDue = new Date();
+                projectDue.setDate(projectDue.getDate() + 14);
+                projectDueInput.value = projectDue.toISOString().split('T')[0];
+            }
+        }
+
+        function loadFullAnalytics() {
+            const container = document.getElementById('fullAnalytics');
+            container.innerHTML = '<div class="loading-spinner"></div> Loading comprehensive analytics...';
+            
+            google.script.run
+                .withSuccessHandler(function(analytics) {
+                    displayFullAnalytics(analytics);
+                })
+                .withFailureHandler(function(error) {
+                    container.innerHTML = '<div style="color: #dc3545;">Failed to load analytics</div>';
+                })
+                .getBusinessAnalytics();
+        }
+        
+        function displayFullAnalytics(analytics) {
+            const container = document.getElementById('fullAnalytics');
+            container.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #f39c12;">Rs. ${analytics.revenue.currentMonth.toLocaleString()}</div>
+                        <div class="stat-label">This Month Revenue</div>
+                        <div style="color: ${analytics.revenue.growth >= 0 ? '#28a745' : '#dc3545'}; font-weight: bold;">
+                            ${analytics.revenue.growth >= 0 ? '+' : ''}${analytics.revenue.growth}% vs last month
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #6f42c1;">${analytics.proposals.conversionRate}%</div>
+                        <div class="stat-label">Proposal Conversion</div>
+                        <div style="color: #6c757d;">${analytics.proposals.accepted}/${analytics.proposals.total} accepted</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #28a745;">${analytics.timeTracking.thisWeekHours}h</div>
+                        <div class="stat-label">This Week Hours</div>
+                        <div style="color: #6c757d;">Rs. ${analytics.timeTracking.avgHourlyRate}/hour average</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #fd7e14;">Rs. ${analytics.expenses.monthlyExpenses.toLocaleString()}</div>
+                        <div class="stat-label">Monthly Expenses</div>
+                        <div style="color: #6c757d;">Top: ${analytics.expenses.topCategory}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function showSuccess(message) {
+            alert('Success: ' + message);
+        }
+        
+        function showError(error) {
+            alert('Error: ' + error);
+        }
+        
+        function handleError(error) {
+            console.error('Error:', error);
+            showError(error);
+        }
+        
+        function sendFollowUps() {
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    showSuccess('Follow-up emails sent!');
+                })
+                .withFailureHandler(showError)
+                .sendAutomaticFollowUps();
+        }
+        
+        function generateReports() {
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    showSuccess('Reports generated and saved to Drive!');
+                })
+                .withFailureHandler(showError)
+                .generateMonthlyReport();
+        }
+
+        function loadToolsData() {
+            // This function can be expanded to load any tools-specific data
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
