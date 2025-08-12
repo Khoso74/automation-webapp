@@ -2851,40 +2851,57 @@
         function testClientLoading() {
             console.log('=== MANUAL CLIENT LOADING TEST ===');
             
-            // Test multiple methods
-            console.log('Testing getAllClientsSimple...');
+            // First check if data exists
             google.script.run
-                .withSuccessHandler(function(clients) {
-                    console.log('✅ getAllClientsSimple result:', clients);
+                .withSuccessHandler(function(dataCheck) {
+                    console.log('✅ Sheet data check:', dataCheck);
                     
-                    if (clients && clients.length > 0) {
-                        console.log('Sample client:', clients[0]);
-                        console.log('Client keys:', Object.keys(clients[0]));
-                        alert(`✅ Simple method: Found ${clients.length} clients\nFirst client: ${clients[0].CompanyName}`);
-                    } else {
-                        console.log('No clients from simple method, trying basic test...');
-                        
-                        // Try the even simpler method
-                        google.script.run
-                            .withSuccessHandler(function(basicClients) {
-                                console.log('✅ getClientsTest result:', basicClients);
-                                if (basicClients && basicClients.length > 0) {
-                                    alert(`✅ Basic method: Found ${basicClients.length} clients\nFirst client: ${basicClients[0].CompanyName}`);
-                                } else {
-                                    alert('❌ No clients found with any method');
-                                }
-                            })
-                            .withFailureHandler(function(error) {
-                                alert('❌ All methods failed: ' + error);
-                            })
-                            .getClientsTest();
+                    if (!dataCheck.hasData) {
+                        alert(`❌ No client data found in sheet!\nLast row: ${dataCheck.lastRow}\nYou need to add clients first.`);
+                        return;
                     }
+                    
+                    alert(`✅ Sheet has data!\nRows: ${dataCheck.lastRow}\nSample: ${dataCheck.sampleClient.CompanyName}`);
+                    
+                    // Test simple method
+                    console.log('Testing getAllClientsSimple...');
+                    google.script.run
+                        .withSuccessHandler(function(clients) {
+                            console.log('✅ getAllClientsSimple result:', clients);
+                            
+                            if (clients && Array.isArray(clients) && clients.length > 0) {
+                                console.log('Sample client:', clients[0]);
+                                console.log('Client keys:', Object.keys(clients[0]));
+                                alert(`✅ Simple method: Found ${clients.length} clients\nFirst client: ${clients[0].CompanyName} (${clients[0].ClientID})`);
+                            } else {
+                                console.log('Simple method returned null/empty, trying basic test...');
+                                
+                                // Try the even simpler method
+                                google.script.run
+                                    .withSuccessHandler(function(basicClients) {
+                                        console.log('✅ getClientsTest result:', basicClients);
+                                        if (basicClients && basicClients.length > 0) {
+                                            alert(`✅ Basic method: Found ${basicClients.length} clients\nFirst client: ${basicClients[0].CompanyName}`);
+                                        } else {
+                                            alert('❌ All methods returned empty arrays');
+                                        }
+                                    })
+                                    .withFailureHandler(function(error) {
+                                        alert('❌ Basic method failed: ' + error);
+                                    })
+                                    .getClientsTest();
+                            }
+                        })
+                        .withFailureHandler(function(error) {
+                            console.error('❌ getAllClientsSimple failed:', error);
+                            alert('❌ Simple method failed: ' + error);
+                        })
+                        .getAllClientsSimple();
                 })
                 .withFailureHandler(function(error) {
-                    console.error('❌ getAllClientsSimple failed:', error);
-                    alert('❌ Simple method failed: ' + error);
+                    alert('❌ Cannot check sheet data: ' + error);
                 })
-                .getAllClientsSimple();
+                .checkSheetData();
         }
 
         // Make test function available globally
@@ -3616,29 +3633,73 @@
             if (selectElement) {
                 selectElement.innerHTML = '<option value="">🔄 Loading clients...</option>';
                 
-                // Test with the simple method first
+                // First check if there's any data at all
                 google.script.run
-                    .withSuccessHandler(function(clients) {
-                        console.log('✅ Direct client loading successful:', clients);
+                    .withSuccessHandler(function(dataCheck) {
+                        console.log('✅ Sheet data check result:', dataCheck);
                         
-                        if (clients && clients.length > 0) {
-                            let options = '<option value="">Choose your client...</option>';
-                            clients.forEach(client => {
-                                const displayName = `${client.CompanyName || client.companyName || 'Unknown Company'} (${client.ClientID || client.clientId || 'No-ID'})`;
-                                options += `<option value="${client.ClientID || client.clientId}">${displayName}</option>`;
-                            });
-                            selectElement.innerHTML = options;
-                            console.log(`✅ Successfully loaded ${clients.length} clients in ${selectId}`);
-                        } else {
-                            selectElement.innerHTML = '<option value="">No clients found - Add a client first</option>';
-                            console.log('❌ No clients found');
+                        if (!dataCheck.hasData) {
+                            selectElement.innerHTML = '<option value="">No clients in database - Add clients first</option>';
+                            console.log('❌ No client data found in sheet');
+                            return;
                         }
+                        
+                        console.log('✅ Data exists, trying to load clients...');
+                        
+                        // Try the simple method
+                        google.script.run
+                            .withSuccessHandler(function(clients) {
+                                console.log('✅ getAllClientsSimple result:', clients);
+                                
+                                if (clients && Array.isArray(clients) && clients.length > 0) {
+                                    let options = '<option value="">Choose your client...</option>';
+                                    clients.forEach(client => {
+                                        const companyName = client.CompanyName || client.companyName || 'Unknown Company';
+                                        const clientId = client.ClientID || client.clientId || 'No-ID';
+                                        const displayName = `${companyName} (${clientId})`;
+                                        options += `<option value="${clientId}">${displayName}</option>`;
+                                    });
+                                    selectElement.innerHTML = options;
+                                    console.log(`✅ Successfully loaded ${clients.length} clients in ${selectId}`);
+                                } else {
+                                    console.log('Simple method returned empty/null, trying basic test...');
+                                    
+                                    // Fallback to basic test
+                                    google.script.run
+                                        .withSuccessHandler(function(basicClients) {
+                                            console.log('✅ getClientsTest result:', basicClients);
+                                            
+                                            if (basicClients && Array.isArray(basicClients) && basicClients.length > 0) {
+                                                let options = '<option value="">Choose your client...</option>';
+                                                basicClients.forEach(client => {
+                                                    const displayName = `${client.CompanyName} (${client.ClientID})`;
+                                                    options += `<option value="${client.ClientID}">${displayName}</option>`;
+                                                });
+                                                selectElement.innerHTML = options;
+                                                console.log(`✅ Basic method loaded ${basicClients.length} clients`);
+                                            } else {
+                                                selectElement.innerHTML = '<option value="">Failed to load clients - Check Apps Script console</option>';
+                                                console.error('❌ All methods failed to return client data');
+                                            }
+                                        })
+                                        .withFailureHandler(function(error) {
+                                            console.error('❌ Basic method also failed:', error);
+                                            selectElement.innerHTML = '<option value="">All loading methods failed</option>';
+                                        })
+                                        .getClientsTest();
+                                }
+                            })
+                            .withFailureHandler(function(error) {
+                                console.error('❌ Simple method failed:', error);
+                                selectElement.innerHTML = '<option value="">Error loading clients - Check console</option>';
+                            })
+                            .getAllClientsSimple();
                     })
                     .withFailureHandler(function(error) {
-                        console.error('❌ Direct client loading failed:', error);
-                        selectElement.innerHTML = '<option value="">Error loading clients</option>';
+                        console.error('❌ Sheet data check failed:', error);
+                        selectElement.innerHTML = '<option value="">Cannot access sheet data</option>';
                     })
-                    .getAllClientsSimple();
+                    .checkSheetData();
             } else {
                 console.error('Select element not found:', selectId);
             }

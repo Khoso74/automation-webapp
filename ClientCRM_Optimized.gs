@@ -97,50 +97,69 @@ function testClientRetrieval() {
 function getAllClientsSimple() {
   try {
     console.log('=== SIMPLE CLIENT RETRIEVAL ===');
+    
+    // Test basic access first
+    console.log('Testing spreadsheet access...');
     const spreadsheet = getSpreadsheet();
+    console.log('✅ Spreadsheet access OK');
+    
+    console.log('Testing sheet access...');
     const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
+    console.log('✅ Clients sheet access OK');
+    
+    // Get basic info first
+    const lastRow = clientsSheet.getLastRow();
+    const lastCol = clientsSheet.getLastColumn();
+    console.log(`Sheet info - Last row: ${lastRow}, Last col: ${lastCol}`);
+    
+    if (lastRow <= 1) {
+      console.log('Sheet is empty or only has headers');
+      return []; // Return empty array, not null
+    }
     
     // Get all data
     const data = clientsSheet.getDataRange().getValues();
     console.log('Raw sheet data rows:', data.length);
-    console.log('First few rows:', data.slice(0, 3));
-    
-    if (data.length <= 1) {
-      console.log('No client data found (only headers or empty)');
-      return [];
-    }
-    
-    const headers = data[0];
-    console.log('Sheet headers:', headers);
+    console.log('Headers (row 1):', data[0]);
     
     // Process each client row
     const clients = [];
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
-      if (row[0]) { // Only if ClientID exists
+      console.log(`Processing row ${i}:`, row);
+      
+      if (row[0] && row[0].toString().trim()) { // Check if ClientID exists and not empty
         const client = {
-          ClientID: row[0],
-          CompanyName: row[1] || 'Unknown Company',
-          ContactName: row[2] || 'Unknown Contact',
-          Email: row[3] || '',
-          Phone: row[4] || '',
-          Address: row[5] || '',
+          ClientID: row[0].toString().trim(),
+          CompanyName: (row[1] || 'Unknown Company').toString().trim(),
+          ContactName: (row[2] || 'Unknown Contact').toString().trim(),
+          Email: (row[3] || '').toString().trim(),
+          Phone: (row[4] || '').toString().trim(),
+          Address: (row[5] || '').toString().trim(),
           CreatedDate: row[6] || new Date(),
-          Status: row[7] || 'Active'
+          Status: (row[7] || 'Active').toString().trim()
         };
         clients.push(client);
-        console.log(`Client ${i}: ${client.CompanyName} (${client.ClientID})`);
+        console.log(`✅ Added client: ${client.CompanyName} (${client.ClientID})`);
+      } else {
+        console.log(`Skipping row ${i} - no ClientID`);
       }
     }
     
     console.log(`Total clients processed: ${clients.length}`);
+    console.log('Final client list:', clients);
     console.log('=== SIMPLE CLIENT RETRIEVAL SUCCESS ===');
-    return clients;
+    
+    // Ensure we return an array, never null
+    return clients || [];
     
   } catch (error) {
     console.error('=== SIMPLE CLIENT RETRIEVAL ERROR ===');
-    console.error('Error details:', error);
+    console.error('Error details:', error.message);
     console.error('Error stack:', error.stack);
+    console.error('Error object:', error);
+    
+    // Return empty array on error, never null
     return [];
   }
 }
@@ -158,12 +177,15 @@ function getClientsTest() {
     console.log('Sheet last row:', lastRow);
     
     if (lastRow <= 1) {
+      console.log('No data rows found');
       return [];
     }
     
     // Get just the first few columns we need
     const range = clientsSheet.getRange(2, 1, lastRow - 1, 3);
     const values = range.getValues();
+    
+    console.log('Range values:', values);
     
     const clients = values.map(row => ({
       ClientID: row[0],
@@ -172,11 +194,62 @@ function getClientsTest() {
     })).filter(client => client.ClientID);
     
     console.log('Basic test clients:', clients);
-    return clients;
+    return clients || [];
     
   } catch (error) {
     console.error('Basic client test failed:', error);
     return [];
+  }
+}
+
+/**
+ * Ultra simple function to check if there's any data at all
+ */
+function checkSheetData() {
+  try {
+    console.log('=== CHECKING SHEET DATA ===');
+    const spreadsheet = getSpreadsheet();
+    console.log('Spreadsheet name:', spreadsheet.getName());
+    console.log('Spreadsheet ID:', spreadsheet.getId());
+    
+    const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
+    console.log('Sheet name:', clientsSheet.getName());
+    
+    const lastRow = clientsSheet.getLastRow();
+    const lastCol = clientsSheet.getLastColumn();
+    console.log(`Last row: ${lastRow}, Last col: ${lastCol}`);
+    
+    if (lastRow > 1) {
+      // Get first data row
+      const firstDataRow = clientsSheet.getRange(2, 1, 1, lastCol).getValues()[0];
+      console.log('First data row:', firstDataRow);
+      
+      return {
+        hasData: true,
+        lastRow: lastRow,
+        lastCol: lastCol,
+        firstDataRow: firstDataRow,
+        sampleClient: {
+          ClientID: firstDataRow[0],
+          CompanyName: firstDataRow[1],
+          ContactName: firstDataRow[2]
+        }
+      };
+    } else {
+      console.log('No data found');
+      return {
+        hasData: false,
+        lastRow: lastRow,
+        lastCol: lastCol
+      };
+    }
+    
+  } catch (error) {
+    console.error('Sheet data check failed:', error);
+    return {
+      hasData: false,
+      error: error.message
+    };
   }
 }
 
