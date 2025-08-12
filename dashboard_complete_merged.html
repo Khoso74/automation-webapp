@@ -1228,55 +1228,283 @@
             }
         }
         
-        /* Activity and Deadline Styles */
+        /* Enhanced Activity and Deadline Styles */
         .activity-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #ecf0f1;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 254, 0.95));
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .activity-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .activity-item:hover {
+            transform: translateX(8px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+            border-left-color: #764ba2;
+        }
+
+        .activity-item:hover::before {
+            left: 100%;
         }
         
         .activity-item:last-child {
-            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .activity-icon {
+            font-size: 1.5em;
+            margin-right: 16px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .activity-content {
+            flex: 1;
         }
         
         .activity-type {
-            font-weight: bold;
+            font-weight: 700;
             color: #2c3e50;
+            margin-bottom: 6px;
+            font-size: 1.05em;
         }
         
         .activity-description {
             color: #7f8c8d;
             font-size: 0.9em;
+            margin-bottom: 4px;
         }
         
         .activity-time {
-            color: #95a5a6;
-            font-size: 0.8em;
+            font-weight: 600;
+            color: #667eea;
+            font-size: 0.85em;
         }
-        
+
         .deadline-item {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 254, 0.95));
+            border-radius: 15px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .deadline-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            transition: left 0.6s;
+        }
+
+        .deadline-item:hover {
+            transform: translateX(8px) scale(1.02);
+        }
+
+        .deadline-item:hover::before {
+            left: 100%;
+        }
+
         .deadline-item.urgent {
-            background: #f8d7da;
-            border-left-color: #dc3545;
+            border-left: 4px solid #e74c3c;
+            background: linear-gradient(145deg, rgba(231, 76, 60, 0.1), rgba(231, 76, 60, 0.05));
+        }
+
+        .deadline-item.urgent::before {
+            background: linear-gradient(90deg, transparent, rgba(231, 76, 60, 0.1), transparent);
+        }
+
+        .deadline-item.urgent:hover {
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.2);
+        }
+
+        .deadline-item.warning {
+            border-left: 4px solid #f39c12;
+            background: linear-gradient(145deg, rgba(243, 156, 18, 0.1), rgba(243, 156, 18, 0.05));
+        }
+
+        .deadline-item.warning::before {
+            background: linear-gradient(90deg, transparent, rgba(243, 156, 18, 0.1), transparent);
+        }
+
+        .deadline-item.warning:hover {
+            box-shadow: 0 8px 25px rgba(243, 156, 18, 0.2);
+        }
+
+        .deadline-item.normal {
+            border-left: 4px solid #27ae60;
+            background: linear-gradient(145deg, rgba(39, 174, 96, 0.1), rgba(39, 174, 96, 0.05));
+        }
+
+        .deadline-item.normal::before {
+            background: linear-gradient(90deg, transparent, rgba(39, 174, 96, 0.1), transparent);
+        }
+
+        .deadline-item.normal:hover {
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.2);
+        }
+
+        .deadline-content {
+            flex: 1;
         }
         
         .deadline-title {
-            font-weight: bold;
+            font-weight: 700;
             color: #2c3e50;
+            margin-bottom: 4px;
+            font-size: 1.05em;
+        }
+
+        .deadline-client {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            margin-bottom: 2px;
         }
         
         .deadline-date {
-            color: #6c757d;
             font-size: 0.9em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .deadline-date.urgent {
+            color: #e74c3c;
+        }
+
+        .deadline-date.warning {
+            color: #f39c12;
+        }
+
+        .deadline-date.normal {
+            color: #27ae60;
+        }
+
+        .deadline-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .deadline-status.urgent {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .deadline-status.warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .deadline-status.normal {
+            background: #27ae60;
+            color: white;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #95a5a6;
+            font-style: italic;
+            padding: 40px 20px;
+            background: linear-gradient(145deg, rgba(149, 165, 166, 0.1), rgba(149, 165, 166, 0.05));
+            border-radius: 15px;
+            border: 2px dashed rgba(149, 165, 166, 0.3);
+            position: relative;
+        }
+
+        .no-data::before {
+            content: '📋';
+            font-size: 3em;
+            display: block;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .refresh-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .refresh-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .loading-skeleton {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            background: linear-gradient(90deg, rgba(240, 240, 240, 0.8) 25%, rgba(250, 250, 250, 0.8) 50%, rgba(240, 240, 240, 0.8) 75%);
+            background-size: 200% 100%;
+            animation: shimmerLoading 1.5s infinite;
+            border-radius: 15px;
+            height: 70px;
+        }
+
+        @keyframes shimmerLoading {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
         
         .no-data {
@@ -1542,17 +1770,27 @@
                 <div class="main-grid">
                     <!-- Recent Activity -->
                     <div class="panel">
-                        <h3>📈 Recent Activity</h3>
+                        <div class="section-header">
+                            <h3 class="section-title">📈 Recent Activity</h3>
+                            <button class="refresh-button" onclick="refreshActivity()">🔄 Refresh</button>
+                        </div>
                         <div id="recentActivity">
-                            <div class="no-data">Loading recent activity...</div>
+                            <div class="loading-skeleton"></div>
+                            <div class="loading-skeleton"></div>
+                            <div class="loading-skeleton"></div>
                         </div>
                     </div>
                     
                     <!-- Upcoming Deadlines -->
                     <div class="panel">
-                        <h3>⏰ Upcoming Deadlines</h3>
+                        <div class="section-header">
+                            <h3 class="section-title">⏰ Upcoming Deadlines</h3>
+                            <button class="refresh-button" onclick="refreshDeadlines()">🔄 Refresh</button>
+                        </div>
                         <div id="upcomingDeadlines">
-                            <div class="no-data">Loading upcoming deadlines...</div>
+                            <div class="loading-skeleton"></div>
+                            <div class="loading-skeleton"></div>
+                            <div class="loading-skeleton"></div>
                         </div>
                     </div>
                 </div>
@@ -2256,6 +2494,7 @@
         
         // Load main dashboard data
         function loadDashboardData() {
+            // Load dashboard statistics
             google.script.run
                 .withSuccessHandler(function(stats) {
                     displayStats(stats);
@@ -2263,18 +2502,48 @@
                 .withFailureHandler(handleError)
                 .getDashboardStats();
                 
+            // Load recent activity with loading state
+            const activityContainer = document.getElementById('recentActivity');
+            activityContainer.innerHTML = `
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+            `;
+            
             google.script.run
                 .withSuccessHandler(function(activity) {
                     displayRecentActivity(activity);
                 })
-                .withFailureHandler(handleError)
+                .withFailureHandler(function(error) {
+                    activityContainer.innerHTML = `
+                        <div class="no-data">
+                            Failed to load activity: ${error}
+                            <button class="refresh-button" onclick="refreshActivity()">🔄 Retry</button>
+                        </div>
+                    `;
+                })
                 .getRecentActivity();
                 
+            // Load upcoming deadlines with loading state
+            const deadlinesContainer = document.getElementById('upcomingDeadlines');
+            deadlinesContainer.innerHTML = `
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+            `;
+            
             google.script.run
                 .withSuccessHandler(function(deadlines) {
                     displayUpcomingDeadlines(deadlines);
                 })
-                .withFailureHandler(handleError)
+                .withFailureHandler(function(error) {
+                    deadlinesContainer.innerHTML = `
+                        <div class="no-data">
+                            Failed to load deadlines: ${error}
+                            <button class="refresh-button" onclick="refreshDeadlines()">🔄 Retry</button>
+                        </div>
+                    `;
+                })
                 .getUpcomingDeadlines();
         }
         
@@ -2293,28 +2562,47 @@
             container.innerHTML = '';
             
             if (!activities || activities.length === 0) {
-                container.innerHTML = '<div class="no-data">No recent activity</div>';
+                container.innerHTML = `
+                    <div class="no-data">
+                        No recent activity found
+                        <button class="refresh-button" onclick="refreshActivity()">🔄 Refresh Now</button>
+                    </div>
+                `;
                 return;
             }
             
-            activities.forEach(activity => {
+            activities.slice(0, 8).forEach(activity => {
                 const item = document.createElement('div');
                 item.className = 'activity-item';
                 
-                const date = new Date(activity[0]).toLocaleDateString('en-PK', {
+                const date = new Date(activity[0]);
+                const timeAgo = getTimeAgo(date);
+                const formattedDate = date.toLocaleDateString('en-PK', {
                     month: 'short',
                     day: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit'
                 });
                 
+                // Determine activity icon based on type
+                let activityIcon = '📋';
+                const activityType = activity[1].toLowerCase();
+                if (activityType.includes('client')) activityIcon = '👥';
+                else if (activityType.includes('proposal')) activityIcon = '📄';
+                else if (activityType.includes('invoice')) activityIcon = '💰';
+                else if (activityType.includes('project')) activityIcon = '🎯';
+                else if (activityType.includes('email')) activityIcon = '📧';
+                else if (activityType.includes('payment')) activityIcon = '💳';
+                
                 item.innerHTML = `
-                    <div>
+                    <div class="activity-icon">${activityIcon}</div>
+                    <div class="activity-content">
                         <div class="activity-type">${activity[1]}</div>
                         <div class="activity-description">${activity[2]}</div>
+                        <div class="activity-time">${timeAgo} • ${formattedDate}</div>
                     </div>
-                    <div class="activity-time">${date}</div>
                 `;
+                
                 container.appendChild(item);
             });
         }
@@ -2325,11 +2613,16 @@
             container.innerHTML = '';
             
             if (!deadlines || deadlines.length === 0) {
-                container.innerHTML = '<div class="no-data">No upcoming deadlines</div>';
+                container.innerHTML = `
+                    <div class="no-data">
+                        No upcoming deadlines
+                        <button class="refresh-button" onclick="refreshDeadlines()">🔄 Refresh Now</button>
+                    </div>
+                `;
                 return;
             }
             
-            deadlines.forEach(deadline => {
+            deadlines.slice(0, 6).forEach(deadline => {
                 const item = document.createElement('div');
                 item.className = 'deadline-item';
                 
@@ -2337,19 +2630,107 @@
                 const today = new Date();
                 const diffDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
                 
+                let priorityClass = 'normal';
+                let statusText = 'Normal';
+                let dueDateClass = 'normal';
+                
                 if (diffDays <= 1) {
-                    item.classList.add('urgent');
+                    priorityClass = 'urgent';
+                    statusText = 'Urgent';
+                    dueDateClass = 'urgent';
+                } else if (diffDays <= 3) {
+                    priorityClass = 'warning';
+                    statusText = 'Soon';
+                    dueDateClass = 'warning';
                 }
                 
+                item.classList.add(priorityClass);
+                
+                const dueDateText = diffDays === 0 ? 'Today' : 
+                                  diffDays === 1 ? 'Tomorrow' : 
+                                  diffDays < 0 ? `${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? 's' : ''} overdue` :
+                                  `${diffDays} day${diffDays !== 1 ? 's' : ''} left`;
+                
                 item.innerHTML = `
-                    <div class="deadline-title">${deadline.type}: ${deadline.title}</div>
-                    <div class="deadline-date">
-                        Due in ${diffDays} day${diffDays !== 1 ? 's' : ''} (${dueDate.toLocaleDateString('en-PK')})
+                    <div class="deadline-content">
+                        <div class="deadline-title">${deadline.type}: ${deadline.title}</div>
+                        <div class="deadline-client">Client: ${deadline.clientName || 'N/A'}</div>
+                        <div class="deadline-date ${dueDateClass}">
+                            📅 ${dueDateText} • ${dueDate.toLocaleDateString('en-PK')}
+                        </div>
                     </div>
+                    <div class="deadline-status ${priorityClass}">${statusText}</div>
                 `;
+                
                 container.appendChild(item);
             });
         }
+
+        // Helper function to get time ago
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) return 'Just now';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+            if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+            return `${Math.floor(diffInSeconds / 604800)}w ago`;
+        }
+
+        // Refresh activity data
+        function refreshActivity() {
+            const container = document.getElementById('recentActivity');
+            container.innerHTML = `
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+            `;
+            
+            google.script.run
+                .withSuccessHandler(function(activity) {
+                    displayRecentActivity(activity);
+                })
+                .withFailureHandler(function(error) {
+                    container.innerHTML = `
+                        <div class="no-data">
+                            Failed to load activity: ${error}
+                            <button class="refresh-button" onclick="refreshActivity()">🔄 Try Again</button>
+                        </div>
+                    `;
+                })
+                .getRecentActivity();
+        }
+
+        // Refresh deadlines data
+        function refreshDeadlines() {
+            const container = document.getElementById('upcomingDeadlines');
+            container.innerHTML = `
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+            `;
+            
+            google.script.run
+                .withSuccessHandler(function(deadlines) {
+                    displayUpcomingDeadlines(deadlines);
+                })
+                .withFailureHandler(function(error) {
+                    container.innerHTML = `
+                        <div class="no-data">
+                            Failed to load deadlines: ${error}
+                            <button class="refresh-button" onclick="refreshDeadlines()">🔄 Try Again</button>
+                        </div>
+                    `;
+                })
+                .getUpcomingDeadlines();
+        }
+
+        // Auto-refresh data every 5 minutes
+        setInterval(function() {
+            refreshActivity();
+            refreshDeadlines();
+        }, 300000); // 5 minutes
 
         // Premium Tools Dialog Management
         function openToolDialog(toolName) {
