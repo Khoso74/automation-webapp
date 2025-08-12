@@ -215,7 +215,11 @@ function verifyFolderStructure() {
     'Templates',
     'Templates/Proposals',
     'Templates/Invoices', 
-    'Templates/Emails'
+    'Templates/Emails',
+    'TimeTracking',
+    'Expenses',
+    'Contracts',
+    'Backups'
   ];
   
   requiredSubfolders.forEach(folderPath => {
@@ -243,6 +247,20 @@ function createSubfolderIfNeeded(parentFolder, path) {
   }
   
   return currentFolder;
+}
+
+/**
+ * Create subfolder for tools data (used by FreelancerTools.gs)
+ */
+function createSubfolder(parentFolder, folderName) {
+  const existing = parentFolder.getFoldersByName(folderName);
+  if (existing.hasNext()) {
+    return existing.next();
+  } else {
+    const newFolder = parentFolder.createFolder(folderName);
+    console.log(`Created subfolder: ${folderName}`);
+    return newFolder;
+  }
 }
 
 /**

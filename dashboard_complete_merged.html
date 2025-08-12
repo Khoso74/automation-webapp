@@ -1878,7 +1878,8 @@
                         activeTimerSession = null;
                         timerStartTime = null;
                         updateTimerButton(false);
-                        showMessage('timeMessage', `Session completed: ${result.duration} hours, Rs. ${result.amount}`, 'success');
+                        showMessage('timeMessage', `Session completed: ${result.duration} hours, Rs. ${result.amount}<br>Data saved to Drive successfully!`, 'success');
+                        loadDashboardData(); // Refresh dashboard
                     } else {
                         showMessage('timeMessage', result.error, 'error');
                     }
@@ -1956,9 +1957,10 @@
                     google.script.run
                         .withSuccessHandler(function(result) {
                             if (result.success) {
-                                showMessage('expenseMessage', 'Expense added successfully!', 'success');
+                                showMessage('expenseMessage', `Expense added successfully! File saved: ${result.fileName || 'N/A'}`, 'success');
                                 document.getElementById('expenseForm').reset();
                                 setDefaultExpenseDate();
+                                loadDashboardData(); // Refresh dashboard
                             } else {
                                 showMessage('expenseMessage', result.error, 'error');
                             }
@@ -2126,7 +2128,7 @@
                     google.script.run
                         .withSuccessHandler(function(result) {
                             if (result.success) {
-                                showMessage('contractMessage', `Contract generated: ${result.fileName}`, 'success');
+                                showMessage('contractMessage', `Contract generated: ${result.fileName}<br>Contract ID: ${result.contractId || 'N/A'}<br><a href="${result.fileUrl}" target="_blank">View PDF</a>`, 'success');
                                 document.getElementById('contractForm').reset();
                                 setDefaultContractDates();
                             } else {
@@ -2159,7 +2161,7 @@
             google.script.run
                 .withSuccessHandler(function(result) {
                     if (result.success) {
-                        showMessage('backupMessage', `Backup created: ${result.fileName}`, 'success');
+                        showMessage('backupMessage', `Backup created successfully!<br>File: ${result.fileName}<br>Sheets backed up: ${result.sheetsBackedUp}<br><a href="${result.fileUrl}" target="_blank">Download Backup</a><br><a href="${result.summaryFileUrl}" target="_blank">View Summary</a>`, 'success');
                     } else {
                         showMessage('backupMessage', result.error, 'error');
                     }

@@ -63,6 +63,29 @@ function startTimeTracking(projectId, taskDescription) {
       'SESSION_TASK_DESC': taskDescription || 'General Work'
     });
     
+    // Save time tracking record to Drive
+    try {
+      const rootFolder = getRootFolder();
+      const timeTrackingFolder = createSubfolder(rootFolder, 'TimeTracking');
+      
+      const sessionRecord = {
+        sessionId: sessionId,
+        projectId: projectId || 'GENERAL',
+        taskDescription: taskDescription || 'General Work',
+        startTime: startTime.toISOString(),
+        hourlyRate: hourlyRate,
+        status: 'ACTIVE',
+        date: Utilities.formatDate(startTime, Session.getScriptTimeZone(), 'yyyy-MM-dd')
+      };
+      
+      const fileName = `TimeSession_${sessionId}_${startTime.toISOString().split('T')[0]}.json`;
+      timeTrackingFolder.createFile(
+        Utilities.newBlob(JSON.stringify(sessionRecord, null, 2), 'application/json', fileName)
+      );
+    } catch (driveError) {
+      console.log('Drive save failed but continuing:', driveError.toString());
+    }
+    
     logActivity('TIME_TRACKING_STARTED', `Started tracking: ${taskDescription}`, sessionId);
     
     return {
@@ -141,13 +164,39 @@ function stopTimeTracking(sessionId) {
     PropertiesService.getScriptProperties().deleteProperty('SESSION_PROJECT_ID');
     PropertiesService.getScriptProperties().deleteProperty('SESSION_TASK_DESC');
     
+    // Save completed session to Drive
+    try {
+      const rootFolder = getRootFolder();
+      const timeTrackingFolder = createSubfolder(rootFolder, 'TimeTracking');
+      
+      const sessionRecord = {
+        sessionId: sessionId,
+        projectId: data[sessionRow - 1][projectIdCol],
+        taskDescription: data[sessionRow - 1][taskDescCol],
+        startTime: data[sessionRow - 1][startTimeCol],
+        endTime: endTime.toISOString(),
+        duration: durationHours.toFixed(2),
+        hourlyRate: hourlyRate,
+        amount: amount.toFixed(2),
+        status: 'COMPLETED',
+        date: data[sessionRow - 1][dateCol]
+      };
+      
+      const fileName = `TimeSession_${sessionId}_COMPLETED.json`;
+      const sessionFile = timeTrackingFolder.createFile(
+        Utilities.newBlob(JSON.stringify(sessionRecord, null, 2), 'application/json', fileName)
+      );
+    } catch (driveError) {
+      console.log('Drive save failed but continuing:', driveError.toString());
+    }
+    
     logActivity('TIME_TRACKING_STOPPED', `Completed session: ${durationHours.toFixed(2)} hours, Rs. ${amount.toFixed(2)}`, sessionId);
     
     return {
       success: true,
       duration: durationHours.toFixed(2),
       amount: amount.toFixed(2),
-      message: 'Time tracking stopped successfully'
+      message: 'Time tracking stopped and saved to Drive successfully'
     };
     
   } catch (error) {
@@ -193,7 +242,7 @@ function getActiveTimeSession() {
 // ================================
 
 /**
- * Add new expense
+ * Add new expense with Drive storage
  */
 function addExpense(expenseData) {
   try {
@@ -214,6 +263,27 @@ function addExpense(expenseData) {
     const expenseId = generateId();
     const currentDate = new Date();
     
+    // Save expense record to Drive
+    const rootFolder = getRootFolder();
+    const expensesFolder = createSubfolder(rootFolder, 'Expenses');
+    
+    // Create detailed expense record
+    const expenseRecord = {
+      expenseId: expenseId,
+      amount: expenseData.amount,
+      currency: expenseData.currency || 'PKR',
+      category: expenseData.category,
+      description: expenseData.description,
+      date: expenseData.date,
+      createdAt: currentDate.toISOString(),
+      status: 'RECORDED'
+    };
+    
+    const fileName = `Expense_${expenseData.category.replace(/\s+/g, '_')}_${expenseData.date}_${expenseId}.json`;
+    const expenseFile = expensesFolder.createFile(
+      Utilities.newBlob(JSON.stringify(expenseRecord, null, 2), 'application/json', fileName)
+    );
+    
     const newRow = [
       expenseId,
       expenseData.amount,
@@ -223,7 +293,7 @@ function addExpense(expenseData) {
       expenseData.date,
       currentDate,
       'RECORDED',
-      '' // Receipt placeholder
+      expenseFile.getId() // Store Drive file ID
     ];
     
     expenseSheet.appendRow(newRow);
@@ -233,7 +303,10 @@ function addExpense(expenseData) {
     return {
       success: true,
       expenseId: expenseId,
-      message: 'Expense added successfully'
+      fileId: expenseFile.getId(),
+      fileUrl: expenseFile.getUrl(),
+      fileName: fileName,
+      message: 'Expense added successfully and saved to Drive'
     };
     
   } catch (error) {
@@ -771,8 +844,31 @@ function generateContract(contractData) {
     // Save to Drive
     const rootFolder = getRootFolder();
     const contractsFolder = createSubfolder(rootFolder, 'Contracts');
-    const fileName = `Contract_${contractData.clientCompany}_${new Date().toISOString().split('T')[0]}.pdf`;
+    const timestamp = new Date().toISOString().split('T')[0];
+    const fileName = `Contract_${contractData.clientCompany.replace(/\s+/g, '_')}_${timestamp}.pdf`;
     const file = contractsFolder.createFile(pdfBlob.setName(fileName));
+    
+    // Create contract metadata file
+    const metadataFileName = `Contract_Metadata_${contractData.clientCompany.replace(/\s+/g, '_')}_${timestamp}.json`;
+    const metadata = {
+      contractId: generateId(),
+      clientName: contractData.clientName,
+      clientCompany: contractData.clientCompany,
+      projectTitle: contractData.projectTitle,
+      amount: contractData.amount,
+      currency: contractData.currency,
+      startDate: contractData.startDate,
+      endDate: contractData.endDate,
+      createdDate: new Date().toISOString(),
+      pdfFileId: file.getId(),
+      pdfFileName: fileName,
+      pdfFileUrl: file.getUrl(),
+      status: 'GENERATED'
+    };
+    
+    const metadataFile = contractsFolder.createFile(
+      Utilities.newBlob(JSON.stringify(metadata, null, 2), 'application/json', metadataFileName)
+    );
     
     logActivity('CONTRACT_GENERATED', `Generated contract for ${contractData.clientName}`, file.getId());
     
@@ -780,7 +876,10 @@ function generateContract(contractData) {
       success: true,
       fileName: fileName,
       fileId: file.getId(),
-      fileUrl: file.getUrl()
+      fileUrl: file.getUrl(),
+      metadataFileId: metadataFile.getId(),
+      metadataFileUrl: metadataFile.getUrl(),
+      contractId: metadata.contractId
     };
     
   } catch (error) {
@@ -934,8 +1033,33 @@ function createDataBackup() {
     // Save to Drive
     const rootFolder = getRootFolder();
     const backupFolder = createSubfolder(rootFolder, 'Backups');
-    const fileName = `FreelancerData_Backup_${new Date().toISOString().split('T')[0]}.json`;
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T');
+    const fileName = `FreelancerData_Backup_${timestamp[0]}_${timestamp[1].split('.')[0]}.json`;
     const file = backupFolder.createFile(Utilities.newBlob(jsonData, 'application/json', fileName));
+    
+    // Create summary file
+    const summaryData = {
+      backupDate: new Date().toISOString(),
+      fileName: fileName,
+      fileId: file.getId(),
+      fileUrl: file.getUrl(),
+      backupSize: jsonData.length,
+      sheetsBackedUp: Object.keys(allData).filter(key => key !== 'metadata').length,
+      sheets: Object.keys(allData).filter(key => key !== 'metadata'),
+      recordCounts: {}
+    };
+    
+    // Add record counts for each sheet
+    Object.keys(allData).forEach(sheetName => {
+      if (sheetName !== 'metadata' && allData[sheetName].data) {
+        summaryData.recordCounts[sheetName] = allData[sheetName].data.length;
+      }
+    });
+    
+    const summaryFileName = `Backup_Summary_${timestamp[0]}_${timestamp[1].split('.')[0]}.json`;
+    const summaryFile = backupFolder.createFile(
+      Utilities.newBlob(JSON.stringify(summaryData, null, 2), 'application/json', summaryFileName)
+    );
     
     logActivity('DATA_BACKUP', `Created data backup: ${fileName}`, file.getId());
     
@@ -943,8 +1067,11 @@ function createDataBackup() {
       success: true,
       fileName: fileName,
       fileId: file.getId(),
+      fileUrl: file.getUrl(),
+      summaryFileId: summaryFile.getId(),
+      summaryFileUrl: summaryFile.getUrl(),
       backupSize: jsonData.length,
-      sheetsBackedUp: Object.keys(allData).length - 1
+      sheetsBackedUp: Object.keys(allData).filter(key => key !== 'metadata').length
     };
     
   } catch (error) {
