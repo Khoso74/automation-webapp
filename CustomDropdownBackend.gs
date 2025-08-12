@@ -4,26 +4,26 @@
  */
 
 // Configuration - Update these with your Google Sheet ID and folder ID
-const CONFIG = {
+const DROPDOWN_CONFIG = {
   SHEET_ID: '1R1C4sXK550SHszOm4DOEUWQE1N0o84MfwFRljs9QGug', // Your Google Sheet ID
   DRIVE_FOLDER_ID: '13kL2PLSdrB7eL7D3ErjHbURjcHJ35OtG' // Your Google Drive folder ID
 };
 
-// Sheet tab names
-const SHEETS = {
+// Sheet tab names for dropdown
+const DROPDOWN_SHEETS = {
   CLIENTS: 'Clients',
   PROPOSALS: 'Proposals'
 };
 
 /**
- * Get the main spreadsheet
+ * Get the main spreadsheet for dropdown
  */
-function getSpreadsheet() {
+function getDropdownSpreadsheet() {
   try {
-    return SpreadsheetApp.openById(CONFIG.SHEET_ID);
+    return SpreadsheetApp.openById(DROPDOWN_CONFIG.SHEET_ID);
   } catch (error) {
     console.error('Error accessing spreadsheet:', error);
-    throw new Error('Cannot access spreadsheet. Check SHEET_ID in CONFIG.');
+    throw new Error('Cannot access spreadsheet. Check SHEET_ID in DROPDOWN_CONFIG.');
   }
 }
 
@@ -35,8 +35,8 @@ function getAllClients() {
   try {
     console.log('🔄 Fetching all clients from sheet...');
     
-    const spreadsheet = getSpreadsheet();
-    const clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
+    const spreadsheet = getDropdownSpreadsheet();
+    const clientsSheet = spreadsheet.getSheetByName(DROPDOWN_SHEETS.CLIENTS);
     
     if (!clientsSheet) {
       console.error('Clients sheet not found');
@@ -129,13 +129,13 @@ function createProposal(proposalData) {
   try {
     console.log('🔄 Creating proposal with data:', proposalData);
     
-    const spreadsheet = getSpreadsheet();
-    let proposalsSheet = spreadsheet.getSheetByName(SHEETS.PROPOSALS);
+    const spreadsheet = getDropdownSpreadsheet();
+    let proposalsSheet = spreadsheet.getSheetByName(DROPDOWN_SHEETS.PROPOSALS);
     
     // Create Proposals sheet if it doesn't exist
     if (!proposalsSheet) {
       console.log('Creating Proposals sheet...');
-      proposalsSheet = spreadsheet.insertSheet(SHEETS.PROPOSALS);
+      proposalsSheet = spreadsheet.insertSheet(DROPDOWN_SHEETS.PROPOSALS);
       
       // Add headers
       const headers = [
@@ -216,7 +216,7 @@ function testBackendConnection() {
   try {
     console.log('🧪 Testing backend connection...');
     
-    const spreadsheet = getSpreadsheet();
+    const spreadsheet = getDropdownSpreadsheet();
     const sheetCount = spreadsheet.getSheets().length;
     
     return {
@@ -273,13 +273,13 @@ function initializeSheets() {
   try {
     console.log('🔄 Initializing sheets...');
     
-    const spreadsheet = getSpreadsheet();
+    const spreadsheet = getDropdownSpreadsheet();
     
     // Check and create Clients sheet
-    let clientsSheet = spreadsheet.getSheetByName(SHEETS.CLIENTS);
+    let clientsSheet = spreadsheet.getSheetByName(DROPDOWN_SHEETS.CLIENTS);
     if (!clientsSheet) {
       console.log('Creating Clients sheet...');
-      clientsSheet = spreadsheet.insertSheet(SHEETS.CLIENTS);
+              clientsSheet = spreadsheet.insertSheet(DROPDOWN_SHEETS.CLIENTS);
       
       // Add headers for Clients sheet
       const clientHeaders = [
@@ -313,10 +313,10 @@ function initializeSheets() {
     }
     
     // Check and create Proposals sheet
-    let proposalsSheet = spreadsheet.getSheetByName(SHEETS.PROPOSALS);
+    let proposalsSheet = spreadsheet.getSheetByName(DROPDOWN_SHEETS.PROPOSALS);
     if (!proposalsSheet) {
       console.log('Creating Proposals sheet...');
-      proposalsSheet = spreadsheet.insertSheet(SHEETS.PROPOSALS);
+              proposalsSheet = spreadsheet.insertSheet(DROPDOWN_SHEETS.PROPOSALS);
       
       // Add headers for Proposals sheet
       const proposalHeaders = [
@@ -346,8 +346,8 @@ function initializeSheets() {
       success: true,
       message: 'Sheets initialized successfully',
       sheetsCreated: {
-        clients: !spreadsheet.getSheetByName(SHEETS.CLIENTS),
-        proposals: !spreadsheet.getSheetByName(SHEETS.PROPOSALS)
+        clients: !spreadsheet.getSheetByName(DROPDOWN_SHEETS.CLIENTS),
+        proposals: !spreadsheet.getSheetByName(DROPDOWN_SHEETS.PROPOSALS)
       }
     };
     
@@ -362,8 +362,8 @@ function initializeSheets() {
  */
 function getProposalStats() {
   try {
-    const spreadsheet = getSpreadsheet();
-    const proposalsSheet = spreadsheet.getSheetByName(SHEETS.PROPOSALS);
+    const spreadsheet = getDropdownSpreadsheet();
+    const proposalsSheet = spreadsheet.getSheetByName(DROPDOWN_SHEETS.PROPOSALS);
     
     if (!proposalsSheet) {
       return {
