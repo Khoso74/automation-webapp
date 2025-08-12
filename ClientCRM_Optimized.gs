@@ -357,6 +357,48 @@ function findColumnIndex(headers, possibleNames) {
 }
 
 /**
+ * MISSING FUNCTION - This was referenced but not defined!
+ * Optimized version that uses getAllClients() as base
+ */
+function getClientsForDropdown() {
+  try {
+    console.log('🔄 getClientsForDropdown called...');
+    
+    // Use the existing getAllClients function
+    const allClients = getAllClients();
+    
+    if (!allClients || allClients.length === 0) {
+      console.log('❌ No clients returned from getAllClients');
+      return [];
+    }
+    
+    // Filter and format for dropdown
+    const dropdownClients = allClients
+      .filter(client => {
+        // Only active clients
+        const isActive = !client.Status || client.Status.toLowerCase() !== 'inactive';
+        return isActive && (client.ClientID || client.CompanyName);
+      })
+      .map(client => ({
+        ClientID: client.ClientID,
+        CompanyName: client.CompanyName,
+        ContactName: client.ContactName,
+        Status: client.Status || 'Active'
+      }));
+    
+    console.log(`✅ getClientsForDropdown processed ${dropdownClients.length} clients`);
+    console.log('Sample dropdown client:', dropdownClients[0]);
+    
+    return dropdownClients;
+    
+  } catch (error) {
+    console.error('❌ getClientsForDropdown failed:', error);
+    console.error('Error stack:', error.stack);
+    return [];
+  }
+}
+
+/**
  * OPTIMIZED: Get all clients with better performance
  */
 function getAllClients() {

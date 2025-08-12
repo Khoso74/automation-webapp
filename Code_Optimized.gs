@@ -1261,6 +1261,60 @@ function testDropdownDataIssue() {
 }
 
 /**
+ * Quick Test - Just for Missing Function
+ */
+function testMissingFunction() {
+  try {
+    console.log('🧪 TESTING MISSING FUNCTION FIX...');
+    
+    // Test the function that was missing
+    console.log('Testing getClientsForDropdown...');
+    const dropdownClients = getClientsForDropdown();
+    
+    console.log('✅ getClientsForDropdown result:', dropdownClients);
+    console.log(`✅ Found ${dropdownClients ? dropdownClients.length : 0} clients`);
+    
+    if (dropdownClients && dropdownClients.length > 0) {
+      console.log('✅ Sample client:', dropdownClients[0]);
+      
+      // Test dropdown format
+      const dropdownOptions = dropdownClients.map(client => {
+        const displayName = `${client.CompanyName} (${client.ClientID})`;
+        return {
+          value: client.ClientID,
+          text: displayName
+        };
+      });
+      
+      console.log('✅ Dropdown options:');
+      dropdownOptions.forEach((option, index) => {
+        console.log(`   ${index + 1}. "${option.text}"`);
+      });
+      
+      return {
+        success: true,
+        clientsFound: dropdownClients.length,
+        dropdownOptions: dropdownOptions,
+        message: 'Function fix successful!'
+      };
+    } else {
+      return {
+        success: false,
+        message: 'Function exists but returns no data'
+      };
+    }
+    
+  } catch (error) {
+    console.error('❌ Missing function test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      message: 'Function fix failed'
+    };
+  }
+}
+
+/**
  * Master Test Function - Run All Tests
  */
 function runAllTests() {
