@@ -1906,6 +1906,22 @@
                             <span class="action-btn-desc">Check acceptance page</span>
                         </div>
                     </button>
+
+                    <button class="action-btn" onclick="testDirectDoGet()" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                        <span class="action-btn-icon">🎯</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Test DIRECT doGet</span>
+                            <span class="action-btn-desc">New serialization fix</span>
+                        </div>
+                    </button>
+
+                    <button class="action-btn" onclick="verifyCompleteFix()" style="background: linear-gradient(135deg, #fd7e14, #e34c26);">
+                        <span class="action-btn-icon">🔧</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">VERIFY FIX</span>
+                            <span class="action-btn-desc">Complete verification</span>
+                        </div>
+                    </button>
                     
                     <button class="action-btn" onclick="testJavaScriptFreeFlow()" style="background: linear-gradient(135deg, #28a745, #218838);">
                         <span class="action-btn-icon">🔧</span>
@@ -5563,6 +5579,126 @@
                          showErrorMessage(`❌ CRITICAL: Page Generation Test Failed: ${error.message}`);
                      })
                      .testAcceptancePageGeneration();
+             }
+             
+             // NEW: Test Direct doGet Implementation (SERIALIZATION FIX)
+             function testDirectDoGet() {
+                 console.log('🎯 Testing DIRECT doGet implementation...');
+                 
+                 removeMessages();
+                 showMessage('🎯 Testing new direct doGet implementation that fixes serialization...', 'info');
+                 
+                 google.script.run
+                     .withSuccessHandler(function(result) {
+                         console.log('🎯 Direct doGet test result:', result);
+                         
+                         if (result.success) {
+                             let message = `🎯 DIRECT doGet TEST SUCCESSFUL!<br><br>`;
+                             
+                             message += `<strong>🔧 FIX STATUS:</strong><br>`;
+                             message += `<span style="color: #28a745; font-weight: bold; font-size: 16px;">${result.fixStatus}</span><br><br>`;
+                             
+                             message += `<strong>📊 Test Results:</strong><br>`;
+                             message += `✅ Test Proposal ID: ${result.testProposalId}<br>`;
+                             message += `📏 HTML Length: ${result.htmlLength} characters<br>`;
+                             message += `✅ Has Proposal Title: ${result.contentVerifications.hasProposalTitle}<br>`;
+                             message += `✅ Has Accept Button: ${result.contentVerifications.hasAcceptButton}<br>`;
+                             message += `✅ Has Form: ${result.contentVerifications.hasForm}<br>`;
+                             message += `✅ Has Proposal ID: ${result.contentVerifications.hasProposalId}<br><br>`;
+                             
+                             message += `<strong>🚀 Deployment Instructions:</strong><br>`;
+                             result.instructions.forEach(instruction => {
+                                 message += `<span style="color: #007bff;">${instruction}</span><br>`;
+                             });
+                             
+                             message += `<br><span style="color: #28a745; font-weight: bold; font-size: 18px;">✅ SERIALIZATION ERROR SHOULD BE FIXED!</span><br>`;
+                             message += `<span style="color: #6c757d;">No more "dropping postMessage.. deserialize threw error"</span>`;
+                             
+                             showSuccessMessage(message);
+                         } else {
+                             showErrorMessage(`❌ Direct doGet Test Failed: ${result.error || 'Unknown error'}`);
+                         }
+                     })
+                     .withFailureHandler(function(error) {
+                         console.error('❌ Direct doGet test failed:', error);
+                         showErrorMessage(`❌ CRITICAL: Direct doGet Test Failed: ${error.message}`);
+                     })
+                     .testDirectDoGetImplementation();
+             }
+             
+             // NEW: Verify Complete Serialization Fix
+             function verifyCompleteFix() {
+                 console.log('🔧 Verifying complete serialization fix...');
+                 
+                 removeMessages();
+                 showMessage('🔧 Running complete serialization fix verification...', 'info');
+                 
+                 google.script.run
+                     .withSuccessHandler(function(result) {
+                         console.log('🔧 Complete fix verification result:', result);
+                         
+                         if (result.success) {
+                             let message = `🔧 COMPLETE FIX VERIFICATION SUCCESSFUL!<br><br>`;
+                             
+                             message += `<strong>🎯 FIX STATUS:</strong><br>`;
+                             message += `<span style="color: #28a745; font-weight: bold; font-size: 18px;">${result.fixStatus}</span><br><br>`;
+                             
+                             message += `<strong>📊 Test Suite Results:</strong><br>`;
+                             
+                             // doGet Test
+                             if (result.results.doGetTest && result.results.doGetTest.success) {
+                                 message += `✅ <strong>Direct doGet Test:</strong> PASSED<br>`;
+                                 message += `&nbsp;&nbsp;&nbsp;📋 Test Proposal: ${result.results.doGetTest.testProposalId}<br>`;
+                                 message += `&nbsp;&nbsp;&nbsp;📏 HTML Generated: ${result.results.doGetTest.htmlLength} chars<br>`;
+                             } else {
+                                 message += `❌ <strong>Direct doGet Test:</strong> FAILED<br>`;
+                                 message += `&nbsp;&nbsp;&nbsp;⚠️ Error: ${result.results.doGetTest ? result.results.doGetTest.error : 'Unknown'}<br>`;
+                             }
+                             
+                             // URL Test
+                             if (result.results.urlTest && result.results.urlTest.success) {
+                                 message += `✅ <strong>URL Generation Test:</strong> PASSED<br>`;
+                                 message += `&nbsp;&nbsp;&nbsp;🔗 Test URL Generated Successfully<br>`;
+                             } else {
+                                 message += `❌ <strong>URL Generation Test:</strong> FAILED<br>`;
+                             }
+                             
+                             // Connectivity Test
+                             if (result.results.connectivityTest && result.results.connectivityTest.success) {
+                                 message += `✅ <strong>System Connectivity:</strong> PASSED<br>`;
+                                 message += `&nbsp;&nbsp;&nbsp;📊 ${result.results.connectivityTest.spreadsheetName}<br>`;
+                                 message += `&nbsp;&nbsp;&nbsp;📁 ${result.results.connectivityTest.driveFolder}<br><br>`;
+                             } else {
+                                 message += `❌ <strong>System Connectivity:</strong> FAILED<br><br>`;
+                             }
+                             
+                             if (result.fixStatus === 'VERIFIED') {
+                                 message += `<div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px; margin: 10px 0;">`;
+                                 message += `<span style="color: #155724; font-weight: bold; font-size: 20px;">🎉 SERIALIZATION FIX VERIFIED!</span><br>`;
+                                 message += `<span style="color: #155724;">Ready for deployment! The "dropping postMessage.. deserialize threw error" should be completely resolved.</span>`;
+                                 message += `</div>`;
+                                 
+                                 message += `<br><strong>🚀 Final Deployment Steps:</strong><br>`;
+                                 message += `<span style="color: #007bff;">1. Go to Google Apps Script</span><br>`;
+                                 message += `<span style="color: #007bff;">2. Archive current web app deployment</span><br>`;
+                                 message += `<span style="color: #007bff;">3. Create NEW deployment with updated code</span><br>`;
+                                 message += `<span style="color: #007bff;">4. Test proposal acceptance - error should be gone!</span><br>`;
+                             } else {
+                                 message += `<div style="background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px; margin: 10px 0;">`;
+                                 message += `<span style="color: #721c24; font-weight: bold;">⚠️ Some tests failed - review above</span>`;
+                                 message += `</div>`;
+                             }
+                             
+                             showSuccessMessage(message);
+                         } else {
+                             showErrorMessage(`❌ Complete Fix Verification Failed: ${result.message || result.error || 'Unknown error'}`);
+                         }
+                     })
+                     .withFailureHandler(function(error) {
+                         console.error('❌ Complete fix verification failed:', error);
+                         showErrorMessage(`❌ CRITICAL: Complete Fix Verification Failed: ${error.message}`);
+                     })
+                     .verifySerializationFix();
              }
              
              // Test JavaScript-Free Proposal Acceptance Flow
