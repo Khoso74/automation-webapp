@@ -1306,17 +1306,18 @@ function getProposalAcceptancePage(proposalId) {
           '<div class="amount">Investment: ' + proposal.Currency + ' ' + proposalAmount + '</div>' +
         '</div>' +
         
-        '<form id="acceptForm" method="post">' +
+        '<form id="acceptForm" method="post" action="">' +
           '<input type="hidden" name="action" value="acceptProposal">' +
           '<input type="hidden" name="proposalId" value="' + proposalId + '">' +
+          '<input type="hidden" name="clientSignature" value="Digital Acceptance">' +
           
           '<div style="margin: 20px 0;">' +
             '<label>' +
-              '<input type="checkbox" required> I agree to the terms and conditions outlined in this proposal' +
+              '<input type="checkbox" id="agreeCheckbox" required> I agree to the terms and conditions outlined in this proposal' +
             '</label>' +
           '</div>' +
           
-          '<button type="submit" class="accept-btn">Accept Proposal</button>' +
+          '<button type="submit" class="accept-btn" id="acceptBtn">Accept Proposal</button>' +
         '</form>' +
         
         '<div class="terms">' +
@@ -1325,45 +1326,57 @@ function getProposalAcceptancePage(proposalId) {
         '</div>' +
       '</div>' +
       
-      '<script>' +
-        'document.getElementById("acceptForm").onsubmit = function(e) {' +
-          'var submitBtn = document.querySelector(".accept-btn");' +
-          'submitBtn.textContent = "⏳ Processing your acceptance...";' +
-          'submitBtn.disabled = true;' +
-          'submitBtn.style.background = "#95a5a6";' +
-          
-          'var progressDiv = document.createElement("div");' +
-          'progressDiv.style.cssText = ' +
-            '"position: fixed; top: 0; left: 0; width: 100%; height: 100%; ' +
-            'background: rgba(0,0,0,0.8); display: flex; align-items: center; ' +
-            'justify-content: center; z-index: 9999; color: white; font-size: 18px; text-align: center;";' +
-          
-          'progressDiv.innerHTML = ' +
-            '"<div style=\\"background: white; color: #333; padding: 30px; border-radius: 10px; max-width: 400px;\\">" +' +
-              '"<div style=\\"font-size: 48px; margin-bottom: 20px;\\">⏳</div>" +' +
-              '"<h3>Processing Your Acceptance</h3>" +' +
-              '"<p>Please wait while we process your proposal acceptance...</p>" +' +
-              '"<div style=\\"margin: 20px 0;\\">" +' +
-                '"<div style=\\"width: 100%; height: 4px; background: #eee; border-radius: 2px; overflow: hidden;\\">" +' +
-                  '"<div style=\\"width: 0%; height: 100%; background: #27ae60; animation: progress 3s ease-in-out infinite;\\"></div>" +' +
-                '"</div>" +' +
-              '"</div>" +' +
-              '"<p style=\\"font-size: 14px; color: #666;\\">This usually takes just a few seconds...</p>" +' +
-            '"</div>" +' +
-            '"<style>@keyframes progress { 0% { width: 0%; } 50% { width: 70%; } 100% { width: 90%; } }</style>";' +
-          
-          'document.body.appendChild(progressDiv);' +
-          
-          'setTimeout(function() {' +
-            'if (document.body.contains(progressDiv)) {' +
-              'progressDiv.querySelector("h3").textContent = "Taking longer than expected...";' +
-              'progressDiv.querySelector("p").textContent = "Please wait, we are still processing your request.";' +
-            '}' +
-          '}, 10000);' +
-          
-          'return true;' +
-        '};' +
-      '</script>' +
+             '<script>' +
+         'console.log("Client acceptance page loaded for proposal: ' + proposalId + '");' +
+         
+         'document.getElementById("acceptForm").onsubmit = function(e) {' +
+           'console.log("Form submission started");' +
+           
+           'var checkbox = document.getElementById("agreeCheckbox");' +
+           'if (!checkbox.checked) {' +
+             'alert("Please agree to the terms and conditions before accepting.");' +
+             'e.preventDefault();' +
+             'return false;' +
+           '}' +
+           
+           'var submitBtn = document.getElementById("acceptBtn");' +
+           'var originalText = submitBtn.textContent;' +
+           'submitBtn.textContent = "⏳ Processing...";' +
+           'submitBtn.disabled = true;' +
+           'submitBtn.style.background = "#95a5a6";' +
+           
+           'console.log("Button disabled, form submitting...");' +
+           
+           'document.body.style.cursor = "wait";' +
+           
+           'var loadingMsg = document.createElement("div");' +
+           'loadingMsg.id = "loadingMessage";' +
+           'loadingMsg.style.cssText = "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); ' +
+             'background: rgba(0,0,0,0.9); color: white; padding: 20px; border-radius: 10px; z-index: 10000; ' +
+             'text-align: center; font-size: 18px;";' +
+           'loadingMsg.innerHTML = "<div>⏳ Processing your acceptance...</div><div style=\\"font-size: 14px; margin-top: 10px;\\">Please wait...</div>";' +
+           'document.body.appendChild(loadingMsg);' +
+           
+           'setTimeout(function() {' +
+             'if (document.getElementById("loadingMessage")) {' +
+               'loadingMsg.innerHTML = "<div>⏳ Still processing...</div><div style=\\"font-size: 14px; margin-top: 10px;\\">This may take a moment...</div>";' +
+             '}' +
+           '}, 3000);' +
+           
+           'setTimeout(function() {' +
+             'if (document.getElementById("loadingMessage")) {' +
+               'console.log("Form taking too long, possible issue");' +
+               'loadingMsg.innerHTML = "<div>❌ Taking longer than expected</div><div style=\\"font-size: 14px; margin-top: 10px;\\">Please contact support if this continues.</div>";' +
+             '}' +
+           '}, 15000);' +
+           
+           'return true;' +
+         '};' +
+         
+         'window.addEventListener("beforeunload", function() {' +
+           'console.log("Page is unloading");' +
+         '});' +
+       '</script>' +
     '</body>' +
     '</html>';
   

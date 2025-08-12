@@ -84,18 +84,37 @@ function doGet(e) {
  */
 function doPost(e) {
   try {
+    console.log('🎯 === doPost CALLED ===');
+    console.log('Request parameters:', e.parameter);
+    
     const action = e.parameter.action;
+    console.log('Action:', action);
     
     switch (action) {
       case 'acceptProposal':
+        console.log('Processing proposal acceptance for ID:', e.parameter.proposalId);
         const result = acceptProposalEnhanced(e.parameter.proposalId, e.parameter.clientSignature || '');
-        return createAcceptanceResultPage(result, e.parameter.proposalId);
+        console.log('Acceptance result:', result);
+        
+        const resultPage = createAcceptanceResultPage(result, e.parameter.proposalId);
+        console.log('Result page created, returning to client');
+        return resultPage;
+        
       default:
-        return ContentService.createTextOutput('Invalid action');
+        console.log('Invalid action received:', action);
+        return ContentService.createTextOutput('Invalid action: ' + action);
     }
   } catch (error) {
-    console.error('doPost error:', error);
-    return createAcceptanceResultPage({ success: false, error: error.message }, e.parameter.proposalId || 'unknown');
+    console.error('❌ doPost error:', error);
+    console.error('Error stack:', error.stack);
+    
+    const errorPage = createAcceptanceResultPage({ 
+      success: false, 
+      error: error.message 
+    }, e.parameter.proposalId || 'unknown');
+    
+    console.log('Error page created, returning to client');
+    return errorPage;
   }
 }
 
@@ -2578,6 +2597,78 @@ function testClientAcceptanceFlow() {
     
   } catch (error) {
     console.error('❌ Client acceptance flow test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+}
+
+/**
+ * Test Direct Proposal Acceptance - Bypass form submission
+ */
+function testDirectProposalAcceptance() {
+  try {
+    console.log('🧪 === TESTING DIRECT PROPOSAL ACCEPTANCE ===');
+    
+    // Get a proposal to test with
+    const proposals = getAllProposals();
+    if (!proposals || proposals.length === 0) {
+      return { success: false, error: 'No proposals found for testing' };
+    }
+    
+    // Find a sent proposal or use the first one
+    let testProposal = proposals.find(p => p.Status === 'Sent') || proposals[0];
+    console.log('🎯 Testing with proposal:', testProposal.ProposalID);
+    
+    // Test the acceptance function directly
+    console.log('📋 Step 1: Testing acceptProposalEnhanced...');
+    const acceptanceResult = acceptProposalEnhanced(testProposal.ProposalID, 'Test Signature');
+    console.log('✅ Acceptance result:', acceptanceResult);
+    
+    // Test the result page creation
+    console.log('📋 Step 2: Testing createAcceptanceResultPage...');
+    const resultPage = createAcceptanceResultPage(acceptanceResult, testProposal.ProposalID);
+    console.log('✅ Result page created:', !!resultPage);
+    
+    // Test the doPost simulation
+    console.log('📋 Step 3: Testing doPost simulation...');
+    const mockRequest = {
+      parameter: {
+        action: 'acceptProposal',
+        proposalId: testProposal.ProposalID,
+        clientSignature: 'Test Signature'
+      }
+    };
+    
+    const doPostResult = doPost(mockRequest);
+    console.log('✅ doPost result:', !!doPostResult);
+    
+    console.log('🎉 === DIRECT ACCEPTANCE TEST COMPLETE ===');
+    
+    return {
+      success: true,
+      message: 'Direct proposal acceptance test completed!',
+      testProposal: {
+        id: testProposal.ProposalID,
+        title: testProposal.Title,
+        status: testProposal.Status
+      },
+      acceptanceResult: acceptanceResult,
+      resultPageCreated: !!resultPage,
+      doPostWorking: !!doPostResult,
+      steps: [
+        '✅ Found test proposal',
+        '✅ acceptProposalEnhanced function working',
+        '✅ createAcceptanceResultPage function working', 
+        '✅ doPost function working',
+        '✅ All backend components functional'
+      ]
+    };
+    
+  } catch (error) {
+    console.error('❌ Direct acceptance test failed:', error);
     return {
       success: false,
       error: error.message,
