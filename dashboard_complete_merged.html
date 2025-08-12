@@ -1016,12 +1016,6 @@
                 <button class="action-btn" onclick="generateReports()">📊 Generate Reports</button>
             </div>
             
-            <!-- Debug Actions -->
-            <div class="quick-actions" style="margin-top: 20px; border-top: 2px dashed #ddd; padding-top: 20px;">
-                <button class="action-btn" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);" onclick="testDriveConnection()">🔍 Test Drive Connection</button>
-                <button class="action-btn" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);" onclick="testPdfSaving()">📄 Test PDF Generation</button>
-            </div>
-            
             <!-- Main Content Grid -->
             <div class="main-grid">
                 <!-- Recent Activity -->
@@ -1679,16 +1673,6 @@
         
         // Load main dashboard data
         function loadDashboardData() {
-            // Test Drive folder connection first
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    console.log('Drive connection test:', result);
-                })
-                .withFailureHandler(function(error) {
-                    console.error('Drive connection failed:', error);
-                })
-                .testConnections();
-                
             google.script.run
                 .withSuccessHandler(function(stats) {
                     displayStats(stats);
@@ -2355,28 +2339,6 @@
                  })
                  .withFailureHandler(showError)
                  .generateMonthlyReport();
-         }
-         
-         function testDriveConnection() {
-             google.script.run
-                 .withSuccessHandler(function(result) {
-                     alert('Drive Connection Test:\n' + result);
-                 })
-                 .withFailureHandler(function(error) {
-                     alert('Drive Test Failed:\n' + error);
-                 })
-                 .testConnections();
-         }
-         
-         function testPdfSaving() {
-             google.script.run
-                 .withSuccessHandler(function(result) {
-                     alert('PDF Test Result:\n' + result);
-                 })
-                 .withFailureHandler(function(error) {
-                     alert('PDF Test Failed:\n' + error);
-                 })
-                 .testPdfGeneration();
          }
 
         function loadToolsData() {
