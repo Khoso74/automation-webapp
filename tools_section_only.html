@@ -1,0 +1,534 @@
+<!-- Premium Tools Section - Add this to your existing dashboard.html -->
+
+<!-- Add this CSS in the <style> section of your existing dashboard.html -->
+<style>
+/* Premium Tools Styles - Add to existing CSS */
+.tools-section {
+    margin-top: 30px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.tools-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 15px;
+}
+
+.tools-title {
+    font-size: 1.8em;
+    font-weight: 600;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.tool-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    padding: 20px;
+    border-left: 4px solid;
+    transition: all 0.3s ease;
+}
+
+.tool-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.time-tracker { border-left-color: #28a745; }
+.expense-manager { border-left-color: #fd7e14; }
+.currency-converter { border-left-color: #20c997; }
+.analytics-tool { border-left-color: #6f42c1; }
+.contract-generator { border-left-color: #dc3545; }
+.backup-tool { border-left-color: #17a2b8; }
+
+.tool-icon {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.tool-title {
+    font-size: 1.2em;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2c3e50;
+}
+
+.tool-description {
+    color: #6c757d;
+    margin-bottom: 15px;
+    line-height: 1.4;
+    font-size: 0.9em;
+}
+
+.tool-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tool-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.tool-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+.time-display {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #28a745;
+    text-align: center;
+    margin: 10px 0;
+    font-family: 'Courier New', monospace;
+}
+
+.currency-form {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 8px;
+    align-items: end;
+    margin: 10px 0;
+}
+
+.currency-input {
+    padding: 8px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 0.9em;
+}
+
+.currency-result {
+    background: #e8f5e8;
+    padding: 12px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 8px;
+    font-size: 0.9em;
+}
+
+.expense-summary {
+    background: #fff3cd;
+    padding: 12px;
+    border-radius: 6px;
+    margin-top: 8px;
+    font-size: 0.9em;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+.status-active { background: #28a745; }
+
+@media (max-width: 768px) {
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+    .currency-form {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<!-- Add this HTML section after your existing quick actions or stats grid -->
+<div class="tools-section">
+    <div class="tools-header">
+        <h2 class="tools-title">🛠️ Premium Tools</h2>
+        <div>
+            <span class="status-indicator status-active"></span>
+            <small>Active</small>
+        </div>
+    </div>
+    
+    <div class="tools-grid">
+        <!-- Time Tracker -->
+        <div class="tool-card time-tracker">
+            <div class="tool-icon">⏱️</div>
+            <div class="tool-title">Time Tracker</div>
+            <div class="tool-description">
+                Track project time with automatic earnings calculation
+            </div>
+            <div class="time-display" id="timeDisplay">00:00:00</div>
+            <div class="tool-actions">
+                <button class="tool-btn btn-success" onclick="startTimer()">▶️ Start</button>
+                <button class="tool-btn btn-warning" onclick="stopTimer()">⏸️ Stop</button>
+            </div>
+        </div>
+        
+        <!-- Expense Manager -->
+        <div class="tool-card expense-manager">
+            <div class="tool-icon">💰</div>
+            <div class="tool-title">Expense Manager</div>
+            <div class="tool-description">
+                Track business expenses and generate reports
+            </div>
+            <div class="expense-summary" id="expenseSummary">
+                <div>Monthly: <strong>Rs. 0</strong></div>
+                <div>Categories: <strong>0</strong></div>
+            </div>
+            <div class="tool-actions">
+                <button class="tool-btn btn-primary" onclick="addExpenseQuick()">➕ Add</button>
+                <button class="tool-btn btn-secondary" onclick="viewExpenseReport()">📄 Report</button>
+            </div>
+        </div>
+        
+        <!-- Currency Converter -->
+        <div class="tool-card currency-converter">
+            <div class="tool-icon">💱</div>
+            <div class="tool-title">Currency Converter</div>
+            <div class="tool-description">
+                PKR to international currency conversion
+            </div>
+            <div class="currency-form">
+                <div>
+                    <input type="number" class="currency-input" id="fromAmount" placeholder="Amount">
+                    <select class="currency-input" id="fromCurrency">
+                        <option value="PKR">PKR</option>
+                        <option value="USD">USD</option>
+                    </select>
+                </div>
+                <div style="text-align: center; font-size: 1.2em;">→</div>
+                <div>
+                    <select class="currency-input" id="toCurrency">
+                        <option value="USD">USD</option>
+                        <option value="PKR">PKR</option>
+                    </select>
+                </div>
+            </div>
+            <div class="currency-result" id="conversionResult">
+                Enter amount
+            </div>
+        </div>
+        
+        <!-- Business Analytics -->
+        <div class="tool-card analytics-tool">
+            <div class="tool-icon">📊</div>
+            <div class="tool-title">Business Analytics</div>
+            <div class="tool-description">
+                Revenue trends and business insights
+            </div>
+            <div class="currency-result" id="analyticsPreview">
+                📈 Loading...
+            </div>
+            <div class="tool-actions">
+                <button class="tool-btn btn-primary" onclick="openAnalyticsModal()">📊 View</button>
+                <button class="tool-btn btn-secondary" onclick="exportReport()">📤 Export</button>
+            </div>
+        </div>
+        
+        <!-- Contract Generator -->
+        <div class="tool-card contract-generator">
+            <div class="tool-icon">📋</div>
+            <div class="tool-title">Contract Generator</div>
+            <div class="tool-description">
+                Professional agreements with Pakistani compliance
+            </div>
+            <div class="tool-actions">
+                <button class="tool-btn btn-primary" onclick="openContractModal()">📝 New</button>
+                <button class="tool-btn btn-secondary" onclick="viewTemplates()">📄 Templates</button>
+            </div>
+        </div>
+        
+        <!-- Data Backup -->
+        <div class="tool-card backup-tool">
+            <div class="tool-icon">💾</div>
+            <div class="tool-title">Data Backup</div>
+            <div class="tool-description">
+                Secure backup of all business data
+            </div>
+            <div class="tool-actions">
+                <button class="tool-btn btn-primary" onclick="createBackup()">💾 Backup</button>
+                <button class="tool-btn btn-secondary" onclick="scheduleBackup()">🔄 Schedule</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add this JavaScript at the end of your existing script section -->
+<script>
+// Premium Tools JavaScript - Add to existing script section
+
+// Global variables for tools
+let timeInterval;
+let startTime;
+let activeSession = null;
+
+// Initialize tools when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof loadActiveSession === 'undefined') {
+        loadActiveSession();
+        loadExpenseSummary();
+        loadAnalyticsPreview();
+    }
+});
+
+// Time Tracking Functions
+function startTimer() {
+    const projectId = prompt('Project ID (optional):') || 'GENERAL';
+    const taskDescription = prompt('Task description:') || 'General Work';
+    
+    google.script.run
+        .withSuccessHandler(function(result) {
+            if (result.success) {
+                activeSession = result.sessionId;
+                startTime = new Date(result.startTime);
+                startTimeDisplay();
+                alert('Time tracking started!');
+            } else {
+                alert('Error: ' + result.error);
+            }
+        })
+        .withFailureHandler(function(error) {
+            alert('Error: ' + error);
+        })
+        .startTimeTracking(projectId, taskDescription);
+}
+
+function stopTimer() {
+    if (!activeSession) {
+        alert('No active session found');
+        return;
+    }
+    
+    google.script.run
+        .withSuccessHandler(function(result) {
+            if (result.success) {
+                stopTimeDisplay();
+                activeSession = null;
+                alert(`Session completed: ${result.duration} hours, Rs. ${result.amount}`);
+            } else {
+                alert('Error: ' + result.error);
+            }
+        })
+        .withFailureHandler(function(error) {
+            alert('Error: ' + error);
+        })
+        .stopTimeTracking(activeSession);
+}
+
+function startTimeDisplay() {
+    timeInterval = setInterval(updateTimeDisplay, 1000);
+}
+
+function stopTimeDisplay() {
+    clearInterval(timeInterval);
+    document.getElementById('timeDisplay').textContent = '00:00:00';
+}
+
+function updateTimeDisplay() {
+    if (startTime) {
+        const now = new Date();
+        const elapsed = now - startTime;
+        const hours = Math.floor(elapsed / 3600000);
+        const minutes = Math.floor((elapsed % 3600000) / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        
+        document.getElementById('timeDisplay').textContent = 
+            `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+}
+
+function loadActiveSession() {
+    google.script.run
+        .withSuccessHandler(function(session) {
+            if (session) {
+                activeSession = session.sessionId;
+                startTime = new Date(session.startTime);
+                startTimeDisplay();
+            }
+        })
+        .withFailureHandler(function(error) {
+            console.log('No active session');
+        })
+        .getActiveTimeSession();
+}
+
+// Expense Management
+function loadExpenseSummary() {
+    google.script.run
+        .withSuccessHandler(function(summary) {
+            const summaryDiv = document.getElementById('expenseSummary');
+            if (summaryDiv) {
+                summaryDiv.innerHTML = `
+                    <div>Monthly: <strong>Rs. ${summary.monthlyExpenses.toLocaleString()}</strong></div>
+                    <div>Categories: <strong>${Object.keys(summary.categories).length}</strong></div>
+                `;
+            }
+        })
+        .withFailureHandler(function(error) {
+            console.error('Error loading expenses:', error);
+        })
+        .getExpensesSummary();
+}
+
+function addExpenseQuick() {
+    const amount = prompt('Amount (PKR):');
+    const category = prompt('Category (Software/Marketing/Travel/Other):') || 'Other';
+    const description = prompt('Description:') || 'Business Expense';
+    
+    if (amount && !isNaN(amount)) {
+        google.script.run
+            .withSuccessHandler(function(result) {
+                if (result.success) {
+                    alert('Expense added successfully!');
+                    loadExpenseSummary();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            })
+            .withFailureHandler(function(error) {
+                alert('Error: ' + error);
+            })
+            .addExpense({
+                amount: parseFloat(amount),
+                category: category,
+                description: description,
+                currency: 'PKR',
+                date: new Date()
+            });
+    }
+}
+
+// Currency Conversion
+function convertCurrency() {
+    const amount = parseFloat(document.getElementById('fromAmount').value);
+    const fromCurrency = document.getElementById('fromCurrency').value;
+    const toCurrency = document.getElementById('toCurrency').value;
+    
+    if (!amount || amount <= 0) {
+        document.getElementById('conversionResult').textContent = 'Enter valid amount';
+        return;
+    }
+    
+    document.getElementById('conversionResult').innerHTML = '🔄 Converting...';
+    
+    google.script.run
+        .withSuccessHandler(function(result) {
+            if (result.success) {
+                document.getElementById('conversionResult').innerHTML = `
+                    <strong>${amount.toLocaleString()} ${fromCurrency}</strong><br>
+                    = <strong>${result.convertedAmount.toLocaleString()} ${toCurrency}</strong>
+                `;
+            } else {
+                document.getElementById('conversionResult').textContent = 'Conversion failed';
+            }
+        })
+        .withFailureHandler(function(error) {
+            document.getElementById('conversionResult').textContent = 'Conversion failed';
+        })
+        .convertCurrency(amount, fromCurrency, toCurrency);
+}
+
+// Analytics Preview
+function loadAnalyticsPreview() {
+    google.script.run
+        .withSuccessHandler(function(analytics) {
+            const preview = document.getElementById('analyticsPreview');
+            if (preview && analytics) {
+                const growth = analytics.revenue.growth || 0;
+                preview.innerHTML = `📈 Revenue: ${growth > 0 ? '+' : ''}${growth}%`;
+            }
+        })
+        .withFailureHandler(function(error) {
+            console.error('Analytics error:', error);
+        })
+        .getBusinessAnalytics();
+}
+
+// Backup Function
+function createBackup() {
+    const btn = event.target;
+    btn.innerHTML = '⏳ Creating...';
+    btn.disabled = true;
+    
+    google.script.run
+        .withSuccessHandler(function(result) {
+            btn.innerHTML = '💾 Backup';
+            btn.disabled = false;
+            
+            if (result.success) {
+                alert(`Backup created: ${result.fileName}`);
+            } else {
+                alert('Backup failed: ' + result.error);
+            }
+        })
+        .withFailureHandler(function(error) {
+            btn.innerHTML = '💾 Backup';
+            btn.disabled = false;
+            alert('Backup failed');
+        })
+        .createDataBackup();
+}
+
+// Auto-convert currency when inputs change
+document.addEventListener('DOMContentLoaded', function() {
+    const fromAmount = document.getElementById('fromAmount');
+    const fromCurrency = document.getElementById('fromCurrency');
+    const toCurrency = document.getElementById('toCurrency');
+    
+    if (fromAmount) {
+        fromAmount.addEventListener('input', function() {
+            if (this.value) {
+                setTimeout(convertCurrency, 500);
+            }
+        });
+    }
+    
+    if (fromCurrency) fromCurrency.addEventListener('change', convertCurrency);
+    if (toCurrency) toCurrency.addEventListener('change', convertCurrency);
+});
+
+// Placeholder functions for modal-based tools
+function openAnalyticsModal() {
+    alert('Full analytics modal - integrate with your existing modal system');
+}
+
+function openContractModal() {
+    alert('Contract generator modal - integrate with your existing modal system');
+}
+
+function viewExpenseReport() {
+    alert('Expense report modal - integrate with your existing modal system');
+}
+
+function exportReport() {
+    alert('Export functionality - to be implemented');
+}
+
+function viewTemplates() {
+    alert('Contract templates - to be implemented');
+}
+
+function scheduleBackup() {
+    alert('Backup scheduling - to be implemented');
+}
+</script>
