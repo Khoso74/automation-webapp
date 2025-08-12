@@ -1030,87 +1030,183 @@ function extractFileIdFromUrl(url) {
 }
 
 /**
- * Create project from accepted proposal
+ * Create project from accepted proposal with enhanced error handling
  */
 function createProjectFromProposal(proposal) {
-  const projectId = generateId('PROJ');
-  
-  const spreadsheet = getSpreadsheet();
-  const projectsSheet = spreadsheet.getSheetByName(SHEETS.PROJECTS);
-  
-  // Create project folder
-  const projectFolder = createProjectFolder(projectId, proposal.Title, proposal.ClientID);
-  
-  const newProject = [
-    projectId,
-    proposal.ProposalID,
-    proposal.ClientID,
-    proposal.Title,
-    'Planning', // Initial status
-    new Date(), // Start date
-    '', // Due date (to be set later)
-    '', // Completion date
-    projectFolder.getId(),
-    `Created from accepted proposal ${proposal.ProposalID}`
-  ];
-  
-  projectsSheet.appendRow(newProject);
-  
-  logActivity('Project', `Project created from proposal: ${proposal.Title}`, projectId);
-  
-  return { success: true, projectId: projectId };
+  try {
+    console.log('🚀 === CREATING PROJECT FROM PROPOSAL ===');
+    console.log('Proposal:', proposal.Title);
+    console.log('Client ID:', proposal.ClientID);
+    
+    const projectId = generateId('PROJ');
+    console.log('✅ Generated Project ID:', projectId);
+    
+    const spreadsheet = getSpreadsheet();
+    const projectsSheet = spreadsheet.getSheetByName(SHEETS.PROJECTS);
+    console.log('✅ Projects sheet accessed');
+    
+    // Create project folder with error handling
+    let projectFolderId = '';
+    let projectFolderUrl = '';
+    
+    try {
+      console.log('📁 Creating project folder...');
+      const projectFolder = createProjectFolder(projectId, proposal.Title, proposal.ClientID);
+      projectFolderId = projectFolder.getId();
+      projectFolderUrl = projectFolder.getUrl();
+      console.log('✅ Project folder created:', projectFolderId);
+    } catch (folderError) {
+      console.error('⚠️ Project folder creation failed:', folderError.message);
+      console.log('⚠️ Continuing with project creation without folder...');
+      projectFolderId = 'ERROR_CREATING_FOLDER';
+      projectFolderUrl = 'Folder creation failed';
+    }
+    
+    const newProject = [
+      projectId,
+      proposal.ProposalID,
+      proposal.ClientID,
+      proposal.Title,
+      'Planning', // Initial status
+      new Date(), // Start date
+      '', // Due date (to be set later)
+      '', // Completion date
+      projectFolderId,
+      `Created from accepted proposal ${proposal.ProposalID}${projectFolderId === 'ERROR_CREATING_FOLDER' ? ' (Folder creation failed)' : ''}`
+    ];
+    
+    console.log('📊 Adding project to sheet...');
+    projectsSheet.appendRow(newProject);
+    console.log('✅ Project added to sheet');
+    
+    logActivity('Project', `Project created from proposal: ${proposal.Title}`, projectId);
+    console.log('📝 Activity logged');
+    
+    console.log('🎉 === PROJECT CREATION COMPLETE ===');
+    return { 
+      success: true, 
+      projectId: projectId,
+      projectFolderId: projectFolderId,
+      projectFolderUrl: projectFolderUrl,
+      folderCreated: projectFolderId !== 'ERROR_CREATING_FOLDER'
+    };
+    
+  } catch (error) {
+    console.error('❌ === PROJECT CREATION ERROR ===');
+    console.error('Error creating project from proposal:', error);
+    console.error('Error stack:', error.stack);
+    
+    return { 
+      success: false, 
+      error: error.message,
+      stack: error.stack
+    };
+  }
 }
 
 /**
- * Create project folder in Drive
+ * Create project folder in Drive with enhanced error handling
  */
 function createProjectFolder(projectId, projectTitle, clientId) {
-  const rootFolderId = PropertiesService.getScriptProperties().getProperty('ROOT_FOLDER_ID');
-  const rootFolder = DriveApp.getFolderById(rootFolderId);
-  
-  // Get projects folder
-  const projectsFolder = createSubfolder(rootFolder, 'Projects');
-  
-  // Create project folder
-  const folderName = `${projectId} - ${projectTitle}`;
-  const projectFolder = projectsFolder.createFolder(folderName);
-  
-  // Create project subfolders
-  const subfolders = ['Documents', 'Assets', 'Deliverables', 'Communications'];
-  subfolders.forEach(subfolder => {
-    projectFolder.createFolder(subfolder);
-  });
-  
-  // Also create shortcut in client folder
   try {
-    const clientFolder = getClientFolder(clientId);
-    if (clientFolder) {
-      const clientProjectsFolder = createSubfolder(clientFolder, 'Projects');
-      // Create a shortcut to the project folder
-      DriveApp.createShortcut(projectFolder.getId()).moveTo(clientProjectsFolder);
+    console.log('🚀 === CREATING PROJECT FOLDER ===');
+    console.log('Project ID:', projectId);
+    console.log('Project Title:', projectTitle);
+    console.log('Client ID:', clientId);
+    
+    // Get root folder with enhanced error handling
+    const rootFolder = getRootFolder();
+    console.log('✅ Root folder accessed:', rootFolder.getName());
+    
+    // Get projects folder
+    const projectsFolder = createSubfolder(rootFolder, 'Projects');
+    console.log('✅ Projects folder accessed:', projectsFolder.getName());
+    
+    // Create project folder with safe name
+    const safeTitle = projectTitle.replace(/[^a-zA-Z0-9\s-_]/g, '').trim();
+    const folderName = `${projectId} - ${safeTitle}`;
+    console.log('📁 Creating project folder:', folderName);
+    
+    const projectFolder = projectsFolder.createFolder(folderName);
+    console.log('✅ Project folder created:', projectFolder.getName());
+    
+    // Create project subfolders
+    const subfolders = ['Documents', 'Assets', 'Deliverables', 'Communications'];
+    console.log('📁 Creating project subfolders...');
+    subfolders.forEach(subfolder => {
+      projectFolder.createFolder(subfolder);
+      console.log(`  ✅ Created: ${subfolder}`);
+    });
+    
+    // Also create shortcut in client folder
+    try {
+      console.log('🔗 Creating shortcut in client folder...');
+      const clientFolder = getClientFolder(clientId);
+      if (clientFolder) {
+        const clientProjectsFolder = createSubfolder(clientFolder, 'Projects');
+        // Create a shortcut to the project folder
+        DriveApp.createShortcut(projectFolder.getId()).moveTo(clientProjectsFolder);
+        console.log('✅ Shortcut created in client Projects folder');
+      } else {
+        console.log('⚠️ Client folder not found, skipping shortcut creation');
+      }
+    } catch (error) {
+      console.log('⚠️ Could not create shortcut in client folder:', error.message);
     }
+    
+    console.log('🎉 === PROJECT FOLDER CREATION COMPLETE ===');
+    console.log('✅ Project Folder ID:', projectFolder.getId());
+    console.log('✅ Project Folder URL:', projectFolder.getUrl());
+    
+    return projectFolder;
+    
   } catch (error) {
-    console.log('Could not create shortcut in client folder:', error.message);
+    console.error('❌ === PROJECT FOLDER CREATION ERROR ===');
+    console.error('Error creating project folder:', error);
+    console.error('Error stack:', error.stack);
+    
+    // Return a dummy folder object to prevent further errors
+    // In real implementation, we might want to create in a fallback location
+    throw new Error(`Failed to create project folder: ${error.message}`);
   }
-  
-  return projectFolder;
 }
 
 /**
- * Get client folder by client ID
+ * Get client folder by client ID with enhanced error handling
  */
 function getClientFolder(clientId) {
-  const client = getClientById(clientId);
-  if (!client) return null;
-  
-  const rootFolderId = PropertiesService.getScriptProperties().getProperty('ROOT_FOLDER_ID');
-  const rootFolder = DriveApp.getFolderById(rootFolderId);
-  const clientsFolder = createSubfolder(rootFolder, 'Clients');
-  
-  const folderName = `${clientId} - ${client.CompanyName}`;
-  const folders = clientsFolder.getFoldersByName(folderName);
-  
-  return folders.hasNext() ? folders.next() : null;
+  try {
+    console.log('🔍 Getting client folder for:', clientId);
+    
+    const client = getClientById(clientId);
+    if (!client) {
+      console.log('❌ Client not found:', clientId);
+      return null;
+    }
+    
+    console.log('✅ Client found:', client.CompanyName);
+    
+    const rootFolder = getRootFolder();
+    const clientsFolder = createSubfolder(rootFolder, 'Clients');
+    
+    const folderName = `${clientId} - ${client.CompanyName}`;
+    console.log('🔍 Looking for client folder:', folderName);
+    
+    const folders = clientsFolder.getFoldersByName(folderName);
+    
+    if (folders.hasNext()) {
+      const clientFolder = folders.next();
+      console.log('✅ Client folder found:', clientFolder.getName());
+      return clientFolder;
+    } else {
+      console.log('❌ Client folder not found:', folderName);
+      return null;
+    }
+    
+  } catch (error) {
+    console.error('❌ Error getting client folder:', error);
+    return null;
+  }
 }
 
 /**

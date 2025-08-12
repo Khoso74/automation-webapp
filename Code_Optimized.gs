@@ -2079,3 +2079,65 @@ function testCompleteWorkflow() {
     };
   }
 }
+
+/**
+ * Test Project Creation Only - Debug folder creation issue
+ */
+function testProjectCreationOnly() {
+  try {
+    console.log('🚀 === TESTING PROJECT CREATION ONLY ===');
+    
+    // Get first client
+    const clients = getAllClients();
+    if (!clients || clients.length === 0) {
+      return { success: false, error: 'No clients found for testing' };
+    }
+    
+    const testClient = clients[0];
+    console.log('🎯 Testing project creation with client:', testClient.CompanyName, '(' + testClient.ClientID + ')');
+    
+    // Create a mock proposal object for testing
+    const mockProposal = {
+      ProposalID: 'PROP_TEST_' + Date.now(),
+      ClientID: testClient.ClientID,
+      Title: 'Test Project Creation - Debug Folder Issue',
+      Description: 'This is a test to debug the project folder creation issue.'
+    };
+    
+    console.log('📋 Mock proposal created:', mockProposal);
+    
+    // Test project creation
+    console.log('\n🚀 Testing createProjectFromProposal function...');
+    const projectResult = createProjectFromProposal(mockProposal);
+    
+    console.log('📊 Project creation result:', projectResult);
+    
+    if (projectResult.success) {
+      console.log('✅ === PROJECT CREATION TEST COMPLETE ===');
+      return {
+        success: true,
+        message: 'Project creation test completed successfully!',
+        projectId: projectResult.projectId,
+        projectFolderId: projectResult.projectFolderId,
+        projectFolderUrl: projectResult.projectFolderUrl,
+        folderCreated: projectResult.folderCreated,
+        mockProposal: mockProposal
+      };
+    } else {
+      console.log('❌ === PROJECT CREATION TEST FAILED ===');
+      return {
+        success: false,
+        error: projectResult.error,
+        stack: projectResult.stack
+      };
+    }
+    
+  } catch (error) {
+    console.error('❌ Project creation test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+}

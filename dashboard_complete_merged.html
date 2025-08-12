@@ -2077,7 +2077,12 @@
                         
                         <button onclick="testCompleteProposalWorkflow()" 
                                 style="padding: 15px 20px; background: #6610f2; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                            🔄 Test Complete Workflow
+                            🔄 Test Complete Workflow (Fixed)
+                        </button>
+                        
+                        <button onclick="testProjectCreation()" 
+                                style="padding: 15px 20px; background: #20c997; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                            🚀 Test Project Creation Only
                         </button>
                 </div>
                 
@@ -4941,48 +4946,91 @@
                 .sendProposalToClient(proposalId, personalMessage);
         }
         
-        // Test complete proposal workflow
-        function testCompleteProposalWorkflow() {
-            console.log('🔄 Testing Complete Proposal Workflow from Frontend...');
-            
-            removeMessages();
-            showMessage('🔄 Testing complete proposal workflow (create → send → simulate acceptance)...', 'info');
-            
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    console.log('✅ Complete workflow test result:', result);
-                    
-                    if (result.success) {
-                        let message = `✅ Complete Proposal Workflow Test Passed!<br><br>`;
-                        
-                        message += `<strong>📋 Workflow Steps Completed:</strong><br>`;
-                        message += `1. ✅ Proposal Created: ${result.proposalId}<br>`;
-                        message += `2. ✅ PDF Generated: <a href="${result.pdfUrl}" target="_blank">View PDF</a><br>`;
-                        message += `3. ✅ Email Sent to: ${result.clientEmail}<br>`;
-                        message += `4. ✅ Sheet Updated: Status = "Sent", Sent Date = ${result.sentDate}<br>`;
-                        
-                        if (result.acceptanceResult) {
-                            message += `5. ✅ Proposal Accepted: ${result.acceptanceResult.acceptedDate}<br>`;
-                            message += `6. ✅ Project Created: ${result.acceptanceResult.projectId}<br>`;
-                            message += `7. ✅ Notifications Sent to Owner<br>`;
-                            message += `8. ✅ Sheet Updated: Status = "Accepted", Accepted Date = ${result.acceptanceResult.acceptedDate}<br><br>`;
-                            
-                            message += `<strong>🎯 All automatic sheet updates working correctly!</strong><br>`;
-                            message += `<strong>📧 Email notifications working!</strong><br>`;
-                            message += `<strong>📁 PDF saving to client folders!</strong>`;
-                        }
-                        
-                        showSuccessMessage(message);
-                    } else {
-                        showErrorMessage(`❌ Workflow Test Failed: ${result.error || 'Unknown error'}`);
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    console.error('❌ Frontend workflow test failed:', error);
-                    showErrorMessage(`❌ Frontend Workflow Test Failed: ${error.message}`);
-                })
-                .testCompleteWorkflow();
-        }
+                 // Test complete proposal workflow
+         function testCompleteProposalWorkflow() {
+             console.log('🔄 Testing Complete Proposal Workflow from Frontend...');
+             
+             removeMessages();
+             showMessage('🔄 Testing complete proposal workflow (create → send → simulate acceptance)...', 'info');
+             
+             google.script.run
+                 .withSuccessHandler(function(result) {
+                     console.log('✅ Complete workflow test result:', result);
+                     
+                     if (result.success) {
+                         let message = `✅ Complete Proposal Workflow Test Passed!<br><br>`;
+                         
+                         message += `<strong>📋 Workflow Steps Completed:</strong><br>`;
+                         message += `1. ✅ Proposal Created: ${result.proposalId}<br>`;
+                         message += `2. ✅ PDF Generated: <a href="${result.pdfUrl}" target="_blank">View PDF</a><br>`;
+                         message += `3. ✅ Email Sent to: ${result.clientEmail}<br>`;
+                         message += `4. ✅ Sheet Updated: Status = "Sent", Sent Date = ${result.sentDate}<br>`;
+                         
+                         if (result.acceptanceResult) {
+                             message += `5. ✅ Proposal Accepted: ${result.acceptanceResult.acceptedDate}<br>`;
+                             message += `6. ✅ Project Created: ${result.acceptanceResult.projectId}<br>`;
+                             
+                             if (result.acceptanceResult.folderCreated) {
+                                 message += `7. ✅ Project Folder Created: <a href="${result.acceptanceResult.projectFolderUrl}" target="_blank">View Folder</a><br>`;
+                             } else {
+                                 message += `7. ⚠️ Project Folder Creation Failed (but project still created)<br>`;
+                             }
+                             
+                             message += `8. ✅ Notifications Sent to Owner<br>`;
+                             message += `9. ✅ Sheet Updated: Status = "Accepted", Accepted Date = ${result.acceptanceResult.acceptedDate}<br><br>`;
+                             
+                             message += `<strong>🎯 All automatic sheet updates working correctly!</strong><br>`;
+                             message += `<strong>📧 Email notifications working!</strong><br>`;
+                             message += `<strong>📁 PDF saving to client folders!</strong>`;
+                         }
+                         
+                         showSuccessMessage(message);
+                     } else {
+                         showErrorMessage(`❌ Workflow Test Failed: ${result.error || 'Unknown error'}`);
+                     }
+                 })
+                 .withFailureHandler(function(error) {
+                     console.error('❌ Frontend workflow test failed:', error);
+                     showErrorMessage(`❌ Frontend Workflow Test Failed: ${error.message}`);
+                 })
+                 .testCompleteWorkflow();
+         }
+         
+         // Test project creation only
+         function testProjectCreation() {
+             console.log('🚀 Testing Project Creation Only...');
+             
+             removeMessages();
+             showMessage('🚀 Testing project creation with enhanced error handling...', 'info');
+             
+             google.script.run
+                 .withSuccessHandler(function(result) {
+                     console.log('✅ Project creation test result:', result);
+                     
+                     if (result.success) {
+                         let message = `✅ Project Creation Test Passed!<br><br>`;
+                         message += `<strong>📋 Results:</strong><br>`;
+                         message += `🆔 Project ID: ${result.projectId}<br>`;
+                         
+                         if (result.folderCreated) {
+                             message += `📁 Project Folder: <a href="${result.projectFolderUrl}" target="_blank">View Folder</a><br>`;
+                             message += `✅ All subfolders created successfully<br>`;
+                         } else {
+                             message += `⚠️ Project Folder Creation Failed<br>`;
+                             message += `📋 Project still created in sheet<br>`;
+                         }
+                         
+                         showSuccessMessage(message);
+                     } else {
+                         showErrorMessage(`❌ Project Creation Test Failed: ${result.error || 'Unknown error'}`);
+                     }
+                 })
+                 .withFailureHandler(function(error) {
+                     console.error('❌ Frontend project creation test failed:', error);
+                     showErrorMessage(`❌ Frontend Project Creation Test Failed: ${error.message}`);
+                 })
+                 .testProjectCreationOnly();
+         }
     </script>
 </body>
 </html>
