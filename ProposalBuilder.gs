@@ -634,93 +634,332 @@ function createProposalHTML(proposal) {
 }
 
 /**
- * Send proposal to client
+ * Send proposal to client via email with automatic sheet updates
  */
-function sendProposal(proposalId) {
+function sendProposalToClient(proposalId, emailMessage = '') {
   try {
+    console.log('📧 === SENDING PROPOSAL TO CLIENT ===');
+    console.log('Proposal ID:', proposalId);
+    
     const proposal = getProposalById(proposalId);
     if (!proposal) {
       throw new Error('Proposal not found');
     }
+    console.log('✅ Proposal found:', proposal.Title);
     
     const client = getClientById(proposal.ClientID);
     if (!client) {
       throw new Error('Client not found');
     }
+    console.log('✅ Client found:', client.ContactName, '-', client.Email);
     
     // Generate PDF if not already generated
-    let pdfResult;
-    if (!proposal.PDFURL) {
-      pdfResult = generateProposalPDF(proposalId);
+    let pdfFileId = null;
+    if (!proposal.PDFURL || proposal.PDFURL === '') {
+      console.log('📄 PDF not found, generating...');
+      const pdfResult = generateProposalPDF(proposalId);
       if (!pdfResult.success) {
         throw new Error('Failed to generate PDF: ' + pdfResult.error);
       }
+      pdfFileId = pdfResult.fileId;
+      console.log('✅ PDF generated:', pdfFileId);
+    } else {
+      pdfFileId = extractFileIdFromUrl(proposal.PDFURL);
+      console.log('✅ Using existing PDF:', pdfFileId);
     }
     
     // Get PDF file
-    const pdfFile = DriveApp.getFileById(pdfResult ? pdfResult.fileId : extractFileIdFromUrl(proposal.PDFURL));
+    const pdfFile = DriveApp.getFileById(pdfFileId);
+    console.log('📄 PDF file accessed:', pdfFile.getName());
     
-    // Create email content
-    const subject = `Proposal: ${proposal.Title}`;
-    const body = createProposalEmailBody(proposal, client);
+    // Create personalized email content
+    const subject = `📄 Business Proposal: ${proposal.Title} - ${getSetting('COMPANY_NAME')}`;
+    const emailBody = createDetailedProposalEmail(proposal, client, emailMessage);
     
     // Send email with PDF attachment
+    console.log('📧 Sending email to:', client.Email);
     GmailApp.sendEmail(
       client.Email,
       subject,
-      body,
+      '', // Plain text body (empty because we're using HTML)
       {
+        htmlBody: emailBody,
         attachments: [pdfFile.getBlob()],
-        name: getSetting('COMPANY_NAME') || 'Your Business'
+        name: getSetting('COMPANY_NAME') || 'Professional Services',
+        replyTo: getSetting('COMPANY_EMAIL')
       }
     );
     
-    // Update proposal status and sent date
+    // AUTOMATICALLY UPDATE SHEET: Sent Date + Status
+    console.log('📊 Updating proposal sheet...');
     updateProposalStatus(proposalId, 'Sent', new Date());
+    console.log('✅ Proposal status updated to "Sent"');
     
+    // Log the activity
     logActivity('Proposal', `Proposal sent to ${client.Email}: ${proposal.Title}`, proposalId);
     
-    return { success: true, message: 'Proposal sent successfully' };
+    console.log('🎉 === PROPOSAL SENT SUCCESSFULLY ===');
+    return { 
+      success: true, 
+      message: 'Proposal sent successfully and sheet updated automatically',
+      clientEmail: client.Email,
+      sentDate: new Date().toLocaleString('en-PK')
+    };
     
   } catch (error) {
+    console.error('❌ === PROPOSAL SENDING ERROR ===');
     console.error('Error sending proposal:', error);
+    console.error('Error stack:', error.stack);
+    
     logActivity('Proposal', `Failed to send proposal: ${error.message}`, proposalId, 'Error');
     return { success: false, error: error.message };
   }
 }
 
 /**
- * Create proposal email body
+ * Create detailed HTML email for proposal
  */
-function createProposalEmailBody(proposal, client) {
-  const companyName = getSetting('COMPANY_NAME') || 'Your Business';
+function createDetailedProposalEmail(proposal, client, personalMessage = '') {
+  const companyName = getSetting('COMPANY_NAME') || 'Professional Services';
+  const companyEmail = getSetting('COMPANY_EMAIL') || 'contact@company.com';
+  const companyPhone = getSetting('COMPANY_PHONE') || '+92-XXX-XXXXXXX';
   const acceptanceUrl = proposal.AcceptanceURL;
+  const currencySymbol = getSetting('CURRENCY_SYMBOL') || 'Rs.';
+  const formattedAmount = parseFloat(proposal.Amount).toLocaleString('en-PK');
   
   return `
-Dear ${client.ContactName},
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #2c5aa0, #1e4080); color: white; padding: 30px; text-align: center; border-radius: 8px; margin-bottom: 30px; }
+        .content { padding: 20px; background: #f9f9f9; border-radius: 8px; margin-bottom: 20px; }
+        .highlight { background: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107; margin: 20px 0; }
+        .amount { font-size: 24px; font-weight: bold; color: #2c5aa0; text-align: center; }
+        .button { background: #28a745; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin: 20px 0; }
+        .footer { background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; font-size: 14px; color: #666; }
+        .personal-message { background: #e8f4fd; padding: 15px; border-radius: 6px; border-left: 4px solid #007bff; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>${companyName}</h1>
+        <p>Professional Business Proposal</p>
+    </div>
+    
+    <div class="content">
+        <h2>Dear ${client.ContactName},</h2>
+        
+        <p>Assalam-o-Alaikum! We hope you are doing well.</p>
+        
+        <p>We are pleased to present our business proposal for <strong>"${proposal.Title}"</strong>. We have carefully reviewed your requirements and prepared a comprehensive solution that meets your needs.</p>
+        
+        ${personalMessage ? `<div class="personal-message"><strong>Personal Message:</strong><br>${personalMessage}</div>` : ''}
+        
+        <div class="highlight">
+            <h3>📋 Project Overview:</h3>
+            <p><strong>Project:</strong> ${proposal.Title}</p>
+            <p><strong>Description:</strong> ${proposal.Description.substring(0, 200)}${proposal.Description.length > 200 ? '...' : ''}</p>
+            <div class="amount">Investment: ${currencySymbol} ${formattedAmount}</div>
+        </div>
+        
+        <h3>📎 What's Included:</h3>
+        <ul>
+            <li>✅ <strong>Detailed Proposal PDF</strong> - Attached to this email</li>
+            <li>✅ <strong>Complete Project Specifications</strong></li>
+            <li>✅ <strong>Timeline and Milestones</strong></li>
+            <li>✅ <strong>Payment Terms</strong> (JazzCash, EasyPaisa, Bank Transfer)</li>
+            <li>✅ <strong>Professional Support</strong> throughout the project</li>
+        </ul>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="${acceptanceUrl}" class="button">
+                ✅ REVIEW & ACCEPT PROPOSAL
+            </a>
+            <p style="font-size: 14px; color: #666;">Click the button above to review and accept this proposal online</p>
+        </div>
+        
+        <h3>💡 Next Steps:</h3>
+        <ol>
+            <li><strong>Review</strong> the attached PDF proposal carefully</li>
+            <li><strong>Contact us</strong> if you have any questions or need modifications</li>
+            <li><strong>Click "Accept Proposal"</strong> button above to proceed</li>
+            <li><strong>Start the project</strong> - We'll begin immediately after acceptance</li>
+        </ol>
+        
+        <p>We understand that choosing the right partner is important for your business. We're committed to delivering high-quality work on time and within budget.</p>
+        
+        <p><strong>This proposal is valid for 30 days.</strong> We recommend accepting it soon to secure your project timeline.</p>
+    </div>
+    
+    <div class="footer">
+        <p><strong>Need to discuss? We're here to help!</strong></p>
+        <p>📧 Email: ${companyEmail}</p>
+        <p>📞 Phone: ${companyPhone}</p>
+        <p>💬 WhatsApp: Available for quick questions</p>
+        
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+        
+        <p><strong>${companyName}</strong><br>
+        Professional Services for Modern Businesses</p>
+        <p style="font-size: 12px;">This is an automated email. Please do not reply directly to this message.</p>
+    </div>
+</body>
+</html>`;
+}
 
-Thank you for considering ${companyName} for your project needs. Please find attached our proposal for "${proposal.Title}".
+/**
+ * Send acceptance notification to business owner
+ */
+function sendAcceptanceNotification(proposalId) {
+  try {
+    console.log('🔔 === SENDING ACCEPTANCE NOTIFICATION ===');
+    
+    const proposal = getProposalById(proposalId);
+    const client = getClientById(proposal.ClientID);
+    const ownerEmail = getSetting('COMPANY_EMAIL') || getSetting('OWNER_EMAIL');
+    const companyName = getSetting('COMPANY_NAME') || 'Your Business';
+    
+    if (!ownerEmail) {
+      console.log('⚠️ No owner email set, skipping notification');
+      return { success: false, error: 'No owner email configured' };
+    }
+    
+    const subject = `🎉 PROPOSAL ACCEPTED! ${proposal.Title} - ${client.CompanyName}`;
+    const emailBody = `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .success { background: #d4edda; padding: 20px; border-radius: 8px; border-left: 5px solid #28a745; }
+        .details { background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="success">
+        <h2>🎉 Congratulations! A proposal has been accepted!</h2>
+    </div>
+    
+    <div class="details">
+        <h3>📋 Proposal Details:</h3>
+        <p><strong>Proposal ID:</strong> ${proposal.ProposalID}</p>
+        <p><strong>Project Title:</strong> ${proposal.Title}</p>
+        <p><strong>Amount:</strong> ${proposal.Currency} ${parseFloat(proposal.Amount).toLocaleString('en-PK')}</p>
+        <p><strong>Accepted Date:</strong> ${new Date().toLocaleString('en-PK')}</p>
+    </div>
+    
+    <div class="details">
+        <h3>👤 Client Information:</h3>
+        <p><strong>Company:</strong> ${client.CompanyName}</p>
+        <p><strong>Contact:</strong> ${client.ContactName}</p>
+        <p><strong>Email:</strong> ${client.Email}</p>
+        <p><strong>Phone:</strong> ${client.Phone}</p>
+    </div>
+    
+    <div class="details">
+        <h3>🚀 Next Steps:</h3>
+        <ul>
+            <li>✅ Project has been automatically created</li>
+            <li>📁 Client folder structure is ready</li>
+            <li>📧 Client has been sent acceptance confirmation</li>
+            <li>💼 You can now start working on the project</li>
+        </ul>
+    </div>
+    
+    <p>Log in to your dashboard to manage this project: <a href="${getWebAppUrl()}">Open Dashboard</a></p>
+    
+    <hr>
+    <p><strong>${companyName}</strong> - Automated Project Management System</p>
+</body>
+</html>`;
+    
+    GmailApp.sendEmail(
+      ownerEmail,
+      subject,
+      '',
+      {
+        htmlBody: emailBody,
+        name: companyName + ' - System Notification'
+      }
+    );
+    
+    console.log('✅ Acceptance notification sent to:', ownerEmail);
+    return { success: true, message: 'Notification sent to business owner' };
+    
+  } catch (error) {
+    console.error('❌ Error sending acceptance notification:', error);
+    return { success: false, error: error.message };
+  }
+}
 
-PROJECT SUMMARY:
-${proposal.Description}
-
-INVESTMENT: ${proposal.Currency} ${parseFloat(proposal.Amount).toLocaleString()}
-
-To accept this proposal, please visit:
-${acceptanceUrl}
-
-This proposal is valid for 30 days. If you have any questions or would like to discuss the project further, please don't hesitate to reach out.
-
-We look forward to the opportunity to work with you!
-
-Best regards,
-${companyName}
-${getSetting('COMPANY_EMAIL')}
-${getSetting('COMPANY_PHONE')}
-
----
-This email was sent from our automated proposal system.
-  `.trim();
+/**
+ * Enhanced accept proposal function with notifications
+ */
+function acceptProposalEnhanced(proposalId, clientSignature = '') {
+  try {
+    console.log('🎯 === ENHANCED PROPOSAL ACCEPTANCE ===');
+    console.log('Proposal ID:', proposalId);
+    
+    const proposal = getProposalById(proposalId);
+    if (!proposal) {
+      throw new Error('Proposal not found');
+    }
+    
+    if (proposal.Status === 'Accepted') {
+      return { success: false, error: 'Proposal already accepted' };
+    }
+    
+    // AUTOMATICALLY UPDATE SHEET: Accepted Date + Status
+    console.log('📊 Updating proposal status to Accepted...');
+    const spreadsheet = getSpreadsheet();
+    const proposalsSheet = spreadsheet.getSheetByName(SHEETS.PROPOSALS);
+    const data = proposalsSheet.getDataRange().getValues();
+    
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0] === proposalId) {
+        proposalsSheet.getRange(i + 1, 7).setValue('Accepted'); // Status column
+        proposalsSheet.getRange(i + 1, 10).setValue(new Date()); // Accepted Date column
+        console.log('✅ Proposal sheet updated with acceptance');
+        break;
+      }
+    }
+    
+    // Create project automatically
+    console.log('🚀 Creating project from proposal...');
+    const projectResult = createProjectFromProposal(proposal);
+    console.log('✅ Project created:', projectResult.projectId);
+    
+    // Send confirmation to client
+    console.log('📧 Sending confirmation to client...');
+    sendProposalAcceptanceConfirmation(proposal);
+    
+    // Send notification to business owner
+    console.log('🔔 Sending notification to business owner...');
+    sendAcceptanceNotification(proposalId);
+    
+    // Log activity
+    logActivity('Proposal', `Proposal accepted: ${proposal.Title}`, proposalId);
+    console.log('📝 Activity logged');
+    
+    console.log('🎉 === PROPOSAL ACCEPTANCE COMPLETE ===');
+    return { 
+      success: true, 
+      message: 'Proposal accepted successfully! Project created and notifications sent.',
+      projectId: projectResult.projectId,
+      acceptedDate: new Date().toLocaleString('en-PK')
+    };
+    
+  } catch (error) {
+    console.error('❌ === PROPOSAL ACCEPTANCE ERROR ===');
+    console.error('Error accepting proposal:', error);
+    console.error('Error stack:', error.stack);
+    
+    logActivity('Proposal', `Failed to accept proposal: ${error.message}`, proposalId, 'Error');
+    return { success: false, error: error.message };
+  }
 }
 
 /**
@@ -782,51 +1021,12 @@ function updateProposalStatus(proposalId, status, sentDate = null) {
 }
 
 /**
- * Accept proposal (called from client-facing page)
+ * Extract file ID from Google Drive URL
  */
-function acceptProposal(proposalId, clientSignature) {
-  try {
-    const proposal = getProposalById(proposalId);
-    if (!proposal) {
-      throw new Error('Proposal not found');
-    }
-    
-    if (proposal.Status === 'Accepted') {
-      return { success: false, error: 'Proposal already accepted' };
-    }
-    
-    // Update proposal status
-    const spreadsheet = getSpreadsheet();
-    const proposalsSheet = spreadsheet.getSheetByName(SHEETS.PROPOSALS);
-    const data = proposalsSheet.getDataRange().getValues();
-    
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][0] === proposalId) {
-        proposalsSheet.getRange(i + 1, 7).setValue('Accepted'); // Status
-        proposalsSheet.getRange(i + 1, 10).setValue(new Date()); // Accepted Date
-        break;
-      }
-    }
-    
-    // Create project from accepted proposal
-    const projectResult = createProjectFromProposal(proposal);
-    
-    // Send confirmation email
-    sendProposalAcceptanceConfirmation(proposal);
-    
-    logActivity('Proposal', `Proposal accepted: ${proposal.Title}`, proposalId);
-    
-    return { 
-      success: true, 
-      message: 'Proposal accepted successfully',
-      projectId: projectResult.projectId
-    };
-    
-  } catch (error) {
-    console.error('Error accepting proposal:', error);
-    logActivity('Proposal', `Failed to accept proposal: ${error.message}`, proposalId, 'Error');
-    return { success: false, error: error.message };
-  }
+function extractFileIdFromUrl(url) {
+  if (!url) return null;
+  const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  return match ? match[1] : null;
 }
 
 /**

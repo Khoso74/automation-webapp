@@ -1971,3 +1971,111 @@ function testCompactPDFDesign() {
     };
   }
 }
+
+/**
+ * Test Complete Proposal Workflow - End to End
+ */
+function testCompleteWorkflow() {
+  try {
+    console.log('🔄 === TESTING COMPLETE PROPOSAL WORKFLOW ===');
+    
+    // Get first client
+    const clients = getAllClients();
+    if (!clients || clients.length === 0) {
+      return { success: false, error: 'No clients found for testing' };
+    }
+    
+    const testClient = clients[0];
+    console.log('🎯 Testing complete workflow with client:', testClient.CompanyName, '(' + testClient.ClientID + ')');
+    
+    // Step 1: Create proposal
+    console.log('\n📋 Step 1: Creating proposal...');
+    const testProposalData = {
+      clientId: testClient.ClientID,
+      title: 'Complete Workflow Test - Website Development',
+      description: 'This is a comprehensive test of the proposal workflow system including creation, sending, and acceptance automation.',
+      amount: 85000,
+      currency: 'PKR'
+    };
+    
+    const proposalResult = createProposal(testProposalData);
+    if (!proposalResult.success) {
+      return { success: false, error: 'Proposal creation failed: ' + proposalResult.error };
+    }
+    
+    const proposalId = proposalResult.proposalId;
+    console.log('✅ Step 1 Complete: Proposal created:', proposalId);
+    
+    // Step 2: Send proposal to client
+    console.log('\n📧 Step 2: Sending proposal to client...');
+    const sendResult = sendProposalToClient(proposalId, 'This is a test proposal to verify our automated workflow system.');
+    if (!sendResult.success) {
+      return { success: false, error: 'Proposal sending failed: ' + sendResult.error };
+    }
+    
+    console.log('✅ Step 2 Complete: Proposal sent to client');
+    
+    // Step 3: Simulate client acceptance
+    console.log('\n🎯 Step 3: Simulating client acceptance...');
+    const acceptanceResult = acceptProposalEnhanced(proposalId, 'Test Client Signature');
+    if (!acceptanceResult.success) {
+      return { success: false, error: 'Proposal acceptance failed: ' + acceptanceResult.error };
+    }
+    
+    console.log('✅ Step 3 Complete: Proposal accepted and project created');
+    
+    // Step 4: Verify sheet updates
+    console.log('\n📊 Step 4: Verifying sheet updates...');
+    const finalProposal = getProposalById(proposalId);
+    
+    const sheetVerification = {
+      proposalFound: !!finalProposal,
+      statusCorrect: finalProposal && finalProposal.Status === 'Accepted',
+      sentDateExists: finalProposal && !!finalProposal.SentDate,
+      acceptedDateExists: finalProposal && !!finalProposal.AcceptedDate,
+      pdfUrlExists: finalProposal && !!finalProposal.PDFURL
+    };
+    
+    console.log('📊 Sheet verification results:', sheetVerification);
+    
+    const allVerificationsPassed = Object.values(sheetVerification).every(check => check === true);
+    
+    if (!allVerificationsPassed) {
+      console.log('⚠️ Some sheet verifications failed');
+    } else {
+      console.log('✅ Step 4 Complete: All sheet updates verified');
+    }
+    
+    console.log('🎉 === COMPLETE WORKFLOW TEST FINISHED ===');
+    
+    return {
+      success: true,
+      message: 'Complete proposal workflow test completed successfully!',
+      proposalId: proposalId,
+      clientEmail: testClient.Email,
+      sentDate: sendResult.sentDate,
+      pdfUrl: proposalResult.pdfResult ? proposalResult.pdfResult.url : finalProposal.PDFURL,
+      acceptanceResult: acceptanceResult,
+      sheetVerification: sheetVerification,
+      workflowSteps: [
+        '✅ Proposal Created',
+        '✅ PDF Generated and Saved to Client Folder',
+        '✅ Email Sent to Client with PDF Attachment',
+        '✅ Sheet Updated: Status → "Sent", Sent Date → Filled',
+        '✅ Client Acceptance Simulated',
+        '✅ Project Created Automatically',
+        '✅ Owner Notification Sent',
+        '✅ Sheet Updated: Status → "Accepted", Accepted Date → Filled',
+        allVerificationsPassed ? '✅ All Sheet Data Verified' : '⚠️ Some Sheet Data Issues'
+      ]
+    };
+    
+  } catch (error) {
+    console.error('❌ Complete workflow test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+}

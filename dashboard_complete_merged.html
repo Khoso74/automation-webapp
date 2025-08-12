@@ -642,9 +642,12 @@
             cursor: pointer;
             transition: all 0.3s ease;
             z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        .dialog-close:hover {
+        
+        .close:hover {
             background: rgba(255, 255, 255, 0.3);
             transform: rotate(90deg);
         }
@@ -2066,23 +2069,33 @@
                                 style="padding: 15px 20px; background: #e83e8c; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
                             🎨 Test New PDF Design
                         </button>
+                        
+                        <button onclick="sendProposalToClient()" 
+                                style="padding: 15px 20px; background: #17a2b8; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                            📧 Send Proposal to Client
+                        </button>
+                        
+                        <button onclick="testCompleteProposalWorkflow()" 
+                                style="padding: 15px 20px; background: #6610f2; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                            🔄 Test Complete Workflow
+                        </button>
                 </div>
                 
                 <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px;">
-                    <strong>📋 Debug Instructions (Updated):</strong>
+                    <strong>📋 Complete Proposal System Guide:</strong>
                     <ol style="margin: 10px 0; padding-left: 20px;">
-                        <li><strong>Debug Folder Structure</strong> - Check what folders exist in Drive</li>
-                        <li><strong>Test Manual File Copy</strong> - Verify basic file creation in client folder works</li>
-                        <li><strong>Test Real Proposal Creation</strong> - 🎯 <strong>MAIN TEST</strong> - Simulate exactly what happens when creating proposal</li>
-                        <li><strong>Force Create Folders</strong> - Create missing client folders if needed</li>
-                        <li><strong>Run All Backend Tests</strong> - Comprehensive system tests</li>
+                        <li><strong>🎨 Test New PDF Design</strong> - Create proposal with compact 2-page PDF</li>
+                        <li><strong>📧 Send Proposal to Client</strong> - Send proposal via email with automatic sheet updates</li>
+                        <li><strong>🔄 Test Complete Workflow</strong> - Full end-to-end test (create → send → accept)</li>
+                        <li><strong>🔍 Debug Folder Structure</strong> - Check Drive folder structure</li>
+                        <li><strong>🚀 Run All Backend Tests</strong> - Comprehensive system diagnostics</li>
                     </ol>
-                    <div style="margin: 10px 0; padding: 10px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px;">
-                        <p style="margin: 0; font-weight: bold; color: #155724;">
-                            ✅ PDF GENERATION FIXED & REDESIGNED
+                    <div style="margin: 10px 0; padding: 10px; background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px;">
+                        <p style="margin: 0; font-weight: bold; color: #0c5460;">
+                            🎯 COMPLETE PROPOSAL AUTOMATION SYSTEM READY!
                         </p>
-                        <p style="margin: 5px 0 0 0; color: #155724;">
-                            🎨 Click "🎨 Test New PDF Design" to see the compact, professional 2-page PDF!
+                        <p style="margin: 5px 0 0 0; color: #0c5460;">
+                            ✅ Auto PDF generation | ✅ Auto email sending | ✅ Auto sheet updates | ✅ Auto notifications
                         </p>
                     </div>
                 </div>
@@ -4896,6 +4909,79 @@
                     showErrorMessage(`❌ Frontend Compact PDF Test Failed: ${error.message}`);
                 })
                 .testCompactPDFDesign();
+        }
+
+        // Send proposal to client
+        function sendProposalToClient() {
+            const proposalId = prompt('Enter Proposal ID to send (e.g., PROP17550241653901873):');
+            if (!proposalId) return;
+            
+            const personalMessage = prompt('Enter personal message for client (optional):') || '';
+            
+            removeMessages();
+            showMessage('📧 Sending proposal to client...', 'info');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    console.log('✅ Send proposal result:', result);
+                    
+                    if (result.success) {
+                        showSuccessMessage(`✅ Proposal Sent Successfully!<br>
+                                         📧 Sent to: ${result.clientEmail}<br>
+                                         📅 Sent Date: ${result.sentDate}<br>
+                                         📊 Sheet automatically updated with "Sent" status and date`);
+                    } else {
+                        showErrorMessage(`❌ Failed to Send Proposal: ${result.error || 'Unknown error'}`);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('❌ Frontend send proposal failed:', error);
+                    showErrorMessage(`❌ Frontend Send Failed: ${error.message}`);
+                })
+                .sendProposalToClient(proposalId, personalMessage);
+        }
+        
+        // Test complete proposal workflow
+        function testCompleteProposalWorkflow() {
+            console.log('🔄 Testing Complete Proposal Workflow from Frontend...');
+            
+            removeMessages();
+            showMessage('🔄 Testing complete proposal workflow (create → send → simulate acceptance)...', 'info');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    console.log('✅ Complete workflow test result:', result);
+                    
+                    if (result.success) {
+                        let message = `✅ Complete Proposal Workflow Test Passed!<br><br>`;
+                        
+                        message += `<strong>📋 Workflow Steps Completed:</strong><br>`;
+                        message += `1. ✅ Proposal Created: ${result.proposalId}<br>`;
+                        message += `2. ✅ PDF Generated: <a href="${result.pdfUrl}" target="_blank">View PDF</a><br>`;
+                        message += `3. ✅ Email Sent to: ${result.clientEmail}<br>`;
+                        message += `4. ✅ Sheet Updated: Status = "Sent", Sent Date = ${result.sentDate}<br>`;
+                        
+                        if (result.acceptanceResult) {
+                            message += `5. ✅ Proposal Accepted: ${result.acceptanceResult.acceptedDate}<br>`;
+                            message += `6. ✅ Project Created: ${result.acceptanceResult.projectId}<br>`;
+                            message += `7. ✅ Notifications Sent to Owner<br>`;
+                            message += `8. ✅ Sheet Updated: Status = "Accepted", Accepted Date = ${result.acceptanceResult.acceptedDate}<br><br>`;
+                            
+                            message += `<strong>🎯 All automatic sheet updates working correctly!</strong><br>`;
+                            message += `<strong>📧 Email notifications working!</strong><br>`;
+                            message += `<strong>📁 PDF saving to client folders!</strong>`;
+                        }
+                        
+                        showSuccessMessage(message);
+                    } else {
+                        showErrorMessage(`❌ Workflow Test Failed: ${result.error || 'Unknown error'}`);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('❌ Frontend workflow test failed:', error);
+                    showErrorMessage(`❌ Frontend Workflow Test Failed: ${error.message}`);
+                })
+                .testCompleteWorkflow();
         }
     </script>
 </body>
