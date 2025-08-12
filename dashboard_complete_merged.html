@@ -26,52 +26,77 @@
         
         .header {
             background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 20px 30px;
+            border-radius: 20px;
+            padding: 25px 35px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(20px);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         .header-content h1 {
             color: #2c3e50;
             margin-bottom: 10px;
-            font-size: 2.5em;
+            font-size: 2.8em;
             font-weight: 300;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .header-content p {
             color: #7f8c8d;
-            font-size: 1.1em;
+            font-size: 1.2em;
+            font-weight: 400;
         }
         
         .header-actions {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             align-items: center;
         }
         
         .nav-tab {
-            padding: 10px 20px;
+            padding: 15px 25px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-weight: 600;
+            font-size: 1em;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+        
+        .nav-tab:hover::before {
+            left: 100%;
         }
         
         .nav-tab:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
         
         .nav-tab.active {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
         }
         
         .tab-content {
@@ -80,6 +105,7 @@
         
         .tab-content.active {
             display: block;
+            animation: fadeIn 0.5s ease;
         }
         
         .stats-grid {
@@ -171,54 +197,78 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
 
-        /* Premium Tools Grid Styles */
+        /* Premium Tools Enhanced Styles */
         .premium-tools-section {
             margin-top: 30px;
-            padding: 25px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 25px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .premium-tools-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.03) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
         }
 
         .tools-header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
+            position: relative;
+            z-index: 1;
         }
 
         .tools-title {
-            font-size: 2.2em;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-size: 3em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.2);
         }
 
         .tools-subtitle {
             color: #6c757d;
-            font-size: 1.1em;
+            font-size: 1.3em;
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
         }
 
         .premium-tools-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            max-width: 1200px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            max-width: 1300px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         .premium-tool-card {
-            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
-            border-radius: 20px;
-            padding: 30px 20px;
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafe 100%);
+            border-radius: 25px;
+            padding: 35px 25px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             position: relative;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         }
 
         .premium-tool-card::before {
@@ -228,61 +278,204 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.7s;
+        }
+
+        .premium-tool-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(102, 126, 234, 0.02) 50%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
         }
 
         .premium-tool-card:hover::before {
             left: 100%;
         }
 
+        .premium-tool-card:hover::after {
+            opacity: 1;
+        }
+
         .premium-tool-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            transform: translateY(-15px) scale(1.03);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+            border-color: rgba(102, 126, 234, 0.2);
+        }
+
+        .tool-icon-container {
+            position: relative;
+            margin-bottom: 25px;
         }
 
         .tool-icon {
-            font-size: 3.5em;
-            margin-bottom: 15px;
+            font-size: 4.5em;
             display: block;
-            transition: transform 0.3s ease;
+            transition: all 0.4s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tool-icon-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 1;
         }
 
         .premium-tool-card:hover .tool-icon {
-            transform: scale(1.1) rotate(5deg);
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .premium-tool-card:hover .tool-icon-bg {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.2);
         }
 
         .tool-name {
-            font-size: 1.3em;
-            font-weight: 600;
+            font-size: 1.5em;
+            font-weight: 700;
             color: #2c3e50;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            transition: color 0.3s ease;
         }
 
         .tool-description {
             color: #6c757d;
-            font-size: 0.9em;
-            line-height: 1.4;
+            font-size: 1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            transition: color 0.3s ease;
         }
 
-        /* Color variations for different tools */
-        .time-tracker { border-left: 5px solid #28a745; }
-        .time-tracker:hover { box-shadow: 0 20px 40px rgba(40, 167, 69, 0.2); }
+        .tool-features {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
 
-        .expense-manager { border-left: 5px solid #fd7e14; }
-        .expense-manager:hover { box-shadow: 0 20px 40px rgba(253, 126, 20, 0.2); }
+        .tool-feature {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 500;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.3s ease;
+        }
 
-        .currency-converter { border-left: 5px solid #20c997; }
-        .currency-converter:hover { box-shadow: 0 20px 40px rgba(32, 201, 151, 0.2); }
+        .tool-status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-        .analytics-tool { border-left: 5px solid #6f42c1; }
-        .analytics-tool:hover { box-shadow: 0 20px 40px rgba(111, 66, 193, 0.2); }
+        .status-premium {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
 
-        .contract-generator { border-left: 5px solid #dc3545; }
-        .contract-generator:hover { box-shadow: 0 20px 40px rgba(220, 53, 69, 0.2); }
+        .status-free {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
 
-        .backup-tool { border-left: 5px solid #17a2b8; }
-        .backup-tool:hover { box-shadow: 0 20px 40px rgba(23, 162, 184, 0.2); }
+        /* Enhanced color variations for different tools */
+        .time-tracker {
+            border-left: 6px solid #28a745;
+        }
+        .time-tracker:hover {
+            box-shadow: 0 25px 60px rgba(40, 167, 69, 0.2);
+        }
+        .time-tracker .tool-icon-bg {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+        .time-tracker:hover .tool-name {
+            color: #28a745;
+        }
+
+        .expense-manager {
+            border-left: 6px solid #fd7e14;
+        }
+        .expense-manager:hover {
+            box-shadow: 0 25px 60px rgba(253, 126, 20, 0.2);
+        }
+        .expense-manager .tool-icon-bg {
+            background: linear-gradient(135deg, #fd7e14, #ffc107);
+        }
+        .expense-manager:hover .tool-name {
+            color: #fd7e14;
+        }
+
+        .currency-converter {
+            border-left: 6px solid #20c997;
+        }
+        .currency-converter:hover {
+            box-shadow: 0 25px 60px rgba(32, 201, 151, 0.2);
+        }
+        .currency-converter .tool-icon-bg {
+            background: linear-gradient(135deg, #20c997, #17a2b8);
+        }
+        .currency-converter:hover .tool-name {
+            color: #20c997;
+        }
+
+        .analytics-tool {
+            border-left: 6px solid #6f42c1;
+        }
+        .analytics-tool:hover {
+            box-shadow: 0 25px 60px rgba(111, 66, 193, 0.2);
+        }
+        .analytics-tool .tool-icon-bg {
+            background: linear-gradient(135deg, #6f42c1, #9b59b6);
+        }
+        .analytics-tool:hover .tool-name {
+            color: #6f42c1;
+        }
+
+        .contract-generator {
+            border-left: 6px solid #dc3545;
+        }
+        .contract-generator:hover {
+            box-shadow: 0 25px 60px rgba(220, 53, 69, 0.2);
+        }
+        .contract-generator .tool-icon-bg {
+            background: linear-gradient(135deg, #dc3545, #e83e8c);
+        }
+        .contract-generator:hover .tool-name {
+            color: #dc3545;
+        }
+
+        .backup-tool {
+            border-left: 6px solid #17a2b8;
+        }
+        .backup-tool:hover {
+            box-shadow: 0 25px 60px rgba(23, 162, 184, 0.2);
+        }
+        .backup-tool .tool-icon-bg {
+            background: linear-gradient(135deg, #17a2b8, #6f42c1);
+        }
+        .backup-tool:hover .tool-name {
+            color: #17a2b8;
+        }
 
         /* Modern Glassmorphism Dialog Styles */
         .premium-dialog-overlay {
@@ -682,6 +875,11 @@
             100% { transform: rotate(360deg); }
         }
 
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         /* Loading Animation */
         .loading-spinner {
             display: inline-block;
@@ -843,50 +1041,104 @@
             <div class="premium-tools-section">
                 <div class="tools-header">
                     <h2 class="tools-title">🛠️ Premium Tools</h2>
-                    <p class="tools-subtitle">Professional tools for modern freelancers</p>
+                    <p class="tools-subtitle">Professional-grade tools designed for modern freelancers to streamline workflow and maximize productivity</p>
                 </div>
                 
                 <div class="premium-tools-grid">
                     <!-- Time Tracker -->
                     <div class="premium-tool-card time-tracker" onclick="openToolDialog('timeTracker')">
-                        <div class="tool-icon">⏱️</div>
-                        <div class="tool-name">Time Tracker</div>
-                        <div class="tool-description">Track project time & earnings</div>
+                        <div class="tool-icon-container">
+                            <div class="tool-icon">⏱️</div>
+                            <div class="tool-icon-bg"></div>
+                        </div>
+                        <div class="tool-name">Advanced Time Tracker</div>
+                        <div class="tool-description">Track project time with precision, automatic earnings calculation, and detailed reporting</div>
+                        <div class="tool-features">
+                            <span class="tool-feature">Real-time Timer</span>
+                            <span class="tool-feature">Auto Calculate</span>
+                            <span class="tool-feature">Reports</span>
+                        </div>
+                        <div class="tool-status status-premium">Premium</div>
                     </div>
                     
                     <!-- Expense Manager -->
                     <div class="premium-tool-card expense-manager" onclick="openToolDialog('expenseManager')">
-                        <div class="tool-icon">💰</div>
-                        <div class="tool-name">Expense Manager</div>
-                        <div class="tool-description">Manage business expenses</div>
+                        <div class="tool-icon-container">
+                            <div class="tool-icon">💰</div>
+                            <div class="tool-icon-bg"></div>
+                        </div>
+                        <div class="tool-name">Smart Expense Manager</div>
+                        <div class="tool-description">Categorize and track business expenses with intelligent insights and tax preparation</div>
+                        <div class="tool-features">
+                            <span class="tool-feature">Auto Categorize</span>
+                            <span class="tool-feature">Tax Ready</span>
+                            <span class="tool-feature">Analytics</span>
+                        </div>
+                        <div class="tool-status status-premium">Premium</div>
                     </div>
                     
                     <!-- Currency Converter -->
                     <div class="premium-tool-card currency-converter" onclick="openToolDialog('currencyConverter')">
-                        <div class="tool-icon">💱</div>
-                        <div class="tool-name">Currency Converter</div>
-                        <div class="tool-description">PKR to global currencies</div>
+                        <div class="tool-icon-container">
+                            <div class="tool-icon">💱</div>
+                            <div class="tool-icon-bg"></div>
+                        </div>
+                        <div class="tool-name">Live Currency Converter</div>
+                        <div class="tool-description">Convert PKR to global currencies with real-time exchange rates and historical data</div>
+                        <div class="tool-features">
+                            <span class="tool-feature">Live Rates</span>
+                            <span class="tool-feature">Multi Currency</span>
+                            <span class="tool-feature">History</span>
+                        </div>
+                        <div class="tool-status status-free">Free API</div>
                     </div>
                     
                     <!-- Business Analytics -->
                     <div class="premium-tool-card analytics-tool" onclick="openToolDialog('analytics')">
-                        <div class="tool-icon">📊</div>
-                        <div class="tool-name">Business Analytics</div>
-                        <div class="tool-description">Revenue & performance insights</div>
+                        <div class="tool-icon-container">
+                            <div class="tool-icon">📊</div>
+                            <div class="tool-icon-bg"></div>
+                        </div>
+                        <div class="tool-name">Business Intelligence</div>
+                        <div class="tool-description">Comprehensive analytics with revenue insights, performance metrics, and growth tracking</div>
+                        <div class="tool-features">
+                            <span class="tool-feature">Revenue Analysis</span>
+                            <span class="tool-feature">KPI Tracking</span>
+                            <span class="tool-feature">Forecasting</span>
+                        </div>
+                        <div class="tool-status status-premium">Premium</div>
                     </div>
                     
                     <!-- Contract Generator -->
                     <div class="premium-tool-card contract-generator" onclick="openToolDialog('contractGenerator')">
-                        <div class="tool-icon">📋</div>
-                        <div class="tool-name">Contract Generator</div>
-                        <div class="tool-description">Professional agreements</div>
+                        <div class="tool-icon-container">
+                            <div class="tool-icon">📋</div>
+                            <div class="tool-icon-bg"></div>
+                        </div>
+                        <div class="tool-name">Legal Contract Generator</div>
+                        <div class="tool-description">Generate professional service agreements with Pakistani legal compliance and e-signature support</div>
+                        <div class="tool-features">
+                            <span class="tool-feature">Legal Templates</span>
+                            <span class="tool-feature">Auto Fill</span>
+                            <span class="tool-feature">PDF Export</span>
+                        </div>
+                        <div class="tool-status status-premium">Premium</div>
                     </div>
                     
                     <!-- Data Backup -->
                     <div class="premium-tool-card backup-tool" onclick="openToolDialog('backupTool')">
-                        <div class="tool-icon">💾</div>
-                        <div class="tool-name">Data Backup</div>
-                        <div class="tool-description">Secure data protection</div>
+                        <div class="tool-icon-container">
+                            <div class="tool-icon">💾</div>
+                            <div class="tool-icon-bg"></div>
+                        </div>
+                        <div class="tool-name">Secure Data Backup</div>
+                        <div class="tool-description">Automated data protection with cloud backup, encryption, and easy restore functionality</div>
+                        <div class="tool-features">
+                            <span class="tool-feature">Auto Backup</span>
+                            <span class="tool-feature">Encrypted</span>
+                            <span class="tool-feature">Quick Restore</span>
+                        </div>
+                        <div class="tool-status status-free">Free</div>
                     </div>
                 </div>
             </div>
