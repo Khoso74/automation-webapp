@@ -1324,10 +1324,72 @@ function getProposalAcceptancePage(proposalId) {
       </div>
       
       <script>
-        document.getElementById('acceptForm').onsubmit = function() {
-          document.querySelector('.accept-btn').textContent = 'Processing...';
-          document.querySelector('.accept-btn').disabled = true;
+        document.getElementById('acceptForm').onsubmit = function(e) {
+          // Show loading state
+          const submitBtn = document.querySelector('.accept-btn');
+          const originalText = submitBtn.textContent;
+          submitBtn.textContent = '⏳ Processing your acceptance...';
+          submitBtn.disabled = true;
+          submitBtn.style.background = '#95a5a6';
+          
+          // Show progress message
+          const container = document.querySelector('.container');
+          const progressDiv = document.createElement('div');
+          progressDiv.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: white;
+            font-size: 18px;
+            text-align: center;
+          `;
+          progressDiv.innerHTML = \`
+            <div style="background: white; color: #333; padding: 30px; border-radius: 10px; max-width: 400px;">
+              <div style="font-size: 48px; margin-bottom: 20px;">⏳</div>
+              <h3>Processing Your Acceptance</h3>
+              <p>Please wait while we process your proposal acceptance...</p>
+              <div style="margin: 20px 0;">
+                <div style="width: 100%; height: 4px; background: #eee; border-radius: 2px; overflow: hidden;">
+                  <div style="width: 0%; height: 100%; background: #27ae60; animation: progress 3s ease-in-out infinite;"></div>
+                </div>
+              </div>
+              <p style="font-size: 14px; color: #666;">This usually takes just a few seconds...</p>
+            </div>
+            <style>
+              @keyframes progress {
+                0% { width: 0%; }
+                50% { width: 70%; }
+                100% { width: 90%; }
+              }
+            </style>
+          \`;
+          document.body.appendChild(progressDiv);
+          
+          // Set timeout fallback in case of issues
+          setTimeout(function() {
+            if (document.body.contains(progressDiv)) {
+              progressDiv.querySelector('h3').textContent = 'Taking longer than expected...';
+              progressDiv.querySelector('p').textContent = 'Please wait, we are still processing your request.';
+            }
+          }, 10000);
+          
+          // Allow form submission to continue
+          return true;
         };
+        
+        // Handle page visibility to show if user navigated away
+        document.addEventListener('visibilitychange', function() {
+          if (document.hidden) {
+            console.log('User navigated away during processing');
+          }
+        });
       </script>
     </body>
     </html>

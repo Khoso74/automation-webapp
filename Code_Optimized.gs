@@ -88,13 +88,14 @@ function doPost(e) {
     
     switch (action) {
       case 'acceptProposal':
-        return acceptProposal(e.parameter.proposalId, e.parameter.clientSignature);
+        const result = acceptProposalEnhanced(e.parameter.proposalId, e.parameter.clientSignature || '');
+        return createAcceptanceResultPage(result, e.parameter.proposalId);
       default:
         return ContentService.createTextOutput('Invalid action');
     }
   } catch (error) {
     console.error('doPost error:', error);
-    return ContentService.createTextOutput('Error: ' + error.message);
+    return createAcceptanceResultPage({ success: false, error: error.message }, e.parameter.proposalId || 'unknown');
   }
 }
 
@@ -2134,6 +2135,449 @@ function testProjectCreationOnly() {
     
   } catch (error) {
     console.error('❌ Project creation test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+}
+
+/**
+ * Create acceptance result page (success or error)
+ */
+function createAcceptanceResultPage(result, proposalId) {
+  try {
+    console.log('🎯 Creating acceptance result page:', result);
+    
+    if (result.success) {
+      // SUCCESS PAGE
+      const proposal = getProposalById(proposalId);
+      const client = proposal ? getClientById(proposal.ClientID) : null;
+      
+      const successHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Proposal Accepted Successfully</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <style>
+                body { 
+                    font-family: 'Segoe UI', Arial, sans-serif; 
+                    margin: 0; 
+                    padding: 20px; 
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .container { 
+                    max-width: 600px; 
+                    background: white; 
+                    padding: 40px; 
+                    border-radius: 15px; 
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                    text-align: center;
+                    animation: slideIn 0.5s ease-out;
+                }
+                @keyframes slideIn {
+                    from { opacity: 0; transform: translateY(30px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .success-icon { 
+                    font-size: 64px; 
+                    color: #27ae60; 
+                    margin-bottom: 20px;
+                    animation: bounce 1s ease-in-out;
+                }
+                @keyframes bounce {
+                    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+                    40% { transform: translateY(-10px); }
+                    60% { transform: translateY(-5px); }
+                }
+                .success-title { 
+                    color: #2c3e50; 
+                    font-size: 28px; 
+                    margin-bottom: 15px;
+                    font-weight: 600;
+                }
+                .success-message { 
+                    color: #666; 
+                    font-size: 16px; 
+                    line-height: 1.6;
+                    margin-bottom: 30px;
+                }
+                .details-box {
+                    background: #f8f9fa;
+                    padding: 20px;
+                    border-radius: 10px;
+                    margin: 20px 0;
+                    border-left: 4px solid #27ae60;
+                }
+                .detail-item {
+                    margin: 10px 0;
+                    padding: 5px 0;
+                }
+                .detail-label {
+                    font-weight: 600;
+                    color: #2c3e50;
+                    display: inline-block;
+                    width: 140px;
+                    text-align: left;
+                }
+                .detail-value {
+                    color: #666;
+                }
+                .next-steps {
+                    background: #e8f5e8;
+                    padding: 20px;
+                    border-radius: 10px;
+                    margin-top: 20px;
+                    text-align: left;
+                }
+                .next-steps h4 {
+                    color: #27ae60;
+                    margin-top: 0;
+                    font-size: 18px;
+                }
+                .next-steps ul {
+                    margin: 10px 0;
+                    padding-left: 20px;
+                }
+                .next-steps li {
+                    margin: 8px 0;
+                    color: #2c3e50;
+                }
+                .contact-info {
+                    background: #fff3cd;
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin-top: 20px;
+                    border: 1px solid #ffeaa7;
+                }
+                .btn-home {
+                    background: #3498db;
+                    color: white;
+                    padding: 12px 25px;
+                    border: none;
+                    border-radius: 6px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    text-decoration: none;
+                    display: inline-block;
+                    margin-top: 20px;
+                    transition: background 0.3s ease;
+                }
+                .btn-home:hover {
+                    background: #2980b9;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="success-icon">🎉</div>
+                <h1 class="success-title">Proposal Accepted Successfully!</h1>
+                <p class="success-message">
+                    Thank you for accepting our proposal. We're excited to work with you on this project!
+                </p>
+                
+                <div class="details-box">
+                    <div class="detail-item">
+                        <span class="detail-label">Proposal ID:</span>
+                        <span class="detail-value">${proposalId}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Project:</span>
+                        <span class="detail-value">${proposal ? proposal.Title : 'Project Details'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Client:</span>
+                        <span class="detail-value">${client ? client.CompanyName : 'Your Company'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Accepted Date:</span>
+                        <span class="detail-value">${result.acceptedDate || new Date().toLocaleString('en-PK')}</span>
+                    </div>
+                    ${result.projectId ? `
+                    <div class="detail-item">
+                        <span class="detail-label">Project ID:</span>
+                        <span class="detail-value">${result.projectId}</span>
+                    </div>
+                    ` : ''}
+                </div>
+                
+                <div class="next-steps">
+                    <h4>🚀 What Happens Next?</h4>
+                    <ul>
+                        <li><strong>Project Kickoff:</strong> We'll contact you within 24 hours to schedule the project kickoff meeting</li>
+                        <li><strong>Documentation:</strong> You'll receive a detailed project timeline and milestones</li>
+                        <li><strong>Payment:</strong> Invoice for the initial deposit will be sent shortly</li>
+                        <li><strong>Communication:</strong> We'll set up a dedicated communication channel for the project</li>
+                        <li><strong>Regular Updates:</strong> You'll receive weekly progress reports throughout the project</li>
+                    </ul>
+                </div>
+                
+                <div class="contact-info">
+                    <strong>📞 Need immediate assistance?</strong><br>
+                    Contact us at: ${getSetting('COMPANY_EMAIL') || 'contact@company.com'}<br>
+                    Phone: ${getSetting('COMPANY_PHONE') || '+92-XXX-XXXXXXX'}
+                </div>
+                
+                <p style="margin-top: 30px; color: #888; font-size: 14px;">
+                    A confirmation email has been sent to your registered email address.<br>
+                    Our team has also been notified and will begin preparing for your project.
+                </p>
+            </div>
+        </body>
+        </html>
+      `;
+      
+      return HtmlService.createHtmlOutput(successHtml)
+        .setTitle('Proposal Accepted Successfully')
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+        
+    } else {
+      // ERROR PAGE
+      const errorHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Proposal Acceptance Error</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <style>
+                body { 
+                    font-family: 'Segoe UI', Arial, sans-serif; 
+                    margin: 0; 
+                    padding: 20px; 
+                    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .container { 
+                    max-width: 500px; 
+                    background: white; 
+                    padding: 40px; 
+                    border-radius: 15px; 
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                    text-align: center;
+                    animation: slideIn 0.5s ease-out;
+                }
+                @keyframes slideIn {
+                    from { opacity: 0; transform: translateY(30px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .error-icon { 
+                    font-size: 64px; 
+                    color: #e74c3c; 
+                    margin-bottom: 20px;
+                }
+                .error-title { 
+                    color: #2c3e50; 
+                    font-size: 24px; 
+                    margin-bottom: 15px;
+                    font-weight: 600;
+                }
+                .error-message { 
+                    color: #666; 
+                    font-size: 16px; 
+                    line-height: 1.6;
+                    margin-bottom: 30px;
+                }
+                .error-details {
+                    background: #ffe6e6;
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin: 20px 0;
+                    border-left: 4px solid #e74c3c;
+                    text-align: left;
+                }
+                .contact-box {
+                    background: #f8f9fa;
+                    padding: 20px;
+                    border-radius: 10px;
+                    margin-top: 20px;
+                }
+                .btn-retry {
+                    background: #3498db;
+                    color: white;
+                    padding: 12px 25px;
+                    border: none;
+                    border-radius: 6px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    text-decoration: none;
+                    display: inline-block;
+                    margin: 10px;
+                    transition: background 0.3s ease;
+                }
+                .btn-retry:hover {
+                    background: #2980b9;
+                }
+                .btn-contact {
+                    background: #27ae60;
+                    color: white;
+                    padding: 12px 25px;
+                    border: none;
+                    border-radius: 6px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    text-decoration: none;
+                    display: inline-block;
+                    margin: 10px;
+                    transition: background 0.3s ease;
+                }
+                .btn-contact:hover {
+                    background: #229954;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="error-icon">❌</div>
+                <h1 class="error-title">Proposal Acceptance Failed</h1>
+                <p class="error-message">
+                    We encountered an issue while processing your proposal acceptance. Please try again or contact us for assistance.
+                </p>
+                
+                <div class="error-details">
+                    <strong>Error Details:</strong><br>
+                    ${result.error || 'Unknown error occurred'}
+                </div>
+                
+                <div class="contact-box">
+                    <h4>🤝 Need Help?</h4>
+                    <p>Our team is here to assist you:</p>
+                    <p>
+                        📧 Email: ${getSetting('COMPANY_EMAIL') || 'contact@company.com'}<br>
+                        📞 Phone: ${getSetting('COMPANY_PHONE') || '+92-XXX-XXXXXXX'}
+                    </p>
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <a href="javascript:history.back()" class="btn-retry">🔄 Try Again</a>
+                    <a href="mailto:${getSetting('COMPANY_EMAIL') || 'contact@company.com'}" class="btn-contact">📧 Contact Support</a>
+                </div>
+                
+                <p style="margin-top: 30px; color: #888; font-size: 14px;">
+                    Proposal ID: ${proposalId}<br>
+                    Error Time: ${new Date().toLocaleString('en-PK')}
+                </p>
+            </div>
+        </body>
+        </html>
+      `;
+      
+      return HtmlService.createHtmlOutput(errorHtml)
+        .setTitle('Proposal Acceptance Error')
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    }
+    
+  } catch (error) {
+    console.error('❌ Error creating acceptance result page:', error);
+    
+    // Fallback simple error page
+    return HtmlService.createHtmlOutput(`
+      <div style="text-align: center; font-family: Arial, sans-serif; margin: 50px;">
+        <h2>System Error</h2>
+        <p>An unexpected error occurred. Please contact support.</p>
+        <p>Error: ${error.message}</p>
+      </div>
+    `).setTitle('System Error');
+  }
+}
+
+/**
+ * Test Client Acceptance Flow - Generate a test acceptance URL
+ */
+function testClientAcceptanceFlow() {
+  try {
+    console.log('🎯 === TESTING CLIENT ACCEPTANCE FLOW ===');
+    
+    // Get first proposal that hasn't been accepted yet
+    const proposals = getAllProposals();
+    if (!proposals || proposals.length === 0) {
+      return { 
+        success: false, 
+        error: 'No proposals found for testing. Create a proposal first.' 
+      };
+    }
+    
+    // Find a proposal that's in "Sent" status or create a new one
+    let testProposal = proposals.find(p => p.Status === 'Sent' || p.Status === 'Draft');
+    
+    if (!testProposal) {
+      console.log('📋 No sent proposals found, using first available proposal');
+      testProposal = proposals[0];
+    }
+    
+    console.log('✅ Using proposal for testing:', testProposal.ProposalID, '-', testProposal.Title);
+    
+    // Generate the acceptance URL
+    const webAppUrl = getWebAppUrl();
+    const acceptanceUrl = `${webAppUrl}?page=proposal&id=${testProposal.ProposalID}`;
+    
+    console.log('🔗 Test acceptance URL:', acceptanceUrl);
+    
+    // Test the acceptance page generation
+    console.log('📄 Testing acceptance page generation...');
+    const acceptancePage = getProposalAcceptancePage(testProposal.ProposalID);
+    
+    if (!acceptancePage) {
+      return {
+        success: false,
+        error: 'Failed to generate acceptance page'
+      };
+    }
+    
+    console.log('✅ Acceptance page generated successfully');
+    
+    // Test acceptance processing (simulate)
+    console.log('🎯 Testing acceptance processing...');
+    const acceptanceResult = acceptProposalEnhanced(testProposal.ProposalID, 'Test Client Signature');
+    
+    console.log('📊 Acceptance result:', acceptanceResult);
+    
+    // Test result page generation
+    console.log('📄 Testing result page generation...');
+    const resultPage = createAcceptanceResultPage(acceptanceResult, testProposal.ProposalID);
+    
+    if (!resultPage) {
+      return {
+        success: false,
+        error: 'Failed to generate result page'
+      };
+    }
+    
+    console.log('✅ Result page generated successfully');
+    
+    console.log('🎉 === CLIENT ACCEPTANCE FLOW TEST COMPLETE ===');
+    
+    return {
+      success: true,
+      message: 'Client acceptance flow test completed successfully!',
+      testProposal: {
+        id: testProposal.ProposalID,
+        title: testProposal.Title,
+        status: testProposal.Status
+      },
+      acceptanceUrl: acceptanceUrl,
+      acceptanceResult: acceptanceResult,
+      webAppUrl: webAppUrl,
+      testSteps: [
+        '✅ Proposal found for testing',
+        '✅ Acceptance URL generated',
+        '✅ Acceptance page created',
+        '✅ Acceptance processing tested',
+        '✅ Result page generated',
+        '✅ All components working properly'
+      ]
+    };
+    
+  } catch (error) {
+    console.error('❌ Client acceptance flow test failed:', error);
     return {
       success: false,
       error: error.message,

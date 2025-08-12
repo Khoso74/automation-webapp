@@ -1850,6 +1850,14 @@
                             <span class="action-btn-desc">Business analytics</span>
                         </div>
                     </button>
+                    
+                    <button class="action-btn" onclick="testClientAcceptance()" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                        <span class="action-btn-icon">✅</span>
+                        <div class="action-btn-text">
+                            <span class="action-btn-title">Test Acceptance</span>
+                            <span class="action-btn-desc">Client acceptance flow</span>
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>
@@ -5113,8 +5121,56 @@
                       submitBtn.disabled = false;
                       submitBtn.textContent = 'Create Sample';
                   })
-                  .createProposal(sampleData);
-          }
-      </script>
-  </body>
-  </html>
+                                     .createProposal(sampleData);
+           }
+           
+           // Test client acceptance flow
+           function testClientAcceptance() {
+               console.log('✅ Testing Client Acceptance Flow...');
+               
+               removeMessages();
+               showMessage('✅ Testing client acceptance flow...', 'info');
+               
+               google.script.run
+                   .withSuccessHandler(function(result) {
+                       console.log('✅ Client acceptance test result:', result);
+                       
+                       if (result.success) {
+                           let message = `✅ Client Acceptance Flow Test Passed!<br><br>`;
+                           
+                           message += `<strong>📋 Test Results:</strong><br>`;
+                           message += `🆔 Test Proposal: ${result.testProposal.id}<br>`;
+                           message += `📄 Project: ${result.testProposal.title}<br>`;
+                           message += `📊 Status: ${result.testProposal.status}<br><br>`;
+                           
+                           message += `<strong>🔗 Acceptance URL:</strong><br>`;
+                           message += `<a href="${result.acceptanceUrl}" target="_blank" style="color: #007bff; word-break: break-all;">${result.acceptanceUrl}</a><br><br>`;
+                           
+                           message += `<strong>📋 Test Steps Completed:</strong><br>`;
+                           result.testSteps.forEach(step => {
+                               message += `${step}<br>`;
+                           });
+                           
+                           if (result.acceptanceResult && result.acceptanceResult.success) {
+                               message += `<br><strong>🎯 Acceptance Result:</strong><br>`;
+                               message += `✅ Project Created: ${result.acceptanceResult.projectId}<br>`;
+                               message += `✅ Accepted Date: ${result.acceptanceResult.acceptedDate}<br>`;
+                           }
+                           
+                           message += `<br><strong>💡 Try the acceptance flow:</strong><br>`;
+                           message += `Click the URL above to test the client acceptance page!`;
+                           
+                           showSuccessMessage(message);
+                       } else {
+                           showErrorMessage(`❌ Client Acceptance Test Failed: ${result.error || 'Unknown error'}`);
+                       }
+                   })
+                   .withFailureHandler(function(error) {
+                       console.error('❌ Frontend client acceptance test failed:', error);
+                       showErrorMessage(`❌ Frontend Test Failed: ${error.message}`);
+                   })
+                   .testClientAcceptanceFlow();
+           }
+       </script>
+   </body>
+   </html>
