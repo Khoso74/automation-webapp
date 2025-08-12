@@ -99,12 +99,31 @@ function generateProposalPDF(proposalId) {
       .getAs('application/pdf');
     
     // Save PDF to Drive
-    const rootFolderId = PropertiesService.getScriptProperties().getProperty('ROOT_FOLDER_ID');
-    const rootFolder = DriveApp.getFolderById(rootFolderId);
-    const proposalsFolder = createSubfolder(rootFolder, 'Proposals');
+    console.log('📁 Setting up main proposals folder...');
+    const rootFolder = getRootFolder();
+    console.log(`✅ Root folder accessed: ${rootFolder.getName()}`);
+    
+    // Find or create main Proposals folder
+    let proposalsFolder;
+    const proposalsFolders = rootFolder.getFoldersByName('Proposals');
+    
+    if (!proposalsFolders.hasNext()) {
+      console.log('❌ Main Proposals folder not found, creating it...');
+      proposalsFolder = rootFolder.createFolder('Proposals');
+      console.log(`✅ Created main Proposals folder: ${proposalsFolder.getName()}`);
+    } else {
+      proposalsFolder = proposalsFolders.next();
+      console.log(`✅ Main Proposals folder found: ${proposalsFolder.getName()}`);
+    }
     
     const fileName = `Proposal_${proposalId}_${proposal.Title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+    console.log(`📄 Creating PDF file: ${fileName}`);
+    console.log(`📁 Target folder: ${proposalsFolder.getName()} (${proposalsFolder.getId()})`);
+    
     const pdfFile = proposalsFolder.createFile(pdfBlob.setName(fileName));
+    console.log(`✅ PDF created successfully!`);
+    console.log(`✅ PDF ID: ${pdfFile.getId()}`);
+    console.log(`✅ PDF URL: ${pdfFile.getUrl()}`);
     
     // Update proposal with PDF URL
     updateProposalPdfUrl(proposalId, pdfFile.getUrl());

@@ -1791,3 +1791,86 @@ function testManualClientFolderCopy() {
     };
   }
 }
+
+/**
+ * Quick Test - PDF Generation Fix
+ */
+function testPDFGenerationFix() {
+  try {
+    console.log('🧪 === TESTING PDF GENERATION FIX ===');
+    
+    // Get first client
+    const clients = getAllClients();
+    if (!clients || clients.length === 0) {
+      return { success: false, error: 'No clients found' };
+    }
+    
+    const testClient = clients[0];
+    console.log('🎯 Testing with client:', testClient.CompanyName, '(' + testClient.ClientID + ')');
+    
+    // Create minimal test proposal data
+    const testProposalData = {
+      clientId: testClient.ClientID,
+      title: 'PDF Test Proposal',
+      description: 'Quick test to verify PDF generation works.',
+      amount: 1000,
+      currency: 'PKR'
+    };
+    
+    console.log('📝 Creating test proposal...');
+    const result = createProposal(testProposalData);
+    
+    console.log('🎯 === PDF GENERATION TEST RESULT ===');
+    
+    if (result.success) {
+      console.log('✅ Proposal created:', result.proposalId);
+      
+      if (result.pdfResult && result.pdfResult.success) {
+        console.log('✅ PDF generated successfully!');
+        console.log('✅ PDF URL:', result.pdfResult.url);
+        
+        if (result.pdfResult.clientFolder && result.pdfResult.clientFolder.success) {
+          console.log('✅ PDF also saved to client folder!');
+          console.log('✅ Client PDF URL:', result.pdfResult.clientFolder.clientPdfUrl);
+          return {
+            success: true,
+            message: 'PDF generation and client folder copy both work!',
+            proposalId: result.proposalId,
+            mainPdfUrl: result.pdfResult.url,
+            clientPdfUrl: result.pdfResult.clientFolder.clientPdfUrl
+          };
+        } else {
+          console.log('⚠️ PDF generated but not saved to client folder');
+          return {
+            success: true,
+            message: 'PDF generation works, but client folder copy failed',
+            proposalId: result.proposalId,
+            mainPdfUrl: result.pdfResult.url,
+            clientFolderError: result.pdfResult.clientFolder ? result.pdfResult.clientFolder.error : 'No client folder data'
+          };
+        }
+      } else {
+        console.log('❌ PDF generation failed');
+        return {
+          success: false,
+          error: 'PDF generation failed: ' + (result.pdfResult ? result.pdfResult.error : 'No PDF result'),
+          proposalId: result.proposalId
+        };
+      }
+    } else {
+      console.log('❌ Proposal creation failed');
+      return {
+        success: false,
+        error: 'Proposal creation failed: ' + result.error
+      };
+    }
+    
+  } catch (error) {
+    console.error('❌ PDF generation test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack
+    };
+  }
+}

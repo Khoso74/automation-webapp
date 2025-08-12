@@ -2056,6 +2056,11 @@
                                 style="padding: 15px 20px; background: #fd7e14; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
                             📋 Test Manual File Copy
                         </button>
+                        
+                        <button onclick="testPDFGenerationFix()" 
+                                style="padding: 15px 20px; background: #20c997; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                            🔧 Test PDF Fix
+                        </button>
                 </div>
                 
                 <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px;">
@@ -2067,9 +2072,14 @@
                         <li><strong>Force Create Folders</strong> - Create missing client folders if needed</li>
                         <li><strong>Run All Backend Tests</strong> - Comprehensive system tests</li>
                     </ol>
-                    <p style="margin: 10px 0; font-weight: bold; color: #e74c3c;">
-                        🎯 Start with "Test Real Proposal Creation" - this will show exactly why PDF isn't saving to client folder!
-                    </p>
+                    <div style="margin: 10px 0; padding: 10px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px;">
+                        <p style="margin: 0; font-weight: bold; color: #155724;">
+                            🎯 ISSUE FOUND & FIXED: "Invalid argument: id" error in PDF generation
+                        </p>
+                        <p style="margin: 5px 0 0 0; color: #155724;">
+                            ✅ Click "🔧 Test PDF Fix" to verify the fix works!
+                        </p>
+                    </div>
                 </div>
                 
                 <p style="margin-top: 15px; font-size: 12px; color: #999;">
@@ -4805,6 +4815,41 @@
                     showErrorMessage(`❌ Frontend Manual Copy Test Failed: ${error.message}`);
                 })
                 .testManualClientFolderCopy();
+        }
+        
+        // Test PDF generation fix
+        function testPDFGenerationFix() {
+            console.log('🔧 Testing PDF Generation Fix from Frontend...');
+            
+            removeMessages();
+            showMessage('🔄 Testing PDF generation fix...', 'info');
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    console.log('✅ PDF generation fix test result:', result);
+                    
+                    if (result.success) {
+                        let message = `✅ PDF Generation Fix Test Passed!<br>`;
+                        message += `📄 Proposal: ${result.proposalId}<br>`;
+                        message += `📄 Main PDF: ${result.mainPdfUrl}<br>`;
+                        
+                        if (result.clientPdfUrl) {
+                            message += `✅ Client PDF: ${result.clientPdfUrl}<br>`;
+                            message += `🎉 Both main and client folder PDFs working!`;
+                        } else if (result.clientFolderError) {
+                            message += `⚠️ Client folder issue: ${result.clientFolderError}`;
+                        }
+                        
+                        showSuccessMessage(message);
+                    } else {
+                        showErrorMessage(`❌ PDF Generation Fix Test Failed: ${result.error || 'Unknown error'}`);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('❌ Frontend PDF fix test failed:', error);
+                    showErrorMessage(`❌ Frontend PDF Fix Test Failed: ${error.message}`);
+                })
+                .testPDFGenerationFix();
         }
     </script>
 </body>
